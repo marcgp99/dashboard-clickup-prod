@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BI Producción - Ixorigue</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { 
+                extend: { 
+                    colors: { 
+                        slate: { 850: '#131b2e', 900: '#0b1329', 950: '#020617' },
+                        brand: { blue: '#3b82f6', emerald: '#10b981', purple: '#8b5cf6', amber: '#f59e0b', orange: '#f97316', red: '#ef4444', cyan: '#06b6d4', teal: '#14b8a6' }
+                    },
+                    fontFamily: { 
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'ui-monospace', 'monospace']
+                    }
+                } 
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap');
+        body { background: radial-gradient(circle at top center, #0f172a 0%, #020617 100%); color: #cbd5e1; }
+        .bi-panel { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 14px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4); }
+        .bi-kpi-card { background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(21, 30, 46, 0.8) 100%); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+        .bi-kpi-card:hover { transform: translateY(-4px); border-color: #3b82f6; box-shadow: 0 12px 20px -3px rgba(59, 130, 246, 0.25); }
+        .glow-amber { border-left: 4px solid #f59e0b !important; box-shadow: -4px 0 20px -2px rgba(245, 158, 11, 0.3) !important; }
+        .glow-orange { border-left: 4px solid #f97316 !important; box-shadow: -4px 0 20px -2px rgba(249, 115, 22, 0.3) !important; }
+        .glow-cyan { border-left: 4px solid #06b6d4 !important; box-shadow: -4px 0 20px -2px rgba(6, 182, 212, 0.3) !important; }
+        .glow-blue { border-left: 4px solid #3b82f6 !important; box-shadow: -4px 0 20px -2px rgba(59, 130, 246, 0.3) !important; }
+        .glow-purple { border-left: 4px solid #8b5cf6 !important; box-shadow: -4px 0 20px -2px rgba(139, 92, 246, 0.3) !important; }
+        .table-row-hover:hover { background-color: rgba(30, 41, 59, 0.7); }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0b1329; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        .tab-btn.active { background-color: #3b82f6; color: #ffffff; box-shadow: 0 0 12px rgba(59, 130, 246, 0.4); }
+        .client-chip.active { background-color: #3b82f6 !important; border-color: #60a5fa !important; color: #ffffff !important; }
+        .acc-chip { transition: all 0.2s ease; cursor: pointer; }
+        .acc-chip:hover, .acc-chip.active { transform: scale(1.02); }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased p-4 md:p-6 overflow-x-hidden">
+
+    <!-- BLOQUEO POR PIN -->
+    <div id="pin-overlay" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 max-w-sm w-full shadow-2xl text-center">
+            <div class="w-12 h-12 bg-blue-500/10 border border-blue-500/30 rounded-xl text-brand-blue flex items-center justify-center mx-auto mb-4 text-xl">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h2 class="text-xl font-bold text-white mb-1">Ixorigue Producción</h2>
+            <p class="text-slate-400 text-xs mb-6">Acceso restringido. Introduce la clave corporativa.</p>
+            <form onsubmit="handlePinSubmit(event)" class="space-y-4">
+                <input type="password" id="pin-input" placeholder="Introduce el PIN" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-center text-white text-sm tracking-wider font-mono focus:outline-none focus:border-brand-blue transition">
+                <p id="pin-error" class="text-red-400 text-xs hidden font-medium"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Clave o PIN incorrecto</p>
+                <button type="submit" class="w-full bg-brand-blue hover:bg-blue-600 text-white font-semibold py-3 rounded-xl transition text-sm">Acceder al Panel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- CABECERA -->
+    <header class="flex flex-col xl:flex-row justify-between items-start xl:items-center pb-5 mb-6 border-b border-slate-800/80 gap-5">
+        <div class="flex items-center gap-3">
+            <div class="p-3 bg-blue-500/10 border border-blue-500/30 rounded-2xl text-brand-blue shadow-lg shadow-blue-500/10">
+                <i class="fa-solid fa-chart-pie text-2xl"></i>
+            </div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                PANEL DE PRODUCCIÓN <span class="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30 font-mono">v4.5 LEAN</span>
+            </h1>
+        </div>
+
+        <!-- MONITORES DE CAPACIDAD SEMANAL -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full xl:w-auto flex-1 max-w-4xl xl:mx-4">
+            <!-- Capacidad Semanal (Esta semana) -->
+            <div class="flex items-center justify-between gap-4 bg-gradient-to-r from-emerald-950/70 via-slate-900/95 to-slate-900/95 border-2 border-emerald-500/60 p-3.5 px-5 rounded-2xl shadow-xl shadow-emerald-950/30">
+                <div class="flex flex-col">
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-check text-emerald-400 text-sm"></i> Capacidad semanal
+                    </span>
+                    <strong id="header-soporte-thisweek" class="text-white text-sm sm:text-base font-mono font-extrabold tracking-tight mt-1">
+                        Ixo: 0/150 | Pro: 0/300 | Cow: 0/1000
+                    </strong>
+                </div>
+                <span id="header-soporte-thisweek-status" class="text-xs px-3 py-1 rounded-xl font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 whitespace-nowrap shadow-sm">Disponible</span>
+            </div>
+
+            <!-- Capacidad Próxima Semana -->
+            <div class="flex items-center justify-between gap-4 bg-gradient-to-r from-[#031c13] via-slate-900/95 to-slate-900/95 border-2 border-emerald-800/80 p-3.5 px-5 rounded-2xl shadow-xl shadow-emerald-950/50">
+                <div class="flex flex-col">
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-600 flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-plus text-emerald-600 text-sm"></i> Capacidad próxima semana
+                    </span>
+                    <strong id="header-soporte-nextweek" class="text-emerald-100/90 text-sm sm:text-base font-mono font-extrabold tracking-tight mt-1">
+                        Ixo: 0/150 | Pro: 0/300 | Cow: 0/1000
+                    </strong>
+                </div>
+                <span id="header-soporte-nextweek-status" class="text-xs px-3 py-1 rounded-xl font-mono font-bold bg-emerald-950/80 text-emerald-500 border border-emerald-800/80 whitespace-nowrap shadow-sm">Disponible</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3 self-end xl:self-auto">
+            <div class="flex items-center gap-2 bg-slate-900 px-3.5 py-2.5 rounded-xl border border-slate-800 text-xs text-slate-400 font-mono">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span id="last-update">Calculando...</span>
+            </div>
+            <button onclick="fetchClickUpData()" class="bg-brand-blue hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-lg shadow-blue-500/20 flex items-center gap-2">
+                <i class="fa-solid fa-rotate"></i> Actualizar
+            </button>
+            <button onclick="logoutPin()" title="Cerrar Sesión" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white p-2.5 rounded-xl text-xs transition">
+                <i class="fa-solid fa-power-off"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="space-y-6 max-w-[1700px] mx-auto">
+        <!-- 7 TARJETAS KPIS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+            <div onclick="openModal('A Fabricar (Próx. 7 Días Lab.)', window.allTasks.filter(t => t.dateInfo.isWithinWindow && !t.esSoloRecibir && !t.esAccesorio && !isTaskCompleted(t)))" class="bi-kpi-card rounded-2xl p-5">
+                <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 flex items-center justify-between">
+                    <span>A Fabricar (7 Días)</span><i class="fa-solid fa-calendar-week text-slate-500"></i>
+                </p>
+                <div class="flex justify-between items-baseline"><h2 id="kpi-semana" class="text-3xl font-extrabold text-white font-mono">0</h2><span class="text-xs text-slate-500 font-medium">unidades</span></div>
+            </div>
+
+            <div onclick="openModal('A Fabricar (Hoy)', window.allTasks.filter(t => t.dateInfo.isTodayOrOverdue && !t.esSoloRecibir && !t.esAccesorio && !isTaskCompleted(t)), true)" class="bi-kpi-card rounded-2xl p-5 glow-amber">
+                <div class="flex justify-between items-start mb-2">
+                    <p class="text-amber-400 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                        <span>A Fabricar (Hoy)</span>
+                        <span id="kpi-sugerencia-badge" class="hidden bg-amber-500/20 text-amber-300 text-[10px] px-2 py-0.5 rounded-full border border-amber-500/40 animate-pulse font-mono"><i class="fa-solid fa-bolt"></i> Lotes</span>
+                    </p>
+                    <i class="fa-solid fa-stopwatch text-amber-400"></i>
+                </div>
+                <div class="flex justify-between items-baseline"><h2 id="kpi-hoy" class="text-3xl font-extrabold text-amber-400 font-mono">0</h2><span class="text-xs text-amber-500/80 font-medium">pendientes</span></div>
+            </div>
+
+            <div onclick="openModal('Tiquets en curso', window.allTasks.filter(t => t.estado === 'EN CURSO' && !t.esSoloRecibir))" class="bi-kpi-card rounded-2xl p-5">
+                <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 flex items-center justify-between"><span>Tiquets en curso</span><i class="fa-solid fa-gears text-emerald-400"></i></p>
+                <div class="flex justify-between items-baseline"><h2 id="kpi-encurso" class="text-3xl font-extrabold text-emerald-400 font-mono">0</h2><span class="text-xs text-emerald-500/80 font-medium">en mesa</span></div>
+            </div>
+
+            <div onclick="openModal('Kits Solares y Gateways a Preparar (Próx 7 Días)', window.allTasks.filter(t => t.kitsSolaresGW > 0 && t.dateInfo.isWithinWindow && !t.esSoloRecibir && !isTaskCompleted(t)), false, true)" class="bi-kpi-card rounded-2xl p-5 glow-blue">
+                <p class="text-blue-400 text-xs font-bold uppercase tracking-wider mb-2 flex items-center justify-between"><span>Kits Solares & GWs</span><i class="fa-solid fa-solar-panel text-blue-400"></i></p>
+                <div class="flex justify-between items-baseline"><h2 id="kpi-kits" class="text-3xl font-extrabold text-blue-400 font-mono">0</h2><span class="text-xs text-blue-500/80 font-medium">a preparar</span></div>
+            </div>
+
+            <div onclick="openModal('Incidencias GW', window.allTasks.filter(t => t.modeloInfo.nombre === 'Gateway' && isTaskCompleted(t)))" class="bi-kpi-card rounded-2xl p-5 glow-orange">
+                <p class="text-orange-400 text-xs font-bold uppercase tracking-wider mb-2 flex items-center justify-between"><span>Incidencias GW</span><i class="fa-solid fa-router text-orange-400"></i></p>
+                <div class="flex justify-between items-baseline"><h2 id="kpi-gw" class="text-3xl font-extrabold text-orange-400 font-mono">0</h2><span class="text-xs text-orange-500/80 font-medium">listos</span></div>
+            </div>
+
+            <!-- Correas / Contrapesos -->
+            <div onclick="openModal('Reemplazos de Correas y Contrapesos', window.allTasks.filter(t => t.esAccesorio), false, false, true)" class="bi-kpi-card rounded-2xl p-5 glow-cyan">
+                <p class="text-cyan-400 text-xs font-bold uppercase tracking-wider mb-2 flex items-center justify-between"><span>Correas / Contrapesos</span><i class="fa-solid fa-weight-hanging text-cyan-400"></i></p>
+                <div class="flex justify-between items-baseline"><h2 id="kpi-accesorios" class="text-3xl font-extrabold text-cyan-400 font-mono">0</h2><span class="text-xs text-cyan-500/80 font-medium">unidades</span></div>
+            </div>
+
+            <div onclick="openModal('Pendientes por Recibir (Bloqueados)', window.allTasks.filter(t => t.esSoloRecibir && t.estado.includes('BLOQUEAD')))" class="bi-kpi-card rounded-2xl p-5 glow-purple">
+                <p class="text-purple-400 text-xs font-bold uppercase tracking-wider mb-2 flex items-center justify-between"><span>Pendiente Recibir</span><i class="fa-solid fa-box-open text-purple-400"></i></p>
+                <div class="flex justify-between items-baseline"><h2 id="kpi-pendientes-recibir" class="text-3xl font-extrabold text-purple-400 font-mono">0</h2><span class="text-xs text-purple-500/80 font-medium">dispositivos</span></div>
+            </div>
+        </div>
+
+        <!-- 4 GRÁFICOS -->
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div class="bi-panel p-5 flex flex-col justify-between min-h-[260px]">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2"><i class="fa-solid fa-chart-pie text-emerald-400"></i> Distribución por Modelo</h3>
+                <div class="w-full h-44 relative flex items-center justify-center"><canvas id="chartModelos"></canvas></div>
+            </div>
+            <div class="bi-panel p-5 flex flex-col justify-between min-h-[260px]">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2"><i class="fa-solid fa-chart-simple text-blue-400"></i> Proyección Carga (L-V)</h3>
+                <div class="w-full h-44 relative"><canvas id="chartTiempos"></canvas></div>
+            </div>
+            <div class="bi-panel p-5 flex flex-col justify-between min-h-[260px]">
+                <h3 class="text-xs font-bold text-brand-purple uppercase tracking-wider mb-2 flex items-center gap-2"><i class="fa-solid fa-tags"></i> Distribución por Etiquetas</h3>
+                <div class="w-full h-44 relative"><canvas id="chartEtiquetas"></canvas></div>
+            </div>
+            <div class="bi-panel p-5 flex flex-col justify-between min-h-[260px]">
+                <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                    <span><i class="fa-solid fa-truck-ramp-box"></i> Envíos Semanales <span class="text-[10px] text-slate-500 font-mono font-normal">(Meta: 600 uds/sem)</span></span>
+                    <span class="text-[10px] text-slate-500 font-mono">Clic para explorar</span>
+                </h3>
+                <div class="w-full h-44 relative"><canvas id="chartRendimiento"></canvas></div>
+            </div>
+        </div>
+
+        <!-- CAJAS NUMÉRICAS POR MODELO -->
+        <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
+            <div onclick="openModal('Ixotrack (7 Días Lab)', window.allTasks.filter(t => t.modeloInfo.nombre === 'Ixotrack' && !t.esSoloRecibir && !t.esAccesorio && t.dateInfo.isWithinWindow && !isTaskCompleted(t)))" class="bi-panel p-4 flex justify-between items-center cursor-pointer hover:bg-slate-800/80 transition">
+                <div class="flex items-center gap-2.5"><span class="w-3 h-3 rounded-full bg-brand-emerald"></span><span class="text-sm font-semibold text-slate-200">Ixotrack</span></div>
+                <span id="mod-ixo" class="text-2xl font-bold font-mono text-white">0</span>
+            </div>
+            <div onclick="openModal('Ixotrack pro (7 Días Lab)', window.allTasks.filter(t => t.modeloInfo.nombre === 'Ixotrack pro' && !t.esSoloRecibir && !t.esAccesorio && t.dateInfo.isWithinWindow && !isTaskCompleted(t)))" class="bi-panel p-4 flex justify-between items-center cursor-pointer hover:bg-slate-800/80 transition">
+                <div class="flex items-center gap-2.5"><span class="w-3 h-3 rounded-full bg-brand-blue"></span><span class="text-sm font-semibold text-slate-200">Ixotrack pro</span></div>
+                <span id="mod-pro" class="text-2xl font-bold font-mono text-white">0</span>
+            </div>
+            <div onclick="openModal('IxotrackproM10 (7 Días Lab)', window.allTasks.filter(t => t.modeloInfo.nombre === 'IxotrackproM10' && !t.esSoloRecibir && !t.esAccesorio && t.dateInfo.isWithinWindow && !isTaskCompleted(t)))" class="bi-panel p-4 flex justify-between items-center cursor-pointer hover:bg-slate-800/80 transition">
+                <div class="flex items-center gap-2.5"><span class="w-3 h-3 rounded-full bg-blue-700"></span><span class="text-sm font-semibold text-slate-200">IxotrackproM10</span></div>
+                <span id="mod-m10" class="text-2xl font-bold font-mono text-white">0</span>
+            </div>
+            <div onclick="openModal('IxotrackproM10LR (7 Días Lab)', window.allTasks.filter(t => t.modeloInfo.nombre === 'IxotrackproM10LR' && !t.esSoloRecibir && !t.esAccesorio && t.dateInfo.isWithinWindow && !isTaskCompleted(t)))" class="bi-panel p-4 flex justify-between items-center cursor-pointer hover:bg-slate-800/80 transition">
+                <div class="flex items-center gap-2.5"><span class="w-3 h-3 rounded-full bg-brand-purple"></span><span class="text-sm font-semibold text-slate-200">IxotrackproM10LR</span></div>
+                <span id="mod-m10lr" class="text-2xl font-bold font-mono text-white">0</span>
+            </div>
+            <div onclick="openModal('Cowpro v2 (7 Días Lab)', window.allTasks.filter(t => t.modeloInfo.nombre === 'Cowpro v2' && !t.esSoloRecibir && !t.esAccesorio && t.dateInfo.isWithinWindow && !isTaskCompleted(t)))" class="bi-panel p-4 flex justify-between items-center cursor-pointer hover:bg-slate-800/80 transition">
+                <div class="flex items-center gap-2.5"><span class="w-3 h-3 rounded-full bg-red-500"></span><span class="text-sm font-semibold text-slate-200">Cowpro v2</span></div>
+                <span id="mod-cowpro" class="text-2xl font-bold font-mono text-white">0</span>
+            </div>
+        </div>
+
+        <!-- TABLA PRINCIPAL -->
+        <section class="bi-panel overflow-hidden flex flex-col h-[520px]">
+            <div class="p-4 border-b border-slate-800/80 bg-slate-900/90 flex flex-col md:flex-row gap-3 justify-between items-start md:items-center">
+                <div class="flex items-center gap-3">
+                    <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-list-check text-brand-blue"></i> Tiquets Activos</h2>
+                    <span id="task-count-badge" class="px-2.5 py-0.5 bg-slate-800 text-slate-400 text-xs rounded-full border border-slate-700 font-mono">0 ACTIVOS</span>
+                </div>
+                <div class="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
+                    <button onclick="setTableFilter('ALL')" id="tab-ALL" class="tab-btn active px-3 py-1 rounded-lg text-slate-400 hover:text-white">Todos</button>
+                    <button onclick="setTableFilter('URGENT')" id="tab-URGENT" class="tab-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white flex items-center gap-1"><i class="fa-solid fa-fire text-red-400"></i> Urgentes</button>
+                    <button onclick="setTableFilter('ENVIO')" id="tab-ENVIO" class="tab-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white flex items-center gap-1"><i class="fa-solid fa-truck-fast text-blue-400"></i> Envíos</button>
+                    <button onclick="setTableFilter('REEMPLAZO')" id="tab-REEMPLAZO" class="tab-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white flex items-center gap-1"><i class="fa-solid fa-rotate-left text-amber-400"></i> Reemplazos</button>
+                    <button onclick="setTableFilter('SOLO_RECIBIR')" id="tab-SOLO_RECIBIR" class="tab-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white flex items-center gap-1"><i class="fa-solid fa-inbox text-emerald-400"></i> Sólo Recibir</button>
+                </div>
+            </div>
+            <div class="overflow-auto flex-1">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead class="sticky top-0 bg-slate-900/95 backdrop-blur-md shadow-md z-10 border-b border-slate-800">
+                        <tr class="text-xs text-slate-400 uppercase tracking-wider font-semibold">
+                            <th class="py-3.5 px-4 cursor-pointer hover:text-white w-28" onclick="sortTable('prioridad')">Prioridad <i class="fa-solid fa-sort ml-1 opacity-40"></i></th>
+                            <th class="py-3.5 px-4 cursor-pointer hover:text-white" onclick="sortTable('nombre')">Tiquet / Cliente / Etiquetas <i class="fa-solid fa-sort ml-1 opacity-40"></i></th>
+                            <th class="py-3.5 px-4 cursor-pointer hover:text-white w-36" onclick="sortTable('modelo')">Modelo <i class="fa-solid fa-sort ml-1 opacity-40"></i></th>
+                            <th class="py-3.5 px-4 cursor-pointer hover:text-white text-center w-20" onclick="sortTable('unidades')">Uds <i class="fa-solid fa-sort ml-1 opacity-40"></i></th>
+                            <th class="py-3.5 px-4 cursor-pointer hover:text-white w-28" onclick="sortTable('estado')">Estado <i class="fa-solid fa-sort ml-1 opacity-40"></i></th>
+                            <th class="py-3.5 px-4 cursor-pointer hover:text-white w-28" onclick="sortTable('fecha')">Deadline <i class="fa-solid fa-sort ml-1 opacity-40"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody id="main-table-body" class="divide-y divide-slate-800/60 font-sans">
+                        <tr><td colspan="6" class="text-center py-12 text-slate-500 font-mono"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Sincronizando datos con ClickUp...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL EMERGENTE -->
+    <div id="detail-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 opacity-0 transition-opacity duration-300">
+        <div class="absolute inset-0 bg-slate-950/85 backdrop-blur-md" onclick="closeModal()"></div>
+        <div class="relative bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl transform transition-transform duration-300 scale-95 overflow-hidden" id="modal-content-box">
+            
+            <div class="flex justify-between items-center p-5 border-b border-slate-800 bg-slate-900">
+                <h3 id="modal-title" class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-filter text-brand-blue"></i> Desglose</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 w-8 h-8 rounded-lg flex items-center justify-center transition"><i class="fa-solid fa-times"></i></button>
+            </div>
+
+            <!-- FILTRO INTERACTIVO CORREAS / CONTRAPESOS -->
+            <div id="modal-accesorios-box" class="hidden bg-cyan-950/40 border-b border-cyan-500/20 p-4 px-5">
+                <h4 class="text-cyan-400 font-bold mb-2.5 flex items-center gap-2 text-xs uppercase tracking-wide">
+                    <i class="fa-solid fa-weight-hanging"></i> Desglose por Accesorio (Haz clic para ver tiquets y clientes):
+                </h4>
+                <div id="modal-accesorios-list" class="flex flex-wrap gap-2.5"></div>
+            </div>
+
+            <!-- FILTRO POR CLIENTE (KITS SOLARES) -->
+            <div id="modal-kits-client-box" class="hidden bg-blue-950/40 border-b border-blue-500/20 p-4 px-5">
+                <div class="flex justify-between items-center mb-2.5">
+                    <h4 class="text-blue-400 font-bold text-xs uppercase tracking-wide"><i class="fa-solid fa-users"></i> Filtrar por Cliente:</h4>
+                    <button onclick="filterModalByClient(null)" id="btn-client-all" class="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded border border-blue-500/30">Ver Todos</button>
+                </div>
+                <div id="modal-kits-client-list" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-1"></div>
+            </div>
+
+            <!-- RESUMEN MODELOS -->
+            <div id="modal-summary-models-box" class="bg-slate-950/60 border-b border-slate-800/80 p-4 px-5">
+                <div id="modal-summary-models-list" class="flex flex-wrap gap-2.5"></div>
+            </div>
+
+            <!-- RECOMENDACIÓN LEAN CON SECCIÓN INTERACTIVA DE FABRICAR HOY POR LOTE -->
+            <div id="modal-recommendation-box" class="hidden bg-amber-500/10 border-b border-amber-500/30 p-5">
+                <h4 class="text-amber-400 font-bold mb-3 flex items-center gap-2 text-sm uppercase tracking-wide"><i class="fa-solid fa-bolt"></i> Oportunidades de Producción en Serie</h4>
+                <div id="modal-recommendation-list" class="space-y-3"></div>
+            </div>
+
+            <div class="overflow-auto flex-1 p-5">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead class="sticky top-0 bg-slate-900">
+                        <tr class="border-b border-slate-800 text-xs text-slate-400 uppercase tracking-wider font-semibold">
+                            <th class="pb-3 pr-4">Tiquet / Etiquetas</th>
+                            <th class="pb-3 px-4">Modelo / Accesorio</th>
+                            <th class="pb-3 px-4 text-center">Uds</th>
+                            <th class="pb-3 pl-4 text-right">Deadline</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-table-body" class="divide-y divide-slate-800/60"></tbody>
+                </table>
+            </div>
+            
+            <div class="p-4 border-t border-slate-800 bg-slate-950/80 flex justify-between items-center">
+                <span class="text-xs text-slate-500 font-mono" id="modal-total-tickets">0 ROWS</span>
+                <div class="text-right flex items-baseline gap-2">
+                    <span class="text-xs text-slate-400 uppercase font-semibold">Suma Unidades:</span>
+                    <span class="text-3xl font-extrabold text-white font-mono" id="modal-total-units">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT Y CONTROL DE DATOS -->
+    <script>
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = 'Inter, sans-serif';
+        let charts = {};
+
+        const CAPACIDAD_OBJETIVO_SEMANAL = 600; 
+        const CAPACIDAD_IXOTRACK = 150;
+        const CAPACIDAD_PRO_SERIES = 300; 
+        const CAPACIDAD_COWPRO = 1000;
+
+        function getModelColorHex(modelName) {
+            const map = {
+                'Ixotrack': '#10b981',         
+                'Ixotrack pro': '#3b82f6',     
+                'IxotrackproM10': '#1d4ed8',   
+                'IxotrackproM10LR': '#8b5cf6', 
+                'Cowpro v2': '#ef4444',        
+                'Gateway': '#f97316',          
+                'Correas': '#06b6d4',          
+                'Contrapesos': '#14b8a6',      
+                'Otro': '#64748b'              
+            };
+            return map[modelName] || '#64748b';
+        }
+
+        window.allTasks = [];
+        window.weekTasksMap = { w0: [], w1: [], w2: [], w3: [] }; 
+        window.currentModalTasks = [];
+        window.activeClientFilter = null;
+        window.activeAccesorioFilter = null;
+        let currentSort = { column: 'fecha', dir: 'asc' };
+        let currentTableFilter = 'ALL';
+
+        function checkPinAuth() {
+            const savedPin = localStorage.getItem('ixorigue_pin');
+            if (savedPin) {
+                document.getElementById('pin-overlay').classList.add('hidden');
+                fetchClickUpData();
+            } else {
+                document.getElementById('pin-overlay').classList.remove('hidden');
+            }
+        }
+
+        function handlePinSubmit(e) {
+            e.preventDefault();
+            const inputPin = document.getElementById('pin-input').value;
+            localStorage.setItem('ixorigue_pin', inputPin);
+            fetchClickUpData();
+        }
+
+        function logoutPin() {
+            localStorage.removeItem('ixorigue_pin');
+            document.getElementById('pin-input').value = '';
+            document.getElementById('pin-overlay').classList.remove('hidden');
+        }
+
+        function isTaskCompleted(task) {
+            const status = (task.estado || '').toUpperCase();
+            return ['LISTO', 'COMPLETADO', 'CERRADO', 'DONE', 'CLOSED'].includes(status);
+        }
+
+        function checkSoloRecibir(task) {
+            if (task.tags && Array.isArray(task.tags)) {
+                return task.tags.some(t => t.name && t.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes("solo recibir"));
+            }
+            return false;
+        }
+
+        function getTagColorHex(tag) {
+            const t = tag.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            if (t.includes("REEMPLAZO")) return '#f59e0b';
+            if (t.includes("SOLO RECIBIR")) return '#10b981';
+            if (t.includes("ENVIO")) return '#3b82f6';
+            if (t.includes("SIN ETIQUETA")) return '#64748b';
+            return '#8b5cf6';
+        }
+
+        function getTagHtml(tag) {
+            const t = tag.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            if (t.includes("REEMPLAZO")) return `<span class="inline-block bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-md text-[10px] font-bold mr-1 mt-1">${tag}</span>`;
+            if (t.includes("SOLO RECIBIR")) return `<span class="inline-block bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-md text-[10px] font-bold mr-1 mt-1">${tag}</span>`;
+            if (t.includes("ENVIO")) return `<span class="inline-block bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded-md text-[10px] font-bold mr-1 mt-1">${tag}</span>`;
+            return `<span class="inline-block bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-md text-[10px] font-bold mr-1 mt-1">${tag}</span>`;
+        }
+
+        function getPriorityHtml(task) {
+            if (task.prioridadNum === 1 || task.prioridadLevel === 'urgent') return '<span class="px-2.5 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg text-[10px] font-bold uppercase tracking-wider inline-flex items-center gap-1"><i class="fa-solid fa-fire"></i>Urgente</span>';
+            if (task.prioridadNum === 2 || task.prioridadLevel === 'high') return '<span class="px-2.5 py-1 bg-orange-500/10 text-orange-400 border border-orange-500/20 rounded-lg text-[10px] font-bold uppercase tracking-wider inline-flex items-center gap-1"><i class="fa-solid fa-angles-up"></i>Alta</span>';
+            if (task.prioridadNum === 4 || task.prioridadLevel === 'low') return '<span class="px-2.5 py-1 bg-slate-800 text-slate-400 border border-slate-700/60 rounded-lg text-[10px] font-bold uppercase tracking-wider inline-flex items-center gap-1"><i class="fa-solid fa-angle-down"></i>Baja</span>';
+            return '<span class="px-2.5 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-lg text-[10px] font-bold uppercase tracking-wider inline-flex items-center gap-1"><i class="fa-solid fa-minus"></i>Normal</span>';
+        }
+
+        function parseClienteName(taskName) {
+            if (!taskName) return "Cliente General";
+            const n = taskName.trim();
+            if (n.includes('-')) {
+                const parts = n.split('-');
+                if (parts.length > 1) {
+                    let candidate = parts[1].trim().replace(/(devuelve|urgente|solo|solo recuperar|reemplazo).*/i, '').trim();
+                    if (candidate.length > 0) return candidate;
+                }
+            }
+            if (n.toUpperCase().startsWith('VENTA')) {
+                const match = n.match(/VENTA\s+(.*?)(?:\s+\d+[a-zA-Z]*|\s+x\d+|$)/i);
+                if (match && match[1].trim().length > 0) return match[1].trim();
+            }
+            return "Cliente General";
+        }
+
+        function parseKitsSolaresGW(taskName, description) {
+            const text = ((taskName || '') + ' ' + (description || '')).trim();
+            if (!text) return { found: false, qty: 0, tipo: '' };
+            const textNorm = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+            const matchAsAe = textNorm.match(/\b(?:x|x\s*)?(\d+)\s*(as|ae|gw|gateways?|antenas?\s*solares?|antenas?\s*enchufables?|kits?\s*solares?|panels?\s*solares?)\b/i);
+            if (matchAsAe) {
+                const qty = parseInt(matchAsAe[1], 10);
+                const unitType = matchAsAe[2].toLowerCase();
+                let tipo = "Gateway / Antena";
+                if (unitType.includes('as') || unitType.includes('panel') || unitType.includes('solar') || unitType.includes('kit')) tipo = "Kit Solar / Antena Solar";
+                else if (unitType.includes('ae') || unitType.includes('enchufable')) tipo = "Antena Enchufable";
+                return { found: true, qty: qty > 0 ? qty : 1, tipo: tipo };
+            }
+
+            const matchKw = textNorm.match(/\b(1as|2as|3as|1ae|2ae|3ae|gw|gateway|gateways|panel\s+solar|antena\s+solar|antena\s+enchufable|kit\s+solar|milesight|rak)\b/i);
+            if (matchKw) {
+                const kw = matchKw[1].toLowerCase();
+                let tipo = "Gateway / Antena";
+                if (kw.includes('as') || kw.includes('panel') || kw.includes('solar') || kw.includes('kit')) tipo = "Kit Solar / Antena Solar";
+                else if (kw.includes('ae')) tipo = "Antena Enchufable";
+                return { found: true, qty: 1, tipo: tipo };
+            }
+            return { found: false, qty: 0, tipo: '' };
+        }
+
+        function parseModelo(taskName) {
+            if (!taskName) return { nombre: 'Otro', color: 'slate', hex: '#64748b' };
+            const n = taskName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            
+            if (taskName.includes('🟥') || n.includes('cowpro') || n.includes('caupro')) return { nombre: 'Cowpro v2', color: 'red', hex: '#ef4444' };
+            if (taskName.includes('🟩') || (n.includes('ixotrack') && !n.includes('pro'))) return { nombre: 'Ixotrack', color: 'emerald', hex: '#10b981' };
+            if (taskName.includes('🟪') || n.includes('m10lr')) return { nombre: 'IxotrackproM10LR', color: 'purple', hex: '#8b5cf6' };
+            if (taskName.includes('🟦')) {
+                if (n.includes('m10')) return { nombre: 'IxotrackproM10', color: 'blue', hex: '#1d4ed8' };
+                return { nombre: 'Ixotrack pro', color: 'blue', hex: '#3b82f6' }; 
+            }
+            if (n.includes('m10lr')) return { nombre: 'IxotrackproM10LR', color: 'purple', hex: '#8b5cf6' };
+            if (n.includes('m10')) return { nombre: 'IxotrackproM10', color: 'blue', hex: '#1d4ed8' };
+            if (n.includes('ixotrack pro') || n.includes('ixotrackpro')) return { nombre: 'Ixotrack pro', color: 'blue', hex: '#3b82f6' };
+
+            if (n.includes("correa")) return { nombre: 'Correas', color: 'cyan', hex: '#06b6d4' };
+            if (n.includes("contrapeso")) return { nombre: 'Contrapesos', color: 'teal', hex: '#14b8a6' };
+            if (n.match(/\bgw\b/) || n.includes('gateway') || n.includes('antena')) return { nombre: 'Gateway', color: 'orange', hex: '#f97316' };
+
+            return { nombre: 'Otro', color: 'slate', hex: '#64748b' };
+        }
+
+        function isKnownModelPart(part) {
+            const p = part.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            return part.includes('🟩') || part.includes('🟪') || part.includes('🟦') || part.includes('🟥') ||
+                   p.includes('ixotrack') || p.includes('m10') || p.includes('cowpro') || p.includes('caupro') ||
+                   p.includes('gw') || p.includes('gateway') || p.includes('antena') ||
+                   p.includes('correa') || p.includes('contrapeso');
+        }
+
+        function parseTaskModels(taskName) {
+            if (!taskName) return [{ text: '', unidades: 1, modeloInfo: parseModelo(''), esAccesorio: false }];
+            const nLower = taskName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const isVenta = nLower.includes('venta');
+
+            if (nLower.includes('correa') && nLower.includes('contrapeso') && !taskName.includes('+') && !isVenta) {
+                const matchC = nLower.match(/x?(\d+)\s*correas?/i);
+                const matchCP = nLower.match(/x?(\d+)\s*contrapesos?/i);
+                const qtyC = matchC ? parseInt(matchC[1], 10) : 1;
+                const qtyCP = matchCP ? parseInt(matchCP[1], 10) : 1;
+                return [
+                    { text: `${qtyC} Correas`, unidades: qtyC, modeloInfo: { nombre: 'Correas', color: 'cyan', hex: '#06b6d4' }, esAccesorio: true },
+                    { text: `${qtyCP} Contrapesos`, unidades: qtyCP, modeloInfo: { nombre: 'Contrapesos', color: 'teal', hex: '#14b8a6' }, esAccesorio: true }
+                ];
+            }
+
+            const parts = taskName.split('+');
+            const validParts = parts.map(p => p.trim()).filter(p => isKnownModelPart(p));
+
+            if (validParts.length > 1) {
+                return validParts.map(p => {
+                    const mod = parseModelo(p);
+                    let qty = 1;
+                    const pLower = p.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    const isAcc = (pLower.includes('correa') || pLower.includes('contrapeso')) && !pLower.includes('venta') && !pLower.includes('ixotrack') && !pLower.includes('m10');
+
+                    if (mod.nombre === 'Gateway') {
+                        const matchGw = p.match(/\bx?(\d+)\s*(gw|gateway|antena)/i) || p.match(/\b(gw|gateway|antena)\s*x?(\d+)/i);
+                        if (matchGw) qty = parseInt(matchGw[1] || matchGw[2], 10);
+                    } else {
+                        const matchQty = p.match(/\bx?(\d+)\b/i);
+                        if (matchQty) qty = parseInt(matchQty[1], 10);
+                    }
+                    return { text: p, unidades: qty > 0 ? qty : 1, modeloInfo: mod, esAccesorio: isAcc };
+                });
+            } else {
+                const mod = parseModelo(taskName);
+                let qty = 1;
+                const isAcc = (nLower.includes('correa') || nLower.includes('contrapeso')) && !nLower.includes('venta') && !nLower.includes('ixotrack') && !nLower.includes('m10');
+
+                if (mod.nombre === 'Gateway') {
+                    const matchGw = taskName.match(/\bx?(\d+)\s*(gw|gateway|antena)/i) || taskName.match(/\b(gw|gateway|antena)\s*x?(\d+)/i);
+                    if (matchGw) qty = parseInt(matchGw[1] || matchGw[2], 10);
+                } else {
+                    const matchQty = taskName.match(/^x(\d+)/i) || taskName.match(/\bx(\d+)\b/i);
+                    if (matchQty) qty = parseInt(matchQty[1], 10);
+                }
+                return [{ text: taskName, unidades: qty > 0 ? qty : 1, modeloInfo: mod, esAccesorio: isAcc }];
+            }
+        }
+
+        function getCalendarWorkWeeks() {
+            const now = new Date();
+            const dayOfWeek = now.getDay() === 0 ? 7 : now.getDay(); 
+            const thisMon = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (dayOfWeek - 1), 0, 0, 0, 0);
+            const thisFri = new Date(thisMon.getFullYear(), thisMon.getMonth(), thisMon.getDate() + 4, 23, 59, 59, 999);
+            const nextMon = new Date(thisMon.getFullYear(), thisMon.getMonth(), thisMon.getDate() + 7, 0, 0, 0, 0);
+            const nextFri = new Date(nextMon.getFullYear(), nextMon.getMonth(), nextMon.getDate() + 4, 23, 59, 59, 999);
+            return {
+                thisWeek: { start: thisMon.getTime(), end: thisFri.getTime() },
+                nextWeek: { start: nextMon.getTime(), end: nextFri.getTime() }
+            };
+        }
+
+        function getEndOfBusinessDays(startDate, days) {
+            let date = new Date(startDate.getTime());
+            let added = 0;
+            while (added < days) {
+                date.setDate(date.getDate() + 1);
+                if (date.getDay() !== 0 && date.getDay() !== 6) added++; 
+            }
+            date.setHours(23, 59, 59, 999);
+            return date.getTime();
+        }
+
+        function parseFechas(timestamp) {
+            if (!timestamp || timestamp === 9999999999999) return { isTodayOrOverdue: false, isFutureRolling: false, isWithinWindow: false, category: 'Sin Fecha' };
+            const ts = parseInt(timestamp, 10);
+            const now = new Date();
+            const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999).getTime();
+            const endOfWindow = getEndOfBusinessDays(now, 7);
+
+            const isTodayOrOverdue = ts <= endOfToday;
+            const isFutureRolling = ts > endOfToday && ts <= endOfWindow;
+            const isWithinWindow = isTodayOrOverdue || isFutureRolling; 
+
+            let category = 'Futuro';
+            if (isTodayOrOverdue) category = 'Hoy/Atrasado';
+            else if (isFutureRolling) category = 'Próx. 7 Días Lab.';
+            return { isTodayOrOverdue, isFutureRolling, isWithinWindow, category };
+        }
+
+        function getWeekBoundaries(weeksAgo = 0) {
+            const now = new Date();
+            const day = now.getDay() || 7; 
+            const mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (day - 1) - (weeksAgo * 7), 0, 0, 0, 0);
+            const sun = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 6, 23, 59, 59, 999);
+            return { start: mon.getTime(), end: sun.getTime() };
+        }
+
+        function normalizeTasks(rawTasks) {
+            return rawTasks.map(task => {
+                const esSoloRecibir = checkSoloRecibir(task);
+                const modelosDesglose = parseTaskModels(task.name);
+                const cliente = parseClienteName(task.name);
+                const kitData = parseKitsSolaresGW(task.name, task.description);
+
+                let totalUnitsContables = 0;
+                let totalUnitsBrutas = 0;
+                let esAccesorio = modelosDesglose.every(m => m.esAccesorio);
+
+                modelosDesglose.forEach(m => {
+                    totalUnitsBrutas += m.unidades;
+                    if (!esSoloRecibir && !m.esAccesorio) totalUnitsContables += m.unidades;
+                });
+
+                const primaryModel = modelosDesglose[0] ? modelosDesglose[0].modeloInfo : parseModelo(task.name);
+                const estado = task.status ? task.status.status.toUpperCase() : 'DESCONOCIDO';
+                const dateInfo = parseFechas(task.due_date);
+
+                let priorityNum = 3, priorityLevel = 'normal';
+                if (task.priority) {
+                    const p = String(task.priority.priority || '').toLowerCase();
+                    if (p === 'urgent' || p === '1') { priorityNum = 1; priorityLevel = 'urgent'; }
+                    else if (p === 'high' || p === '2') { priorityNum = 2; priorityLevel = 'high'; }
+                    else if (p === 'normal' || p === '3') { priorityNum = 3; priorityLevel = 'normal'; }
+                    else if (p === 'low' || p === '4') { priorityNum = 4; priorityLevel = 'low'; }
+                }
+
+                const arrayEtiquetas = (task.tags && Array.isArray(task.tags)) ? task.tags.map(t => t.name.toUpperCase()) : [];
+                const closedTimestamp = task.date_closed ? parseInt(task.date_closed, 10) : (task.date_updated ? parseInt(task.date_updated, 10) : 0);
+
+                return {
+                    id: task.id,
+                    nombre: task.name,
+                    cliente: cliente,
+                    unidades: totalUnitsContables,
+                    unidadesBrutas: totalUnitsBrutas,
+                    kitsSolaresGW: kitData.found ? kitData.qty : 0,
+                    kitTipo: kitData.tipo,
+                    esSoloRecibir: esSoloRecibir,
+                    esAccesorio: esAccesorio,
+                    modeloInfo: primaryModel,
+                    modelosDesglose: modelosDesglose,
+                    estado: estado,
+                    estadoColor: task.status ? task.status.color : '#64748b',
+                    dateInfo: dateInfo,
+                    etiquetas: arrayEtiquetas,
+                    timestamp: task.due_date ? parseInt(task.due_date, 10) : 9999999999999,
+                    closedTimestamp: closedTimestamp,
+                    prioridadNum: priorityNum,
+                    prioridadLevel: priorityLevel
+                };
+            });
+        }
+
+        async function fetchClickUpData() {
+            const pin = localStorage.getItem('ixorigue_pin');
+            const pinError = document.getElementById('pin-error');
+            try {
+                const response = await fetch('/api/clickup?t=' + Date.now(), { 
+                    cache: 'no-store',
+                    headers: { 'x-pin-token': pin || '' }
+                });
+                
+                if (response.status === 401) {
+                    if (pinError) pinError.classList.remove('hidden');
+                    document.getElementById('pin-overlay').classList.remove('hidden');
+                    return;
+                }
+                if (!response.ok) throw new Error('Error de conexión');
+                
+                if (pinError) pinError.classList.add('hidden');
+                document.getElementById('pin-overlay').classList.add('hidden');
+
+                const data = await response.json();
+                window.allTasks = normalizeTasks(data.tasks || []);
+                window.allTasks.sort((a, b) => a.prioridadNum - b.prioridadNum || a.timestamp - b.timestamp);
+                
+                updateDashboard();
+                document.getElementById('last-update').innerText = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            } catch (error) {
+                console.error(error);
+                document.getElementById('last-update').innerText = 'Fallo de Red';
+            }
+        }
+
+        function setTableFilter(filterType) {
+            currentTableFilter = filterType;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById(`tab-${filterType}`);
+            if (activeBtn) activeBtn.classList.add('active');
+            renderMainTable();
+        }
+
+        // DESPLIEGUE INTERACTIVO DEL CUADRO DE DISPOSITIVOS A FABRICAR HOY POR LOTE
+        window.toggleTodayBatchBox = function(safeId) {
+            const box = document.getElementById(`today-box-${safeId}`);
+            const chevron = document.getElementById(`chevron-${safeId}`);
+            if (box) {
+                if (box.classList.contains('hidden')) {
+                    box.classList.remove('hidden');
+                    if (chevron) chevron.classList.add('rotate-180');
+                } else {
+                    box.classList.add('hidden');
+                    if (chevron) chevron.classList.remove('rotate-180');
+                }
+            }
+        };
+
+        function checkBatchingRecommendations() {
+            let modelsData = {};
+            window.allTasks.forEach(task => {
+                if (task.esSoloRecibir || task.esAccesorio) return; 
+                if (isTaskCompleted(task)) return;
+                if (!task.dateInfo.isWithinWindow) return; 
+
+                task.modelosDesglose.forEach(m => {
+                    const model = m.modeloInfo.nombre;
+                    const modelHex = m.modeloInfo.hex;
+                    if (model === 'Otro' || model === 'Gateway' || model === 'Correas' || model === 'Contrapesos') return;
+
+                    if (!modelsData[model]) {
+                        modelsData[model] = { todayUnits: 0, futureUnits: 0, todayTickets: [], futureTickets: [], hex: modelHex };
+                    }
+
+                    if (task.dateInfo.isTodayOrOverdue) {
+                        modelsData[model].todayUnits += m.unidades;
+                        modelsData[model].todayTickets.push({
+                            nombre: task.nombre,
+                            cliente: task.cliente,
+                            unidades: m.unidades
+                        });
+                    } else if (task.dateInfo.isFutureRolling) {
+                        modelsData[model].futureUnits += m.unidades;
+                        modelsData[model].futureTickets.push(`${task.nombre} (${m.unidades} uds)`);
+                    }
+                });
+            });
+
+            let suggestions = [];
+            for (const [model, data] of Object.entries(modelsData)) {
+                if (data.futureUnits > 0) {
+                    const batchTotal = data.todayUnits + data.futureUnits;
+                    const safeId = model.replace(/[^a-zA-Z0-9]/g, '_');
+
+                    const todayTicketsHtml = data.todayTickets.length > 0
+                        ? data.todayTickets.map(t => `
+                            <span class="bg-slate-900 border border-amber-500/50 text-amber-200 px-2.5 py-1.5 rounded-lg text-[11px] font-mono flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-stopwatch text-amber-400"></i> ${t.nombre} 
+                                <strong class="text-white bg-amber-500/25 px-1.5 py-0.5 rounded border border-amber-500/40 font-bold">${t.unidades} uds</strong>
+                            </span>`).join('')
+                        : '<span class="text-xs text-slate-400 italic">No hay tiquets con vencimiento hoy para este modelo.</span>';
+
+                    const ticketsHtml = data.futureTickets.map(t => `<span class="bg-slate-900 border border-slate-700 text-slate-300 px-2 py-1 rounded text-[11px] font-mono"><i class="fa-solid fa-ticket text-slate-500"></i> ${t}</span>`).join('');
+
+                    suggestions.push(`
+                        <div class="bg-slate-900/80 p-4 rounded-xl border border-amber-500/30 mb-3 shadow-inner">
+                            <div class="flex items-center gap-3 mb-2 flex-wrap">
+                                <!-- BOTÓN INTERACTIVO DEL RECUADRO DE LOTE -->
+                                <button type="button" onclick="toggleTodayBatchBox('${safeId}')" class="px-2.5 py-1.5 rounded-md text-xs font-bold uppercase text-white hover:ring-2 hover:ring-amber-400/80 active:scale-95 transition cursor-pointer flex items-center gap-2 shadow-md" style="background-color: ${data.hex}" title="Haz clic para ver/ocultar los dispositivos a fabricar hoy">
+                                    <span>Lote: ${model}</span>
+                                    <span class="text-[10px] bg-black/40 px-1.5 py-0.5 rounded font-mono font-normal flex items-center gap-1">
+                                        <i class="fa-solid fa-bolt text-amber-300"></i> Ver Hoy (${data.todayUnits}) <i class="fa-solid fa-chevron-down text-[8px] transition-transform duration-200" id="chevron-${safeId}"></i>
+                                    </span>
+                                </button>
+                                <span class="text-slate-200 text-sm">
+                                    <span class="cursor-pointer underline decoration-amber-400/60 hover:text-amber-300 font-medium" onclick="toggleTodayBatchBox('${safeId}')" title="Clic para ver desglose de hoy">Hoy: <strong class="text-amber-400 font-mono">${data.todayUnits}</strong></span> + Adelantar (7 días): <strong>${data.futureUnits}</strong> = <strong class="text-amber-400 text-base font-mono ml-1">Lote de ${batchTotal} uds</strong>
+                                </span>
+                            </div>
+
+                            <!-- CUADRO INTERACTIVO DE DISPOSITIVOS A FABRICAR HOY -->
+                            <div id="today-box-${safeId}" class="hidden mt-3 mb-3 p-3.5 bg-amber-950/40 border-2 border-amber-500/50 rounded-xl transition-all shadow-inner">
+                                <div class="flex items-center justify-between mb-2.5 pb-1.5 border-b border-amber-500/20">
+                                    <span class="text-xs font-bold text-amber-300 uppercase tracking-wide flex items-center gap-1.5">
+                                        <i class="fa-solid fa-stopwatch text-amber-400"></i> Dispositivos / Tiquets a Fabricar HOY - ${model} (${data.todayUnits} uds)
+                                    </span>
+                                    <span class="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full font-mono font-bold">
+                                        Prioridad Hoy
+                                    </span>
+                                </div>
+                                <div class="flex flex-wrap gap-2">
+                                    ${todayTicketsHtml}
+                                </div>
+                            </div>
+
+                            <p class="text-[12px] text-slate-400 mb-2 mt-2 border-t border-slate-800 pt-2"><i class="fa-solid fa-boxes-stacked mr-1 text-slate-500"></i> Unidades sugeridas para completar lote en serie (adelantar 7 días):</p>
+                            <div class="flex flex-wrap gap-2 mt-1">${ticketsHtml}</div>
+                        </div>
+                    `);
+                }
+            }
+            const badge = document.getElementById('kpi-sugerencia-badge');
+            if (suggestions.length > 0) badge.classList.remove('hidden');
+            else badge.classList.add('hidden');
+            return suggestions;
+        }
+
+        function renderCharts(agrupacionModelos, agrupacionTiempos, agrupacionEtiquetas, historialProduccion) {
+            if(charts.modelos) charts.modelos.destroy();
+            if(charts.tiempos) charts.tiempos.destroy();
+            if(charts.etiquetas) charts.etiquetas.destroy();
+            if(charts.rendimiento) charts.rendimiento.destroy();
+
+            const modelosLabels = Object.keys(agrupacionModelos);
+            const modelosColors = modelosLabels.map(m => getModelColorHex(m));
+
+            charts.modelos = new Chart(document.getElementById('chartModelos').getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: modelosLabels, datasets: [{ data: Object.values(agrupacionModelos), backgroundColor: modelosColors, borderWidth: 0, hoverOffset: 6 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } } }
+            });
+
+            charts.tiempos = new Chart(document.getElementById('chartTiempos').getContext('2d'), {
+                type: 'bar',
+                data: { labels: Object.keys(agrupacionTiempos), datasets: [{ label: 'Unidades Requeridas', data: Object.values(agrupacionTiempos), backgroundColor: '#3b82f6', borderRadius: 6 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } }
+            });
+
+            const etiquetasLabels = Object.keys(agrupacionEtiquetas);
+            const etiquetasColors = etiquetasLabels.map(tag => getTagColorHex(tag));
+            charts.etiquetas = new Chart(document.getElementById('chartEtiquetas').getContext('2d'), {
+                type: 'bar',
+                data: { labels: etiquetasLabels, datasets: [{ label: 'Tiquets por Etiqueta', data: Object.values(agrupacionEtiquetas), backgroundColor: etiquetasColors, borderRadius: 6 }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { grid: { display: false } } }, plugins: { legend: { display: false } } }
+            });
+
+            charts.rendimiento = new Chart(document.getElementById('chartRendimiento').getContext('2d'), {
+                type: 'bar',
+                data: { labels: ['Sem -3', 'Sem -2', 'Sem Pasada', 'Esta Sem'], datasets: [{ label: 'Envíos Realizados (Uds)', data: historialProduccion, backgroundColor: ['#6366f1', '#3b82f6', '#8b5cf6', '#10b981'], borderRadius: 6 }] },
+                options: { 
+                    responsive: true, maintainAspectRatio: false, 
+                    scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } }, 
+                    plugins: { legend: { display: false } },
+                    onClick: (e, activeElements) => {
+                        if (activeElements.length > 0) {
+                            const weekKeys = ['w3', 'w2', 'w1', 'w0'];
+                            const weekTitles = ['Envíos Hace 3 Semanas', 'Envíos Hace 2 Semanas', 'Envíos Semana Pasada', 'Envíos Esta Semana'];
+                            openModal(weekTitles[activeElements[0].index], window.weekTasksMap[weekKeys[activeElements[0].index]] || []);
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateSoporteBadge(elementTextId, elementStatusId, data, isNextWeek = false) {
+            document.getElementById(elementTextId).innerText = `Ixo: ${data.ixo}/${CAPACIDAD_IXOTRACK} | Pro: ${data.pro}/${CAPACIDAD_PRO_SERIES} | Cow: ${data.cow}/${CAPACIDAD_COWPRO}`;
+            const statusEl = document.getElementById(elementStatusId);
+            const pctIxo = (data.ixo / CAPACIDAD_IXOTRACK) * 100;
+            const pctPro = (data.pro / CAPACIDAD_PRO_SERIES) * 100;
+            const pctCow = (data.cow / CAPACIDAD_COWPRO) * 100;
+
+            if (data.ixo >= CAPACIDAD_IXOTRACK || data.pro >= CAPACIDAD_PRO_SERIES || data.cow >= CAPACIDAD_COWPRO) {
+                let saturated = [];
+                if (data.ixo >= CAPACIDAD_IXOTRACK) saturated.push('Ixotrack');
+                if (data.pro >= CAPACIDAD_PRO_SERIES) saturated.push('Pro');
+                if (data.cow >= CAPACIDAD_COWPRO) saturated.push('Cowpro v2');
+                statusEl.innerText = `Cupo Lleno (${saturated.join(', ')})`;
+                statusEl.className = `text-xs px-3 py-1 rounded-xl font-mono font-bold bg-red-500/20 text-red-300 border border-red-500/40 animate-pulse whitespace-nowrap shadow-sm`;
+            } else if (pctIxo >= 80 || pctPro >= 80 || pctCow >= 80) {
+                statusEl.innerText = "Cerca del Límite";
+                statusEl.className = `text-xs px-3 py-1 rounded-xl font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 whitespace-nowrap shadow-sm`;
+            } else {
+                statusEl.innerText = "Disponible";
+                statusEl.className = isNextWeek ? `text-xs px-3 py-1 rounded-xl font-mono font-bold bg-emerald-950/80 text-emerald-500 border border-emerald-800/80 whitespace-nowrap shadow-sm` : `text-xs px-3 py-1 rounded-xl font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 whitespace-nowrap shadow-sm`;
+            }
+        }
+
+        function updateDashboard() {
+            let totalSemana = 0, totalHoy = 0, totalGWListos = 0, totalAccesorios = 0, totalKitsGWs = 0, totalPendientesRecibir = 0, enCursoCount = 0;
+            let statsModelos = { 'Ixotrack': 0, 'Ixotrack pro': 0, 'IxotrackproM10': 0, 'IxotrackproM10LR': 0, 'Cowpro v2': 0, 'Gateway': 0, 'Otro': 0 };
+            let statsTiempos = { 'Hoy/Atrasado': 0, 'Próx. 7 Días Lab.': 0, 'Futuro': 0, 'Sin Fecha': 0 };
+            let statsEtiquetas = {}; 
+
+            const w0 = getWeekBoundaries(0), w1 = getWeekBoundaries(1), w2 = getWeekBoundaries(2), w3 = getWeekBoundaries(3);
+            window.weekTasksMap = { w0: [], w1: [], w2: [], w3: [] };
+            let outputW0 = 0, outputW1 = 0, outputW2 = 0, outputW3 = 0;
+
+            const workWeeks = getCalendarWorkWeeks();
+            let thisWeekFamilies = { ixo: 0, pro: 0, cow: 0 }, nextWeekFamilies = { ixo: 0, pro: 0, cow: 0 };
+
+            window.allTasks.forEach(t => {
+                const completed = isTaskCompleted(t);
+                if (completed && !t.esSoloRecibir && !t.esAccesorio && t.closedTimestamp > 0) {
+                    if (t.closedTimestamp >= w0.start && t.closedTimestamp <= w0.end) { outputW0 += t.unidadesBrutas; window.weekTasksMap.w0.push(t); }
+                    else if (t.closedTimestamp >= w1.start && t.closedTimestamp <= w1.end) { outputW1 += t.unidadesBrutas; window.weekTasksMap.w1.push(t); }
+                    else if (t.closedTimestamp >= w2.start && t.closedTimestamp <= w2.end) { outputW2 += t.unidadesBrutas; window.weekTasksMap.w2.push(t); }
+                    else if (t.closedTimestamp >= w3.start && t.closedTimestamp <= w3.end) { outputW3 += t.unidadesBrutas; window.weekTasksMap.w3.push(t); }
+                }
+
+                if (!completed && !t.esSoloRecibir && t.dateInfo.isWithinWindow && t.kitsSolaresGW > 0) totalKitsGWs += t.kitsSolaresGW;
+                if (t.esSoloRecibir && t.estado.includes('BLOQUEAD')) totalPendientesRecibir += t.unidadesBrutas;
+
+                if (!t.esSoloRecibir && !t.esAccesorio && !completed) {
+                    if (t.dateInfo.isWithinWindow) totalSemana += t.unidades;
+                    if (t.dateInfo.isTodayOrOverdue) totalHoy += t.unidades;
+
+                    const isThisW = (t.timestamp <= workWeeks.thisWeek.end);
+                    const isNextW = (t.timestamp > workWeeks.thisWeek.end && t.timestamp <= workWeeks.nextWeek.end);
+
+                    t.modelosDesglose.forEach(m => {
+                        const name = m.modeloInfo.nombre;
+                        if (t.dateInfo.isWithinWindow && statsModelos[name] !== undefined) statsModelos[name] += m.unidades;
+                        if (isThisW) {
+                            if (name === 'Ixotrack') thisWeekFamilies.ixo += m.unidades;
+                            else if (name.includes('Ixotrack pro') || name.includes('M10')) thisWeekFamilies.pro += m.unidades;
+                            else if (name === 'Cowpro v2') thisWeekFamilies.cow += m.unidades;
+                        } else if (isNextW) {
+                            if (name === 'Ixotrack') nextWeekFamilies.ixo += m.unidades;
+                            else if (name.includes('Ixotrack pro') || name.includes('M10')) nextWeekFamilies.pro += m.unidades;
+                            else if (name === 'Cowpro v2') nextWeekFamilies.cow += m.unidades;
+                        }
+                    });
+
+                    if (statsTiempos[t.dateInfo.category] !== undefined) statsTiempos[t.dateInfo.category] += t.unidades;
+                }
+
+                if (t.esAccesorio) totalAccesorios += t.unidadesBrutas;
+                if (t.modeloInfo.nombre === 'Gateway' && completed) totalGWListos += (t.esSoloRecibir ? t.unidadesBrutas : t.unidades);
+                if (t.estado === 'EN CURSO' && !t.esSoloRecibir && !completed) enCursoCount++;
+
+                if (!completed) {
+                    if (t.etiquetas.length > 0) t.etiquetas.forEach(tag => statsEtiquetas[tag] = (statsEtiquetas[tag] || 0) + 1);
+                    else statsEtiquetas['SIN ETIQUETA'] = (statsEtiquetas['SIN ETIQUETA'] || 0) + 1;
+                }
+            });
+
+            updateSoporteBadge('header-soporte-thisweek', 'header-soporte-thisweek-status', thisWeekFamilies, false);
+            updateSoporteBadge('header-soporte-nextweek', 'header-soporte-nextweek-status', nextWeekFamilies, true);
+
+            document.getElementById('kpi-semana').innerText = totalSemana;
+            document.getElementById('kpi-hoy').innerText = totalHoy;
+            document.getElementById('kpi-encurso').innerText = enCursoCount;
+            document.getElementById('kpi-gw').innerText = totalGWListos;
+            document.getElementById('kpi-accesorios').innerText = totalAccesorios;
+            document.getElementById('kpi-kits').innerText = totalKitsGWs;
+            document.getElementById('kpi-pendientes-recibir').innerText = totalPendientesRecibir;
+
+            document.getElementById('mod-ixo').innerText = statsModelos['Ixotrack'];
+            document.getElementById('mod-pro').innerText = statsModelos['Ixotrack pro'];
+            document.getElementById('mod-m10').innerText = statsModelos['IxotrackproM10'];
+            document.getElementById('mod-m10lr').innerText = statsModelos['IxotrackproM10LR'];
+            document.getElementById('mod-cowpro').innerText = statsModelos['Cowpro v2'];
+            
+            document.getElementById('task-count-badge').innerText = `${window.allTasks.filter(t => !isTaskCompleted(t)).length} ACTIVOS`;
+            
+            checkBatchingRecommendations();
+            renderMainTable();
+            
+            Object.keys(statsModelos).forEach(k => { if(statsModelos[k] === 0) delete statsModelos[k]; });
+            renderCharts(statsModelos, statsTiempos, statsEtiquetas, [outputW3, outputW2, outputW1, outputW0]);
+        }
+
+        function renderMainTable() {
+            const tbody = document.getElementById('main-table-body');
+            tbody.innerHTML = '';
+            
+            let visibleTasks = window.allTasks.filter(t => !isTaskCompleted(t));
+            if (currentTableFilter === 'URGENT') visibleTasks = visibleTasks.filter(t => t.prioridadNum === 1 || t.prioridadLevel === 'urgent');
+            else if (currentTableFilter === 'ENVIO') visibleTasks = visibleTasks.filter(t => t.etiquetas.some(tag => tag.includes('ENVIO')));
+            else if (currentTableFilter === 'REEMPLAZO') visibleTasks = visibleTasks.filter(t => t.etiquetas.some(tag => tag.includes('REEMPLAZO')));
+            else if (currentTableFilter === 'SOLO_RECIBIR') visibleTasks = visibleTasks.filter(t => t.esSoloRecibir);
+
+            if (visibleTasks.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-slate-500 font-mono">No hay tiquets que coincidan con este filtro.</td></tr>';
+                return;
+            }
+
+            visibleTasks.forEach(task => {
+                const f = new Date(task.timestamp);
+                const fechaText = task.timestamp === 9999999999999 ? 'No Deadline' : f.toLocaleDateString('es-ES', { day:'2-digit', month:'short' });
+                const highlightClass = (task.dateInfo.isTodayOrOverdue && !task.esSoloRecibir) ? 'text-amber-400 font-bold' : '';
+                const etiquetasHtml = task.etiquetas.map(getTagHtml).join('');
+
+                tbody.innerHTML += `
+                    <tr class="table-row-hover border-b border-slate-800/60 transition-colors ${task.esSoloRecibir || task.esAccesorio ? 'opacity-60' : ''}">
+                        <td class="py-3.5 px-4 align-top pt-4">${getPriorityHtml(task)}</td>
+                        <td class="py-3.5 px-4">
+                            <div class="font-semibold text-slate-200 text-xs mb-1">${task.nombre}</div>
+                            <div class="flex flex-wrap gap-1">${etiquetasHtml}</div>
+                        </td>
+                        <td class="py-3.5 px-4 align-top pt-4">
+                            <span class="inline-flex items-center gap-2 text-xs text-slate-300 font-medium">
+                                <span class="w-2 h-2 rounded-full" style="background-color: ${task.modeloInfo.hex}"></span>${task.modeloInfo.nombre}
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-center align-top pt-4 font-bold text-sm font-mono ${task.esSoloRecibir || task.esAccesorio ? 'text-slate-500 line-through' : 'text-white'}">
+                            ${task.esSoloRecibir || task.esAccesorio ? `0 (${task.unidadesBrutas})` : task.unidades}
+                        </td>
+                        <td class="py-3.5 px-4 align-top pt-4">
+                            <span class="px-2.5 py-0.5 text-[9px] rounded-md font-bold uppercase" style="background-color: ${task.estadoColor}15; color: ${task.estadoColor}; border: 1px solid ${task.estadoColor}30">${task.estado}</span>
+                        </td>
+                        <td class="py-3.5 px-4 align-top pt-4 text-xs ${highlightClass} font-mono">${fechaText}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function sortTable(col) {
+            currentSort.dir = (currentSort.column === col && currentSort.dir === 'asc') ? 'desc' : 'asc';
+            currentSort.column = col;
+            const mult = currentSort.dir === 'asc' ? 1 : -1;
+            window.allTasks.sort((a, b) => {
+                if(col === 'prioridad') return (a.prioridadNum - b.prioridadNum) * mult;
+                if(col === 'unidades') return (a.unidades - b.unidades) * mult;
+                if(col === 'fecha') return (a.timestamp - b.timestamp) * mult;
+                if(col === 'nombre') return a.nombre.localeCompare(b.nombre) * mult;
+                if(col === 'modelo') return a.modeloInfo.nombre.localeCompare(b.modeloInfo.nombre) * mult;
+                if(col === 'estado') return a.estado.localeCompare(b.estado) * mult;
+            });
+            renderMainTable();
+        }
+
+        function filterModalByClient(clientName) {
+            window.activeClientFilter = clientName;
+            document.querySelectorAll('.client-chip').forEach(btn => {
+                if (clientName && btn.dataset.client === clientName) btn.classList.add('active');
+                else if (!clientName && btn.id === 'btn-client-all') btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            renderModalTable();
+        }
+
+        function filterModalByAccesorio(accType) {
+            window.activeAccesorioFilter = accType;
+            document.querySelectorAll('.acc-chip').forEach(btn => {
+                if (accType && btn.dataset.acc === accType) { btn.classList.add('active'); btn.style.borderColor = accType === 'Correas' ? '#06b6d4' : '#14b8a6'; }
+                else if (!accType && btn.id === 'btn-acc-all') { btn.classList.add('active'); btn.style.borderColor = '#94a3b8'; }
+                else { btn.classList.remove('active'); btn.style.borderColor = ''; }
+            });
+            renderModalTable();
+        }
+
+        function renderModalTable() {
+            const tbody = document.getElementById('modal-table-body');
+            let tasksToRender = window.currentModalTasks || [];
+
+            if (window.activeClientFilter) tasksToRender = tasksToRender.filter(t => t.cliente === window.activeClientFilter);
+            if (window.isCurrentAccesorioModal && window.activeAccesorioFilter) {
+                tasksToRender = tasksToRender.filter(t => t.modelosDesglose.some(m => m.modeloInfo.nombre === window.activeAccesorioFilter));
+            }
+
+            let tUnidades = 0;
+            tbody.innerHTML = '';
+            if (tasksToRender.length === 0) {
+                 tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-slate-500 text-sm font-mono">No hay datos para este filtro.</td></tr>`;
+            }
+            
+            tasksToRender.forEach(t => {
+                const isKitModal = window.isCurrentKitSolarModal;
+                const isAccModal = window.isCurrentAccesorioModal;
+                let unitsShow = t.unidades > 0 ? t.unidades : t.unidadesBrutas;
+                let displayModelName = t.modeloInfo.nombre;
+                let displayModelHex = t.modeloInfo.hex;
+                
+                if (isKitModal) {
+                    unitsShow = t.kitsSolaresGW > 0 ? t.kitsSolaresGW : 1;
+                    displayModelName = t.kitTipo || 'Kit Solar / Gateway';
+                } else if (isAccModal) {
+                    if (window.activeAccesorioFilter) {
+                        const targetPart = t.modelosDesglose.find(m => m.modeloInfo.nombre === window.activeAccesorioFilter);
+                        unitsShow = targetPart ? targetPart.unidades : 0;
+                        displayModelName = window.activeAccesorioFilter;
+                        displayModelHex = window.activeAccesorioFilter === 'Correas' ? '#06b6d4' : '#14b8a6';
+                    } else {
+                        unitsShow = t.unidadesBrutas;
+                        displayModelName = t.modelosDesglose.map(m => `${m.modeloInfo.nombre} (${m.unidades})`).join(' + ');
+                        displayModelHex = '#06b6d4';
+                    }
+                }
+
+                tUnidades += unitsShow;
+                const f = new Date(t.timestamp);
+                const fechaText = t.timestamp === 9999999999999 ? '-' : f.toLocaleDateString('es-ES', { day:'2-digit', month:'short' });
+                const etiquetasHtml = t.etiquetas.map(getTagHtml).join('');
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-800/40 border-b border-slate-800/50 ${t.esSoloRecibir ? 'opacity-60' : ''}">
+                        <td class="py-3 pr-4">
+                            <div class="font-semibold text-slate-200 text-xs">${t.nombre}</div>
+                            <div class="text-[11px] text-blue-400 font-mono mt-0.5 flex items-center gap-1.5"><i class="fa-solid fa-user text-[10px]"></i> Cliente: <span class="text-white font-semibold">${t.cliente}</span></div>
+                            <div class="flex flex-wrap gap-1 mt-1">${etiquetasHtml}</div>
+                        </td>
+                        <td class="py-3 px-4 align-top pt-4">
+                            <span class="flex items-center gap-2 text-[11px] text-slate-300 font-medium">
+                                <span class="w-2 h-2 rounded-full" style="background-color: ${displayModelHex}"></span>${displayModelName}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 align-top pt-4 text-center font-bold font-mono text-sm ${t.esSoloRecibir ? 'text-slate-500' : 'text-white'}">${unitsShow}</td>
+                        <td class="py-3 pl-4 align-top pt-4 text-right font-mono text-[10px] text-slate-500">${fechaText}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('modal-total-tickets').innerText = `${tasksToRender.length} ROWS`;
+            document.getElementById('modal-total-units').innerText = tUnidades;
+        }
+
+        function openModal(title, tasks, showRecommendations = false, isKitSolarModal = false, isAccesorioModal = false) {
+            document.getElementById('modal-title').innerHTML = `<i class="fa-solid fa-filter text-brand-blue"></i> Filtro Activo: ${title}`;
+            window.currentModalTasks = tasks;
+            window.activeClientFilter = null;
+            window.activeAccesorioFilter = null;
+            window.isCurrentKitSolarModal = isKitSolarModal;
+            window.isCurrentAccesorioModal = isAccesorioModal;
+
+            const clientBox = document.getElementById('modal-kits-client-box');
+            const clientList = document.getElementById('modal-kits-client-list');
+            const accBox = document.getElementById('modal-accesorios-box');
+            const accList = document.getElementById('modal-accesorios-list');
+
+            // SELECTOR INTERACTIVO ACCESORIOS
+            if (isAccesorioModal) {
+                let sumC = 0, sumCP = 0;
+                tasks.forEach(t => {
+                    t.modelosDesglose.forEach(m => {
+                        if (m.modeloInfo.nombre === 'Correas') sumC += m.unidades;
+                        if (m.modeloInfo.nombre === 'Contrapesos') sumCP += m.unidades;
+                    });
+                });
+                accList.innerHTML = `
+                    <button onclick="filterModalByAccesorio(null)" id="btn-acc-all" data-acc="all" class="acc-chip active bg-slate-900 border-2 border-slate-600 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 text-slate-200">
+                        <span class="w-3 h-3 rounded-full bg-slate-400"></span><span class="font-bold">Todos:</span><strong class="text-white font-mono text-sm">${sumC + sumCP} uds</strong>
+                    </button>
+                    <button onclick="filterModalByAccesorio('Correas')" id="btn-acc-correas" data-acc="Correas" class="acc-chip bg-slate-900 border-2 border-cyan-500/40 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 text-slate-200 shadow-lg shadow-cyan-950/40">
+                        <span class="w-3 h-3 rounded-full bg-cyan-400"></span><span class="font-bold text-cyan-300">Correas:</span><strong class="text-white font-mono text-base">${sumC} uds</strong>
+                    </button>
+                    <button onclick="filterModalByAccesorio('Contrapesos')" id="btn-acc-contrapesos" data-acc="Contrapesos" class="acc-chip bg-slate-900 border-2 border-teal-500/40 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 text-slate-200 shadow-lg shadow-teal-950/40">
+                        <span class="w-3 h-3 rounded-full bg-teal-400"></span><span class="font-bold text-teal-300">Contrapesos:</span><strong class="text-white font-mono text-base">${sumCP} uds</strong>
+                    </button>
+                `;
+                accBox.classList.remove('hidden');
+            } else {
+                accBox.classList.add('hidden');
+            }
+
+            if (isKitSolarModal) {
+                let clientMap = {};
+                tasks.forEach(t => {
+                    const cName = t.cliente || 'Cliente General';
+                    clientMap[cName] = (clientMap[cName] || 0) + (t.kitsSolaresGW > 0 ? t.kitsSolaresGW : 1);
+                });
+                const clients = Object.keys(clientMap);
+                if (clients.length > 0) {
+                    clientList.innerHTML = clients.map(c => `
+                        <button onclick="filterModalByClient('${c}')" data-client="${c}" class="client-chip bg-blue-900/60 border border-blue-500/30 px-3 py-1.5 rounded-xl text-xs flex items-center gap-2 text-slate-200">
+                            <i class="fa-solid fa-user text-blue-400"></i><span class="font-medium">${c}:</span><strong class="text-white font-mono">${clientMap[c]} kits/GWs</strong>
+                        </button>
+                    `).join('');
+                    clientBox.classList.remove('hidden');
+                } else clientBox.classList.add('hidden');
+            } else {
+                clientBox.classList.add('hidden');
+            }
+
+            const summaryContainer = document.getElementById('modal-summary-models-box');
+            const summaryList = document.getElementById('modal-summary-models-list');
+            let modelBreakdown = {};
+            tasks.forEach(t => {
+                t.modelosDesglose.forEach(m => {
+                    const mName = m.modeloInfo.nombre;
+                    if (!modelBreakdown[mName]) modelBreakdown[mName] = { units: 0, hex: m.modeloInfo.hex };
+                    modelBreakdown[mName].units += (m.unidades > 0 ? m.unidades : 1);
+                });
+            });
+
+            const activeModels = Object.keys(modelBreakdown);
+            if (activeModels.length > 0 && !isKitSolarModal && !isAccesorioModal) {
+                summaryList.innerHTML = activeModels.map(m => `
+                    <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3.5 py-1.5 rounded-xl shadow-sm">
+                        <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${modelBreakdown[m].hex}"></span>
+                        <span class="text-xs font-medium text-slate-300">${m}:</span>
+                        <span class="text-sm font-bold font-mono text-white">${modelBreakdown[m].units} <span class="text-[10px] text-slate-400">uds</span></span>
+                    </div>
+                `).join('');
+                summaryContainer.classList.remove('hidden');
+            } else {
+                summaryContainer.classList.add('hidden');
+            }
+
+            const recBox = document.getElementById('modal-recommendation-box');
+            if (showRecommendations) {
+                const sugerencias = checkBatchingRecommendations();
+                if (sugerencias.length > 0) {
+                    document.getElementById('modal-recommendation-list').innerHTML = sugerencias.join('');
+                    recBox.classList.remove('hidden');
+                } else recBox.classList.add('hidden');
+            } else recBox.classList.add('hidden');
+
+            renderModalTable();
+
+            const modal = document.getElementById('detail-modal');
+            const modalContent = document.getElementById('modal-content-box');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('detail-modal');
+            const modalContent = document.getElementById('modal-content-box');
+            modal.classList.add('opacity-0');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        checkPinAuth();
+        setInterval(fetchClickUpData, 60000);
+    </script>
+</body>
+</html>
