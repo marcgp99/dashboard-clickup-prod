@@ -179,8 +179,11 @@
                 <div class="w-full h-44 relative"><canvas id="chartTiempos"></canvas></div>
             </div>
             <div class="bi-panel p-5 flex flex-col justify-between min-h-[260px]">
-                <h3 class="text-xs font-bold text-brand-purple uppercase tracking-wider mb-2 flex items-center gap-2"><i class="fa-solid fa-tags"></i> Distribución por Etiquetas</h3>
-                <div class="w-full h-44 relative"><canvas id="chartEtiquetas"></canvas></div>
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-xs font-bold text-brand-purple uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-tags"></i> Distribución por Etiquetas</h3>
+                    <span id="chart-etiquetas-hint" class="text-[10px] text-slate-500 font-mono">Clic para filtrar</span>
+                </div>
+                <div class="w-full h-44 relative cursor-pointer"><canvas id="chartEtiquetas"></canvas></div>
             </div>
             <div class="bi-panel p-5 flex flex-col justify-between min-h-[260px]">
                 <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2 flex items-center justify-between">
@@ -216,18 +219,37 @@
         </div>
 
         <!-- TABLA PRINCIPAL -->
-        <section class="bi-panel overflow-hidden flex flex-col h-[520px]">
-            <div class="p-4 border-b border-slate-800/80 bg-slate-900/90 flex flex-col md:flex-row gap-3 justify-between items-start md:items-center">
-                <div class="flex items-center gap-3">
+        <section class="bi-panel overflow-hidden flex flex-col h-[520px]" id="seccion-tabla-principal">
+            <div class="p-4 border-b border-slate-800/80 bg-slate-900/90 flex flex-col lg:flex-row gap-3 justify-between items-start lg:items-center">
+                <div class="flex items-center gap-3 flex-wrap">
                     <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-list-check text-brand-blue"></i> Tiquets Activos</h2>
                     <span id="task-count-badge" class="px-2.5 py-0.5 bg-slate-800 text-slate-400 text-xs rounded-full border border-slate-700 font-mono">0 ACTIVOS</span>
+                    
+                    <!-- PÍLDORA DE ETIQUETA ACTIVA -->
+                    <div id="active-tag-chip-container" class="hidden items-center gap-1.5 bg-purple-500/20 border border-purple-500/40 text-purple-300 px-2.5 py-1 rounded-xl text-xs font-mono shadow-sm">
+                        <i class="fa-solid fa-tag text-[10px]"></i>
+                        <span>Etiqueta: <strong id="active-tag-chip-name" class="text-white"></strong></span>
+                        <button type="button" onclick="filterByTag('')" title="Quitar filtro de etiqueta" class="hover:text-red-400 ml-1 text-sm font-bold leading-none cursor-pointer">&times;</button>
+                    </div>
                 </div>
-                <div class="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
-                    <button onclick="setTableFilter('ALL')" id="tab-ALL" class="tab-btn active px-3 py-1 rounded-lg text-slate-400 hover:text-white">Todos</button>
-                    <button onclick="setTableFilter('URGENT')" id="tab-URGENT" class="tab-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white flex items-center gap-1"><i class="fa-solid fa-fire text-red-400"></i> Urgentes</button>
-                    <button onclick="setTableFilter('ENVIO')" id="tab-ENVIO" class="tab-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white flex items-center gap-1"><i class="fa-solid fa-truck-fast text-blue-400"></i> Envíos</button>
-                    <button onclick="setTableFilter('REEMPLAZO')" id="tab-REEMPLAZO" class="tab-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white flex items-center gap-1"><i class="fa-solid fa-rotate-left text-amber-400"></i> Reemplazos</button>
-                    <button onclick="setTableFilter('SOLO_RECIBIR')" id="tab-SOLO_RECIBIR" class="tab-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white flex items-center gap-1"><i class="fa-solid fa-inbox text-emerald-400"></i> Sólo Recibir</button>
+
+                <div class="flex items-center gap-2 flex-wrap w-full lg:w-auto justify-end">
+                    <!-- SELECTOR DESPLEGABLE DE ETIQUETAS -->
+                    <div class="relative">
+                        <select id="select-etiqueta-filter" onchange="filterByTag(this.value)" class="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-1.5 font-sans focus:outline-none focus:border-brand-purple cursor-pointer pr-7 appearance-none shadow-sm hover:border-slate-700 transition">
+                            <option value="">🏷️ Todas las etiquetas</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-500 pointer-events-none"></i>
+                    </div>
+
+                    <!-- BOTONES DE CATEGORÍA -->
+                    <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs flex-wrap">
+                        <button onclick="setTableFilter('ALL')" id="tab-ALL" class="tab-btn active px-3 py-1 rounded-lg text-slate-400 hover:text-white">Todos</button>
+                        <button onclick="setTableFilter('URGENT')" id="tab-URGENT" class="tab-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white flex items-center gap-1"><i class="fa-solid fa-fire text-red-400"></i> Urgentes</button>
+                        <button onclick="setTableFilter('ENVIO')" id="tab-ENVIO" class="tab-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white flex items-center gap-1"><i class="fa-solid fa-truck-fast text-blue-400"></i> Envíos</button>
+                        <button onclick="setTableFilter('REEMPLAZO')" id="tab-REEMPLAZO" class="tab-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white flex items-center gap-1"><i class="fa-solid fa-rotate-left text-amber-400"></i> Reemplazos</button>
+                        <button onclick="setTableFilter('SOLO_RECIBIR')" id="tab-SOLO_RECIBIR" class="tab-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white flex items-center gap-1"><i class="fa-solid fa-inbox text-emerald-400"></i> Sólo Recibir</button>
+                    </div>
                 </div>
             </div>
             <div class="overflow-auto flex-1">
@@ -343,6 +365,7 @@
         window.currentModalTasks = [];
         window.activeClientFilter = null;
         window.activeAccesorioFilter = null;
+        window.selectedTagFilter = ''; // Filtro interactivo por etiqueta
         let currentSort = { column: 'fecha', dir: 'asc' };
         let currentTableFilter = 'ALL';
 
@@ -392,10 +415,16 @@
 
         function getTagHtml(tag) {
             const t = tag.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            if (t.includes("REEMPLAZO")) return `<span class="inline-block bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-md text-[10px] font-bold mr-1 mt-1">${tag}</span>`;
-            if (t.includes("SOLO RECIBIR")) return `<span class="inline-block bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-md text-[10px] font-bold mr-1 mt-1">${tag}</span>`;
-            if (t.includes("ENVIO")) return `<span class="inline-block bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded-md text-[10px] font-bold mr-1 mt-1">${tag}</span>`;
-            return `<span class="inline-block bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-md text-[10px] font-bold mr-1 mt-1">${tag}</span>`;
+            let baseColorClass = "bg-purple-500/20 text-purple-300 border-purple-500/30 hover:border-purple-400";
+            if (t.includes("REEMPLAZO")) baseColorClass = "bg-amber-500/20 text-amber-300 border-amber-500/30 hover:border-amber-400";
+            else if (t.includes("SOLO RECIBIR")) baseColorClass = "bg-emerald-500/20 text-emerald-300 border-emerald-500/30 hover:border-emerald-400";
+            else if (t.includes("ENVIO")) baseColorClass = "bg-blue-500/20 text-blue-300 border-blue-500/30 hover:border-blue-400";
+            
+            const isSelected = window.selectedTagFilter && window.selectedTagFilter.toUpperCase() === tag.toUpperCase();
+            const activeRing = isSelected ? "ring-2 ring-brand-purple ring-offset-1 ring-offset-slate-900 font-extrabold" : "";
+            const safeTag = tag.replace(/'/g, "\\'");
+
+            return `<span onclick="filterByTag('${safeTag}')" title="Filtrar por etiqueta: ${tag}" class="inline-block border px-2 py-0.5 rounded-md text-[10px] font-bold mr-1 mt-1 cursor-pointer transition-all hover:scale-105 active:scale-95 ${baseColorClass} ${activeRing}">${tag}</span>`;
         }
 
         function getPriorityHtml(task) {
@@ -673,6 +702,68 @@
             renderMainTable();
         }
 
+        // CONTROL DEL FILTRO POR ETIQUETA
+        function filterByTag(tagName) {
+            const cleanTag = (tagName || '').trim();
+            if (window.selectedTagFilter && window.selectedTagFilter.toUpperCase() === cleanTag.toUpperCase()) {
+                window.selectedTagFilter = '';
+            } else {
+                window.selectedTagFilter = cleanTag;
+            }
+
+            // Sincronizar select
+            const tagSelect = document.getElementById('select-etiqueta-filter');
+            if (tagSelect) tagSelect.value = window.selectedTagFilter;
+
+            // Sincronizar chip en tabla
+            const chipBox = document.getElementById('active-tag-chip-container');
+            const chipName = document.getElementById('active-tag-chip-name');
+            const chartHint = document.getElementById('chart-etiquetas-hint');
+
+            if (window.selectedTagFilter) {
+                if (chipBox && chipName) {
+                    chipName.innerText = window.selectedTagFilter;
+                    chipBox.classList.remove('hidden');
+                    chipBox.classList.add('inline-flex');
+                }
+                if (chartHint) {
+                    chartHint.innerHTML = `<span class="text-brand-purple font-bold">Filtro: ${window.selectedTagFilter} <i class="fa-solid fa-xmark ml-1 cursor-pointer hover:text-red-400" onclick="event.stopPropagation(); filterByTag('')" title="Quitar filtro"></i></span>`;
+                }
+            } else {
+                if (chipBox) {
+                    chipBox.classList.add('hidden');
+                    chipBox.classList.remove('inline-flex');
+                }
+                if (chartHint) {
+                    chartHint.innerText = 'Clic para filtrar';
+                }
+            }
+
+            // Si el modal está abierto, cerrarlo para ver la tabla
+            const modal = document.getElementById('detail-modal');
+            if (modal && !modal.classList.contains('hidden')) {
+                closeModal();
+            }
+
+            renderMainTable();
+
+            // Actualizar visualmente la gráfica de etiquetas destacando la barra seleccionada
+            if (charts.etiquetas && charts.etiquetas.data) {
+                const labels = charts.etiquetas.data.labels;
+                charts.etiquetas.data.datasets[0].backgroundColor = labels.map(tag => {
+                    const base = getTagColorHex(tag);
+                    if (window.selectedTagFilter) {
+                        return tag.toUpperCase() === window.selectedTagFilter.toUpperCase() ? base : base + '35';
+                    }
+                    return base;
+                });
+                charts.etiquetas.data.datasets[0].borderWidth = labels.map(tag => 
+                    (window.selectedTagFilter && tag.toUpperCase() === window.selectedTagFilter.toUpperCase()) ? 2 : 0
+                );
+                charts.etiquetas.update();
+            }
+        }
+
         // DESPLIEGUE INTERACTIVO DEL CUADRO DE DISPOSITIVOS A FABRICAR HOY POR LOTE
         window.toggleTodayBatchBox = function(safeId) {
             const box = document.getElementById(`today-box-${safeId}`);
@@ -798,11 +889,45 @@
             });
 
             const etiquetasLabels = Object.keys(agrupacionEtiquetas);
-            const etiquetasColors = etiquetasLabels.map(tag => getTagColorHex(tag));
+            const etiquetasColors = etiquetasLabels.map(tag => {
+                const baseColor = getTagColorHex(tag);
+                if (window.selectedTagFilter) {
+                    return tag.toUpperCase() === window.selectedTagFilter.toUpperCase() ? baseColor : baseColor + '35';
+                }
+                return baseColor;
+            });
+
             charts.etiquetas = new Chart(document.getElementById('chartEtiquetas').getContext('2d'), {
                 type: 'bar',
-                data: { labels: etiquetasLabels, datasets: [{ label: 'Tiquets por Etiqueta', data: Object.values(agrupacionEtiquetas), backgroundColor: etiquetasColors, borderRadius: 6 }] },
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { grid: { display: false } } }, plugins: { legend: { display: false } } }
+                data: { 
+                    labels: etiquetasLabels, 
+                    datasets: [{ 
+                        label: 'Tiquets por Etiqueta', 
+                        data: Object.values(agrupacionEtiquetas), 
+                        backgroundColor: etiquetasColors, 
+                        borderRadius: 6,
+                        borderWidth: etiquetasLabels.map(tag => (window.selectedTagFilter && tag.toUpperCase() === window.selectedTagFilter.toUpperCase()) ? 2 : 0),
+                        borderColor: '#ffffff'
+                    }] 
+                },
+                options: { 
+                    indexAxis: 'y', 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: { 
+                        x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, 
+                        y: { grid: { display: false } } 
+                    }, 
+                    plugins: { legend: { display: false } },
+                    onClick: (e, activeElements) => {
+                        if (activeElements.length > 0) {
+                            const clickedTag = etiquetasLabels[activeElements[0].index];
+                            filterByTag(clickedTag);
+                            const tableSection = document.getElementById('seccion-tabla-principal');
+                            if (tableSection) tableSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }
+                    }
+                }
             });
 
             charts.rendimiento = new Chart(document.getElementById('chartRendimiento').getContext('2d'), {
@@ -922,8 +1047,21 @@
             document.getElementById('mod-m10lr').innerText = statsModelos['IxotrackproM10LR'];
             document.getElementById('mod-cowpro').innerText = statsModelos['Cowpro v2'];
             
-            document.getElementById('task-count-badge').innerText = `${window.allTasks.filter(t => !isTaskCompleted(t)).length} ACTIVOS`;
-            
+            // Sincronizar opciones del desplegable de etiquetas
+            const tagSelect = document.getElementById('select-etiqueta-filter');
+            if (tagSelect) {
+                const currentVal = window.selectedTagFilter || '';
+                const sortedTags = Object.keys(statsEtiquetas).sort((a,b) => a.localeCompare(b));
+                tagSelect.innerHTML = '<option value="">🏷️ Todas las etiquetas</option>';
+                sortedTags.forEach(t => {
+                    const opt = document.createElement('option');
+                    opt.value = t;
+                    opt.textContent = `🏷️ ${t} (${statsEtiquetas[t]})`;
+                    if (t.toUpperCase() === currentVal.toUpperCase()) opt.selected = true;
+                    tagSelect.appendChild(opt);
+                });
+            }
+
             checkBatchingRecommendations();
             renderMainTable();
             
@@ -935,11 +1073,32 @@
             const tbody = document.getElementById('main-table-body');
             tbody.innerHTML = '';
             
+            const totalActivos = window.allTasks.filter(t => !isTaskCompleted(t)).length;
             let visibleTasks = window.allTasks.filter(t => !isTaskCompleted(t));
+            
             if (currentTableFilter === 'URGENT') visibleTasks = visibleTasks.filter(t => t.prioridadNum === 1 || t.prioridadLevel === 'urgent');
             else if (currentTableFilter === 'ENVIO') visibleTasks = visibleTasks.filter(t => t.etiquetas.some(tag => tag.includes('ENVIO')));
             else if (currentTableFilter === 'REEMPLAZO') visibleTasks = visibleTasks.filter(t => t.etiquetas.some(tag => tag.includes('REEMPLAZO')));
             else if (currentTableFilter === 'SOLO_RECIBIR') visibleTasks = visibleTasks.filter(t => t.esSoloRecibir);
+
+            // Filtrado interactivo por etiqueta seleccionada
+            if (window.selectedTagFilter) {
+                if (window.selectedTagFilter === 'SIN ETIQUETA') {
+                    visibleTasks = visibleTasks.filter(t => t.etiquetas.length === 0);
+                } else {
+                    visibleTasks = visibleTasks.filter(t => t.etiquetas.some(tag => tag.toUpperCase() === window.selectedTagFilter.toUpperCase()));
+                }
+            }
+
+            // Actualizar badge del contador de tiquets activos
+            const badgeEl = document.getElementById('task-count-badge');
+            if (badgeEl) {
+                if (window.selectedTagFilter || currentTableFilter !== 'ALL') {
+                    badgeEl.innerText = `${visibleTasks.length} / ${totalActivos} ACTIVOS`;
+                } else {
+                    badgeEl.innerText = `${totalActivos} ACTIVOS`;
+                }
+            }
 
             if (visibleTasks.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-slate-500 font-mono">No hay tiquets que coincidan con este filtro.</td></tr>';
