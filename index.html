@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BI Producción - Ixorigue</title>
+    <title>BI Producción & Soporte - Ixorigue</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -40,6 +40,7 @@
         ::-webkit-scrollbar-track { background: #0b1329; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
         .tab-btn.active { background-color: #3b82f6; color: #ffffff; box-shadow: 0 0 12px rgba(59, 130, 246, 0.4); }
+        .subtab-btn.active { background-color: #8b5cf6; color: #ffffff; box-shadow: 0 0 12px rgba(139, 92, 246, 0.4); }
         .client-chip.active { background-color: #3b82f6 !important; border-color: #60a5fa !important; color: #ffffff !important; }
         .acc-chip { transition: all 0.2s ease; cursor: pointer; }
         .acc-chip:hover, .acc-chip.active { transform: scale(1.02); }
@@ -53,8 +54,8 @@
             <div class="w-12 h-12 bg-blue-500/10 border border-blue-500/30 rounded-xl text-brand-blue flex items-center justify-center mx-auto mb-4 text-xl">
                 <i class="fa-solid fa-lock"></i>
             </div>
-            <h2 class="text-xl font-bold text-white mb-1">Ixorigue Producción</h2>
-            <p class="text-slate-400 text-xs mb-6">Acceso restringido. Introduce la clave corporativa.</p>
+            <h2 class="text-xl font-bold text-white mb-1">Ixorigue Hub</h2>
+            <p class="text-slate-400 text-xs mb-6">Acceso corporativo a Producción y Soporte.</p>
             <form onsubmit="handlePinSubmit(event)" class="space-y-4">
                 <input type="password" id="pin-input" placeholder="Introduce el PIN" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-center text-white text-sm tracking-wider font-mono focus:outline-none focus:border-brand-blue transition">
                 <p id="pin-error" class="text-red-400 text-xs hidden font-medium"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Clave o PIN incorrecto</p>
@@ -65,18 +66,33 @@
 
     <!-- CABECERA -->
     <header class="flex flex-col xl:flex-row justify-between items-start xl:items-center pb-5 mb-6 border-b border-slate-800/80 gap-5">
-        <div class="flex items-center gap-3">
-            <div class="p-3 bg-blue-500/10 border border-blue-500/30 rounded-2xl text-brand-blue shadow-lg shadow-blue-500/10">
-                <i class="fa-solid fa-chart-pie text-2xl"></i>
+        
+        <div class="flex items-center gap-4 flex-wrap">
+            <div class="flex items-center gap-3">
+                <div id="app-logo-box" class="p-3 bg-blue-500/10 border border-blue-500/30 rounded-2xl text-brand-blue shadow-lg shadow-blue-500/10">
+                    <i class="fa-solid fa-chart-pie text-2xl" id="app-logo-icon"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-white flex items-center gap-2" id="app-main-title">
+                        PANEL DE PRODUCCIÓN <span class="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30 font-mono" id="app-version-badge">v4.5 LEAN</span>
+                    </h1>
+                    <p class="text-[11px] text-slate-400 font-mono" id="app-subtitle">Sincronización en vivo ClickUp</p>
+                </div>
             </div>
-            <h1 class="text-2xl font-extrabold tracking-tight text-white flex items-center gap-2">
-                PANEL DE PRODUCCIÓN <span class="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30 font-mono">v4.5 LEAN</span>
-            </h1>
+
+            <!-- SELECTOR DE VISTAS (PRODUCCIÓN vs SOPORTE) -->
+            <div class="flex items-center bg-slate-950 p-1.5 rounded-2xl border border-slate-800 shadow-inner ml-0 sm:ml-4">
+                <button type="button" id="tab-nav-produccion" onclick="switchEnvironment('produccion')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all bg-brand-blue text-white shadow-lg shadow-blue-500/25">
+                    <i class="fa-solid fa-industry"></i> Producción
+                </button>
+                <button type="button" id="tab-nav-soporte" onclick="switchEnvironment('soporte')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-headset"></i> Soporte & Análisis
+                </button>
+            </div>
         </div>
 
-        <!-- MONITORES DE CAPACIDAD SEMANAL -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full xl:w-auto flex-1 max-w-4xl xl:mx-4">
-            <!-- Capacidad Semanal (Esta semana) -->
+        <!-- MONITORES DE CAPACIDAD SEMANAL (SÓLO PRODUCCIÓN) -->
+        <div id="header-capacity-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full xl:w-auto flex-1 max-w-3xl xl:mx-4">
             <div class="flex items-center justify-between gap-4 bg-gradient-to-r from-emerald-950/70 via-slate-900/95 to-slate-900/95 border-2 border-emerald-500/60 p-3.5 px-5 rounded-2xl shadow-xl shadow-emerald-950/30">
                 <div class="flex flex-col">
                     <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
@@ -89,7 +105,6 @@
                 <span id="header-soporte-thisweek-status" class="text-xs px-3 py-1 rounded-xl font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 whitespace-nowrap shadow-sm">Disponible</span>
             </div>
 
-            <!-- Capacidad Próxima Semana -->
             <div class="flex items-center justify-between gap-4 bg-gradient-to-r from-[#031c13] via-slate-900/95 to-slate-900/95 border-2 border-emerald-800/80 p-3.5 px-5 rounded-2xl shadow-xl shadow-emerald-950/50">
                 <div class="flex flex-col">
                     <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-600 flex items-center gap-2">
@@ -103,6 +118,7 @@
             </div>
         </div>
 
+        <!-- CONTROLES GLOBALES -->
         <div class="flex items-center gap-3 self-end xl:self-auto">
             <div class="flex items-center gap-2 bg-slate-900 px-3.5 py-2.5 rounded-xl border border-slate-800 text-xs text-slate-400 font-mono">
                 <span class="relative flex h-2 w-2">
@@ -120,7 +136,10 @@
         </div>
     </header>
 
-    <main class="space-y-6 max-w-[1700px] mx-auto">
+    <!-- ========================================================================= -->
+    <!-- CONTENIDO 1: MODO PRODUCCIÓN (TALLER / CAPTURAS) -->
+    <!-- ========================================================================= -->
+    <div id="env-produccion-section" class="space-y-6 max-w-[1700px] mx-auto">
         <!-- 7 TARJETAS KPIS -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
             <div onclick="openModal('A Fabricar (Próx. 7 Días Lab.)', window.allTasks.filter(t => t.dateInfo.isWithinWindow && !t.esSoloRecibir && !t.esAccesorio && !isTaskCompleted(t)))" class="bi-kpi-card rounded-2xl p-5">
@@ -156,7 +175,6 @@
                 <div class="flex justify-between items-baseline"><h2 id="kpi-gw" class="text-3xl font-extrabold text-orange-400 font-mono">0</h2><span class="text-xs text-orange-500/80 font-medium">listos</span></div>
             </div>
 
-            <!-- Correas / Contrapesos -->
             <div onclick="openModal('Reemplazos de Correas y Contrapesos', window.allTasks.filter(t => t.esAccesorio), false, false, true)" class="bi-kpi-card rounded-2xl p-5 glow-cyan">
                 <p class="text-cyan-400 text-xs font-bold uppercase tracking-wider mb-2 flex items-center justify-between"><span>Correas / Contrapesos</span><i class="fa-solid fa-weight-hanging text-cyan-400"></i></p>
                 <div class="flex justify-between items-baseline"><h2 id="kpi-accesorios" class="text-3xl font-extrabold text-cyan-400 font-mono">0</h2><span class="text-xs text-cyan-500/80 font-medium">unidades</span></div>
@@ -218,14 +236,13 @@
             </div>
         </div>
 
-        <!-- TABLA PRINCIPAL -->
+        <!-- TABLA PRINCIPAL DE PRODUCCIÓN -->
         <section class="bi-panel overflow-hidden flex flex-col h-[520px]" id="seccion-tabla-principal">
             <div class="p-4 border-b border-slate-800/80 bg-slate-900/90 flex flex-col lg:flex-row gap-3 justify-between items-start lg:items-center">
                 <div class="flex items-center gap-3 flex-wrap">
                     <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-list-check text-brand-blue"></i> Tiquets Activos</h2>
                     <span id="task-count-badge" class="px-2.5 py-0.5 bg-slate-800 text-slate-400 text-xs rounded-full border border-slate-700 font-mono">0 ACTIVOS</span>
                     
-                    <!-- PÍLDORA DE ETIQUETA ACTIVA -->
                     <div id="active-tag-chip-container" class="hidden items-center gap-1.5 bg-purple-500/20 border border-purple-500/40 text-purple-300 px-2.5 py-1 rounded-xl text-xs font-mono shadow-sm">
                         <i class="fa-solid fa-tag text-[10px]"></i>
                         <span>Etiqueta: <strong id="active-tag-chip-name" class="text-white"></strong></span>
@@ -234,7 +251,6 @@
                 </div>
 
                 <div class="flex items-center gap-2 flex-wrap w-full lg:w-auto justify-end">
-                    <!-- SELECTOR DESPLEGABLE DE ETIQUETAS -->
                     <div class="relative">
                         <select id="select-etiqueta-filter" onchange="filterByTag(this.value)" class="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-1.5 font-sans focus:outline-none focus:border-brand-purple cursor-pointer pr-7 appearance-none shadow-sm hover:border-slate-700 transition">
                             <option value="">🏷️ Todas las etiquetas</option>
@@ -242,7 +258,6 @@
                         <i class="fa-solid fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-500 pointer-events-none"></i>
                     </div>
 
-                    <!-- BOTONES DE CATEGORÍA -->
                     <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs flex-wrap">
                         <button onclick="setTableFilter('ALL')" id="tab-ALL" class="tab-btn active px-3 py-1 rounded-lg text-slate-400 hover:text-white">Todos</button>
                         <button onclick="setTableFilter('URGENT')" id="tab-URGENT" class="tab-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white flex items-center gap-1"><i class="fa-solid fa-fire text-red-400"></i> Urgentes</button>
@@ -270,9 +285,139 @@
                 </table>
             </div>
         </section>
-    </main>
+    </div>
 
-    <!-- MODAL EMERGENTE -->
+    <!-- ========================================================================= -->
+    <!-- CONTENIDO 2: MODO SOPORTE & ANÁLISIS DE DATOS -->
+    <!-- ========================================================================= -->
+    <div id="env-soporte-section" class="hidden space-y-6 max-w-[1700px] mx-auto">
+        
+        <!-- SUB-NAVEGACIÓN DE SOPORTE -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800">
+            <div class="flex items-center gap-2 flex-wrap">
+                <button type="button" onclick="setSupportSubTab('GW_INCIDENCIAS')" id="subtab-GW_INCIDENCIAS" class="subtab-btn active px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-300">
+                    <i class="fa-solid fa-router"></i> Incidencias GW & Hardware
+                </button>
+                <button type="button" onclick="setSupportSubTab('ACCESORIOS')" id="subtab-ACCESORIOS" class="subtab-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-weight-hanging"></i> Correas & Contrapesos
+                </button>
+                <button type="button" onclick="setSupportSubTab('BLOQUEADOS')" id="subtab-BLOQUEADOS" class="subtab-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-inbox"></i> Pendiente Recibir (Bloqueados)
+                </button>
+                <button type="button" onclick="setSupportSubTab('KITS_SOLARES')" id="subtab-KITS_SOLARES" class="subtab-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-solar-panel"></i> Kits Solares
+                </button>
+            </div>
+
+            <!-- BUSCADOR EN VIVO DE SOPORTE -->
+            <div class="relative w-full sm:w-80">
+                <input type="text" id="support-search-input" oninput="renderSupportView()" placeholder="Buscar cliente, fallo, equipo..." 
+                       class="w-full bg-slate-950 border border-slate-700/80 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition shadow-inner">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-500"></i>
+            </div>
+        </div>
+
+        <!-- 4 KPIS ANALÍTICOS DE SOPORTE -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bi-panel p-5 border-l-4 border-l-purple-500">
+                <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span>Total Registros Módulo</span><i class="fa-solid fa-clipboard-list text-purple-400"></i>
+                </p>
+                <div class="flex items-baseline justify-between mt-2">
+                    <h2 id="sup-kpi-total" class="text-3xl font-extrabold text-white font-mono">0</h2>
+                    <span class="text-xs text-slate-500 font-mono">tiquets</span>
+                </div>
+            </div>
+
+            <div class="bi-panel p-5 border-l-4 border-l-amber-500">
+                <p class="text-amber-400 text-xs font-bold uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span>Incidencia Más Común</span><i class="fa-solid fa-chart-column text-amber-400"></i>
+                </p>
+                <div class="mt-2">
+                    <h3 id="sup-kpi-top-problema" class="text-base font-extrabold text-white truncate">Calculando...</h3>
+                    <p id="sup-kpi-top-problema-sub" class="text-xs text-amber-400/80 font-mono mt-0.5">0% del total</p>
+                </div>
+            </div>
+
+            <div class="bi-panel p-5 border-l-4 border-l-red-500">
+                <p class="text-red-400 text-xs font-bold uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span>Clientes Recurrentes</span><i class="fa-solid fa-triangle-exclamation text-red-400"></i>
+                </p>
+                <div class="flex items-baseline justify-between mt-2">
+                    <h2 id="sup-kpi-recurrentes" class="text-3xl font-extrabold text-red-400 font-mono">0</h2>
+                    <span class="text-xs text-red-400/80 font-mono">&gt;1 incidencia</span>
+                </div>
+            </div>
+
+            <div class="bi-panel p-5 border-l-4 border-l-cyan-500">
+                <p class="text-cyan-400 text-xs font-bold uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span>Pendientes de Resolución</span><i class="fa-solid fa-hourglass-half text-cyan-400"></i>
+                </p>
+                <div class="flex items-baseline justify-between mt-2">
+                    <h2 id="sup-kpi-pendientes" class="text-3xl font-extrabold text-cyan-400 font-mono">0</h2>
+                    <span class="text-xs text-cyan-400/80 font-mono">en gestión</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2 GRÁFICOS ANALÍTICOS DE SOPORTE -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="bi-panel p-5">
+                <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-pie-chart text-purple-400"></i> Desglose por Causa / Tipo de Problema
+                </h3>
+                <div class="w-full h-52 relative"><canvas id="chartSupportCausas"></canvas></div>
+            </div>
+
+            <div class="bi-panel p-5">
+                <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-users-rays text-red-400"></i> Top Clientes con Incidencias Reincidentes
+                </h3>
+                <div class="w-full h-52 relative"><canvas id="chartSupportClientes"></canvas></div>
+            </div>
+        </div>
+
+        <!-- TABLA ANALÍTICA DE SOPORTE CON BUSCADOR -->
+        <section class="bi-panel overflow-hidden flex flex-col h-[520px]">
+            <div class="p-4 border-b border-slate-800/80 bg-slate-900/90 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div class="flex items-center gap-3">
+                    <h2 class="text-sm font-bold text-white flex items-center gap-2" id="support-table-title">
+                        <i class="fa-solid fa-list-check text-purple-400"></i> Tiquets de Soporte
+                    </h2>
+                    <span id="support-count-badge" class="px-2.5 py-0.5 bg-slate-800 text-purple-300 text-xs rounded-full border border-slate-700 font-mono">0 REGISTROS</span>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 hover:border-slate-700">
+                        <input type="checkbox" id="support-recurrent-toggle" onchange="renderSupportView()" class="rounded border-slate-700 text-purple-600 focus:ring-0">
+                        <span>Solo Reincidentes (&ge;2)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="overflow-auto flex-1">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead class="sticky top-0 bg-slate-900/95 backdrop-blur-md shadow-md z-10 border-b border-slate-800">
+                        <tr class="text-xs text-slate-400 uppercase tracking-wider font-semibold">
+                            <th class="py-3.5 px-4 w-48">Cliente</th>
+                            <th class="py-3.5 px-4">Tiquet / Asunto</th>
+                            <th class="py-3.5 px-4 w-44">Causa / Clasificación</th>
+                            <th class="py-3.5 px-4 text-center w-20">Uds</th>
+                            <th class="py-3.5 px-4 w-28">Estado</th>
+                            <th class="py-3.5 px-4 w-28 text-right">Deadline</th>
+                        </tr>
+                    </thead>
+                    <tbody id="support-table-body" class="divide-y divide-slate-800/60 font-sans">
+                        <tr><td colspan="6" class="text-center py-12 text-slate-500 font-mono">Cargando módulo de soporte...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL EMERGENTE COMPARTIDO -->
+    <!-- ========================================================================= -->
     <div id="detail-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 opacity-0 transition-opacity duration-300">
         <div class="absolute inset-0 bg-slate-950/85 backdrop-blur-md" onclick="closeModal()"></div>
         <div class="relative bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl transform transition-transform duration-300 scale-95 overflow-hidden" id="modal-content-box">
@@ -282,7 +427,6 @@
                 <button onclick="closeModal()" class="text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 w-8 h-8 rounded-lg flex items-center justify-center transition"><i class="fa-solid fa-times"></i></button>
             </div>
 
-            <!-- FILTRO INTERACTIVO CORREAS / CONTRAPESOS -->
             <div id="modal-accesorios-box" class="hidden bg-cyan-950/40 border-b border-cyan-500/20 p-4 px-5">
                 <h4 class="text-cyan-400 font-bold mb-2.5 flex items-center gap-2 text-xs uppercase tracking-wide">
                     <i class="fa-solid fa-weight-hanging"></i> Desglose por Accesorio (Haz clic para ver tiquets y clientes):
@@ -290,7 +434,6 @@
                 <div id="modal-accesorios-list" class="flex flex-wrap gap-2.5"></div>
             </div>
 
-            <!-- FILTRO POR CLIENTE (KITS SOLARES) -->
             <div id="modal-kits-client-box" class="hidden bg-blue-950/40 border-b border-blue-500/20 p-4 px-5">
                 <div class="flex justify-between items-center mb-2.5">
                     <h4 class="text-blue-400 font-bold text-xs uppercase tracking-wide"><i class="fa-solid fa-users"></i> Filtrar por Cliente:</h4>
@@ -299,12 +442,10 @@
                 <div id="modal-kits-client-list" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-1"></div>
             </div>
 
-            <!-- RESUMEN MODELOS -->
             <div id="modal-summary-models-box" class="bg-slate-950/60 border-b border-slate-800/80 p-4 px-5">
                 <div id="modal-summary-models-list" class="flex flex-wrap gap-2.5"></div>
             </div>
 
-            <!-- RECOMENDACIÓN LEAN CON SECCIÓN INTERACTIVA DE FABRICAR HOY POR LOTE -->
             <div id="modal-recommendation-box" class="hidden bg-amber-500/10 border-b border-amber-500/30 p-5">
                 <h4 class="text-amber-400 font-bold mb-3 flex items-center gap-2 text-sm uppercase tracking-wide"><i class="fa-solid fa-bolt"></i> Oportunidades de Producción en Serie</h4>
                 <div id="modal-recommendation-list" class="space-y-3"></div>
@@ -334,7 +475,9 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT Y CONTROL DE DATOS -->
+    <!-- ========================================================================= -->
+    <!-- MOTOR JAVASCRIPT GLOBAL -->
+    <!-- ========================================================================= -->
     <script>
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.font.family = 'Inter, sans-serif';
@@ -365,9 +508,91 @@
         window.currentModalTasks = [];
         window.activeClientFilter = null;
         window.activeAccesorioFilter = null;
-        window.selectedTagFilter = ''; // Filtro interactivo por etiqueta
+        window.selectedTagFilter = '';
         let currentSort = { column: 'fecha', dir: 'asc' };
         let currentTableFilter = 'ALL';
+
+        // ESTADO DE VISTAS (PRODUCCIÓN / SOPORTE)
+        window.activeEnvironment = localStorage.getItem('ixorigue_env') || 'produccion';
+        window.activeSupportSubTab = 'GW_INCIDENCIAS';
+
+        function switchEnvironment(env) {
+            window.activeEnvironment = env;
+            localStorage.setItem('ixorigue_env', env);
+
+            const btnProd = document.getElementById('tab-nav-produccion');
+            const btnSop = document.getElementById('tab-nav-soporte');
+            const secProd = document.getElementById('env-produccion-section');
+            const secSop = document.getElementById('env-soporte-section');
+            const capBox = document.getElementById('header-capacity-container');
+            const mainTitle = document.getElementById('app-main-title');
+            const subTitle = document.getElementById('app-subtitle');
+            const badgeVer = document.getElementById('app-version-badge');
+            const logoIcon = document.getElementById('app-logo-icon');
+            const logoBox = document.getElementById('app-logo-box');
+
+            if (env === 'produccion') {
+                btnProd.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all bg-brand-blue text-white shadow-lg shadow-blue-500/25";
+                btnSop.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white";
+                secProd.classList.remove('hidden');
+                secSop.classList.add('hidden');
+                capBox.classList.remove('hidden');
+
+                mainTitle.innerHTML = `PANEL DE PRODUCCIÓN <span class="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30 font-mono" id="app-version-badge">v4.5 LEAN</span>`;
+                subTitle.innerText = "Sincronización en vivo ClickUp";
+                logoIcon.className = "fa-solid fa-chart-pie text-2xl";
+                logoBox.className = "p-3 bg-blue-500/10 border border-blue-500/30 rounded-2xl text-brand-blue shadow-lg shadow-blue-500/10";
+            } else {
+                btnSop.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all bg-brand-purple text-white shadow-lg shadow-purple-500/25";
+                btnProd.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white";
+                secProd.classList.add('hidden');
+                secSop.classList.remove('hidden');
+                capBox.classList.add('hidden');
+
+                mainTitle.innerHTML = `SOPORTE & ANALÍTICA <span class="text-xs px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 font-mono">DATA BI</span>`;
+                subTitle.innerText = "Control de RMA, Causas Raíz e Incidencias Recurrentes";
+                logoIcon.className = "fa-solid fa-headset text-2xl";
+                logoBox.className = "p-3 bg-purple-500/10 border border-purple-500/30 rounded-2xl text-brand-purple shadow-lg shadow-purple-500/10";
+                
+                renderSupportView();
+            }
+        }
+
+        function setSupportSubTab(tab) {
+            window.activeSupportSubTab = tab;
+            document.querySelectorAll('.subtab-btn').forEach(b => {
+                b.classList.remove('active', 'text-white', 'bg-brand-purple');
+                b.classList.add('text-slate-400');
+            });
+            const activeBtn = document.getElementById(`subtab-${tab}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active', 'text-white');
+                activeBtn.classList.remove('text-slate-400');
+            }
+            renderSupportView();
+        }
+
+        // MOTOR DE ANÁLISIS DE FALLO Y CAUSA RAÍZ PARA SOPORTE
+        function analyzeSupportIssue(task) {
+            const raw = ((task.nombre || '') + ' ' + (task.description || '') + ' ' + (task.etiquetas || []).join(' ')).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            
+            if (raw.includes('bateria') || raw.includes('pila') || raw.includes('carga') || raw.includes('descarga') || raw.includes('battery')) {
+                return { tipo: 'Cambio Batería', hex: '#f59e0b', color: 'amber', icon: 'fa-battery-quarter' };
+            }
+            if (raw.includes('cable') || raw.includes('conector') || raw.includes('alimentacion') || raw.includes('borne') || raw.includes('cables')) {
+                return { tipo: 'Cables / Conectores', hex: '#3b82f6', color: 'blue', icon: 'fa-plug' };
+            }
+            if (raw.includes('panel') || raw.includes('solar') || raw.includes('placa')) {
+                return { tipo: 'Panel Solar', hex: '#10b981', color: 'emerald', icon: 'fa-solar-panel' };
+            }
+            if (raw.includes('antena') || raw.includes('cobertura') || raw.includes('lora') || raw.includes('alcance') || raw.includes('desconectad')) {
+                return { tipo: 'Antena / Cobertura', hex: '#06b6d4', color: 'cyan', icon: 'fa-tower-broadcast' };
+            }
+            if (raw.includes('gw') || raw.includes('gateway') || raw.includes('no enciende') || raw.includes('roto') || raw.includes('reinicio') || raw.includes('fallo') || raw.includes('placa base')) {
+                return { tipo: 'Hardware / Fallo GW', hex: '#f97316', color: 'orange', icon: 'fa-microchip' };
+            }
+            return { tipo: 'General / Otro', hex: '#8b5cf6', color: 'purple', icon: 'fa-circle-question' };
+        }
 
         function checkPinAuth() {
             const savedPin = localStorage.getItem('ixorigue_pin');
@@ -639,9 +864,12 @@
                 const arrayEtiquetas = (task.tags && Array.isArray(task.tags)) ? task.tags.map(t => t.name.toUpperCase()) : [];
                 const closedTimestamp = task.date_closed ? parseInt(task.date_closed, 10) : (task.date_updated ? parseInt(task.date_updated, 10) : 0);
 
+                const causaInfo = analyzeSupportIssue(task);
+
                 return {
                     id: task.id,
                     nombre: task.name,
+                    description: task.description || '',
                     cliente: cliente,
                     unidades: totalUnitsContables,
                     unidadesBrutas: totalUnitsBrutas,
@@ -658,7 +886,8 @@
                     timestamp: task.due_date ? parseInt(task.due_date, 10) : 9999999999999,
                     closedTimestamp: closedTimestamp,
                     prioridadNum: priorityNum,
-                    prioridadLevel: priorityLevel
+                    prioridadLevel: priorityLevel,
+                    causaSoporte: causaInfo
                 };
             });
         }
@@ -687,6 +916,9 @@
                 window.allTasks.sort((a, b) => a.prioridadNum - b.prioridadNum || a.timestamp - b.timestamp);
                 
                 updateDashboard();
+                if (window.activeEnvironment === 'soporte') {
+                    renderSupportView();
+                }
                 document.getElementById('last-update').innerText = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
             } catch (error) {
                 console.error(error);
@@ -702,7 +934,6 @@
             renderMainTable();
         }
 
-        // CONTROL DEL FILTRO POR ETIQUETA
         function filterByTag(tagName) {
             const cleanTag = (tagName || '').trim();
             if (window.selectedTagFilter && window.selectedTagFilter.toUpperCase() === cleanTag.toUpperCase()) {
@@ -711,11 +942,9 @@
                 window.selectedTagFilter = cleanTag;
             }
 
-            // Sincronizar select
             const tagSelect = document.getElementById('select-etiqueta-filter');
             if (tagSelect) tagSelect.value = window.selectedTagFilter;
 
-            // Sincronizar chip en tabla
             const chipBox = document.getElementById('active-tag-chip-container');
             const chipName = document.getElementById('active-tag-chip-name');
             const chartHint = document.getElementById('chart-etiquetas-hint');
@@ -739,7 +968,6 @@
                 }
             }
 
-            // Si el modal está abierto, cerrarlo para ver la tabla
             const modal = document.getElementById('detail-modal');
             if (modal && !modal.classList.contains('hidden')) {
                 closeModal();
@@ -747,7 +975,6 @@
 
             renderMainTable();
 
-            // Actualizar visualmente la gráfica de etiquetas destacando la barra seleccionada
             if (charts.etiquetas && charts.etiquetas.data) {
                 const labels = charts.etiquetas.data.labels;
                 charts.etiquetas.data.datasets[0].backgroundColor = labels.map(tag => {
@@ -764,7 +991,6 @@
             }
         }
 
-        // DESPLIEGUE INTERACTIVO DEL CUADRO DE DISPOSITIVOS A FABRICAR HOY POR LOTE
         window.toggleTodayBatchBox = function(safeId) {
             const box = document.getElementById(`today-box-${safeId}`);
             const chevron = document.getElementById(`chevron-${safeId}`);
@@ -828,7 +1054,6 @@
                     suggestions.push(`
                         <div class="bg-slate-900/80 p-4 rounded-xl border border-amber-500/30 mb-3 shadow-inner">
                             <div class="flex items-center gap-3 mb-2 flex-wrap">
-                                <!-- BOTÓN INTERACTIVO DEL RECUADRO DE LOTE -->
                                 <button type="button" onclick="toggleTodayBatchBox('${safeId}')" class="px-2.5 py-1.5 rounded-md text-xs font-bold uppercase text-white hover:ring-2 hover:ring-amber-400/80 active:scale-95 transition cursor-pointer flex items-center gap-2 shadow-md" style="background-color: ${data.hex}" title="Haz clic para ver/ocultar los dispositivos a fabricar hoy">
                                     <span>Lote: ${model}</span>
                                     <span class="text-[10px] bg-black/40 px-1.5 py-0.5 rounded font-mono font-normal flex items-center gap-1">
@@ -840,7 +1065,6 @@
                                 </span>
                             </div>
 
-                            <!-- CUADRO INTERACTIVO DE DISPOSITIVOS A FABRICAR HOY -->
                             <div id="today-box-${safeId}" class="hidden mt-3 mb-3 p-3.5 bg-amber-950/40 border-2 border-amber-500/50 rounded-xl transition-all shadow-inner">
                                 <div class="flex items-center justify-between mb-2.5 pb-1.5 border-b border-amber-500/20">
                                     <span class="text-xs font-bold text-amber-300 uppercase tracking-wide flex items-center gap-1.5">
@@ -1047,7 +1271,6 @@
             document.getElementById('mod-m10lr').innerText = statsModelos['IxotrackproM10LR'];
             document.getElementById('mod-cowpro').innerText = statsModelos['Cowpro v2'];
             
-            // Sincronizar opciones del desplegable de etiquetas
             const tagSelect = document.getElementById('select-etiqueta-filter');
             if (tagSelect) {
                 const currentVal = window.selectedTagFilter || '';
@@ -1081,7 +1304,6 @@
             else if (currentTableFilter === 'REEMPLAZO') visibleTasks = visibleTasks.filter(t => t.etiquetas.some(tag => tag.includes('REEMPLAZO')));
             else if (currentTableFilter === 'SOLO_RECIBIR') visibleTasks = visibleTasks.filter(t => t.esSoloRecibir);
 
-            // Filtrado interactivo por etiqueta seleccionada
             if (window.selectedTagFilter) {
                 if (window.selectedTagFilter === 'SIN ETIQUETA') {
                     visibleTasks = visibleTasks.filter(t => t.etiquetas.length === 0);
@@ -1090,7 +1312,6 @@
                 }
             }
 
-            // Actualizar badge del contador de tiquets activos
             const badgeEl = document.getElementById('task-count-badge');
             if (badgeEl) {
                 if (window.selectedTagFilter || currentTableFilter !== 'ALL') {
@@ -1133,6 +1354,189 @@
                     </tr>
                 `;
             });
+        }
+
+        // =========================================================================
+        // MOTOR DE RENDERIZADO ANALÍTICO DE SOPORTE
+        // =========================================================================
+        function renderSupportView() {
+            const searchVal = (document.getElementById('support-search-input')?.value || '').toLowerCase().trim();
+            const onlyRecurrent = document.getElementById('support-recurrent-toggle')?.checked || false;
+            const currentTab = window.activeSupportSubTab;
+
+            // 1. Filtrar tareas según la subpestaña activa de soporte
+            let dataset = [];
+            let tabTitle = '';
+            if (currentTab === 'GW_INCIDENCIAS') {
+                tabTitle = '<i class="fa-solid fa-router text-orange-400"></i> Incidencias Gateways & Hardware';
+                dataset = window.allTasks.filter(t => t.modeloInfo.nombre === 'Gateway' || t.nombre.toLowerCase().includes('gw') || t.etiquetas.some(e => e.includes('INCIDENCIA')));
+            } else if (currentTab === 'ACCESORIOS') {
+                tabTitle = '<i class="fa-solid fa-weight-hanging text-cyan-400"></i> Reemplazos Correas / Contrapesos';
+                dataset = window.allTasks.filter(t => t.esAccesorio);
+            } else if (currentTab === 'BLOQUEADOS') {
+                tabTitle = '<i class="fa-solid fa-inbox text-purple-400"></i> Pendientes por Recibir (Bloqueados)';
+                dataset = window.allTasks.filter(t => t.esSoloRecibir);
+            } else if (currentTab === 'KITS_SOLARES') {
+                tabTitle = '<i class="fa-solid fa-solar-panel text-blue-400"></i> Kits Solares & Antenas';
+                dataset = window.allTasks.filter(t => t.kitsSolaresGW > 0);
+            }
+
+            document.getElementById('support-table-title').innerHTML = tabTitle;
+
+            // 2. Conteo de recurrencia por cliente en este conjunto
+            const clientCounts = {};
+            dataset.forEach(t => {
+                const c = t.cliente || 'Cliente General';
+                clientCounts[c] = (clientCounts[c] || 0) + 1;
+            });
+
+            // 3. Causas / Desglose analítico
+            const causasStats = {};
+            let pendientesCount = 0;
+            dataset.forEach(t => {
+                if (!isTaskCompleted(t)) pendientesCount++;
+                const causaName = t.causaSoporte.tipo;
+                causasStats[causaName] = (causasStats[causaName] || 0) + 1;
+            });
+
+            // Top causa
+            const causasEntries = Object.entries(causasStats).sort((a,b) => b[1] - a[1]);
+            const topCausa = causasEntries[0] ? causasEntries[0][0] : 'N/A';
+            const topCausaCount = causasEntries[0] ? causasEntries[0][1] : 0;
+            const topCausaPct = dataset.length > 0 ? Math.round((topCausaCount / dataset.length) * 100) : 0;
+
+            // Clientes con >= 2 incidencias
+            const recurrentClients = Object.entries(clientCounts).filter(([c, count]) => count >= 2);
+
+            // KPIs
+            document.getElementById('sup-kpi-total').innerText = dataset.length;
+            document.getElementById('sup-kpi-top-problema').innerText = topCausa;
+            document.getElementById('sup-kpi-top-problema-sub').innerText = `${topCausaCount} tiquets (${topCausaPct}%)`;
+            document.getElementById('sup-kpi-recurrentes').innerText = recurrentClients.length;
+            document.getElementById('sup-kpi-pendientes').innerText = pendientesCount;
+
+            // Gráficos analíticos de soporte
+            renderSupportCharts(causasStats, clientCounts);
+
+            // 4. Filtrar por buscador y toggle de recurrentes
+            let filtered = dataset.filter(t => {
+                const c = t.cliente || 'Cliente General';
+                const isRecurrent = (clientCounts[c] || 0) >= 2;
+
+                if (onlyRecurrent && !isRecurrent) return false;
+
+                if (searchVal) {
+                    const hayCoincidencia = 
+                        t.nombre.toLowerCase().includes(searchVal) ||
+                        c.toLowerCase().includes(searchVal) ||
+                        t.causaSoporte.tipo.toLowerCase().includes(searchVal) ||
+                        (t.description && t.description.toLowerCase().includes(searchVal)) ||
+                        t.etiquetas.some(e => e.toLowerCase().includes(searchVal));
+                    if (!hayCoincidencia) return false;
+                }
+                return true;
+            });
+
+            document.getElementById('support-count-badge').innerText = `${filtered.length} / ${dataset.length} REGISTROS`;
+
+            // 5. Renderizado de tabla
+            const tbody = document.getElementById('support-table-body');
+            tbody.innerHTML = '';
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-12 text-slate-500 font-mono">No se encontraron tiquets con el criterio de búsqueda.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(t => {
+                const c = t.cliente || 'Cliente General';
+                const countThisClient = clientCounts[c] || 1;
+                const isRecurrent = countThisClient >= 2;
+
+                const recurrentBadge = isRecurrent 
+                    ? `<span class="bg-red-500/20 text-red-300 border border-red-500/40 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold flex items-center gap-1 mt-1 shadow-sm"><i class="fa-solid fa-triangle-exclamation text-red-400"></i> Reincidente (${countThisClient} incidencias)</span>`
+                    : '';
+
+                const f = new Date(t.timestamp);
+                const fechaText = t.timestamp === 9999999999999 ? '-' : f.toLocaleDateString('es-ES', { day:'2-digit', month:'short' });
+                const unitsShow = t.unidadesBrutas > 0 ? t.unidadesBrutas : (t.kitsSolaresGW > 0 ? t.kitsSolaresGW : 1);
+
+                tbody.innerHTML += `
+                    <tr class="table-row-hover border-b border-slate-800/60 transition-colors">
+                        <td class="py-3.5 px-4 align-top">
+                            <strong class="text-white font-medium text-xs block">${c}</strong>
+                            ${recurrentBadge}
+                        </td>
+                        <td class="py-3.5 px-4 align-top">
+                            <div class="font-semibold text-slate-200 text-xs mb-1">${t.nombre}</div>
+                            <div class="flex flex-wrap gap-1">${t.etiquetas.map(getTagHtml).join('')}</div>
+                        </td>
+                        <td class="py-3.5 px-4 align-top">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold" style="background-color: ${t.causaSoporte.hex}18; color: ${t.causaSoporte.hex}; border: 1px solid ${t.causaSoporte.hex}35">
+                                <i class="fa-solid ${t.causaSoporte.icon}"></i> ${t.causaSoporte.tipo}
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-center align-top font-bold text-sm font-mono text-white">${unitsShow}</td>
+                        <td class="py-3.5 px-4 align-top">
+                            <span class="px-2.5 py-0.5 text-[9px] rounded-md font-bold uppercase" style="background-color: ${t.estadoColor}15; color: ${t.estadoColor}; border: 1px solid ${t.estadoColor}30">${t.estado}</span>
+                        </td>
+                        <td class="py-3.5 px-4 text-right align-top text-xs font-mono text-slate-400">${fechaText}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderSupportCharts(causasStats, clientCounts) {
+            if (charts.supportCausas) charts.supportCausas.destroy();
+            if (charts.supportClientes) charts.supportClientes.destroy();
+
+            // Gráfico 1: Causas
+            const causasLabels = Object.keys(causasStats);
+            const causasData = Object.values(causasStats);
+            const causasColors = ['#f59e0b', '#3b82f6', '#10b981', '#06b6d4', '#f97316', '#8b5cf6', '#64748b'];
+
+            const ctxCausas = document.getElementById('chartSupportCausas')?.getContext('2d');
+            if (ctxCausas) {
+                charts.supportCausas = new Chart(ctxCausas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: causasLabels,
+                        datasets: [{ data: causasData, backgroundColor: causasColors.slice(0, causasLabels.length), borderWidth: 0 }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } }
+                    }
+                });
+            }
+
+            // Gráfico 2: Top Clientes Reincidentes
+            const sortedClients = Object.entries(clientCounts)
+                .filter(([c, count]) => count >= 2 && c !== 'Cliente General')
+                .sort((a,b) => b[1] - a[1])
+                .slice(0, 5);
+
+            const clientLabels = sortedClients.map(c => c[0]);
+            const clientValues = sortedClients.map(c => c[1]);
+
+            const ctxClientes = document.getElementById('chartSupportClientes')?.getContext('2d');
+            if (ctxClientes) {
+                charts.supportClientes = new Chart(ctxClientes, {
+                    type: 'bar',
+                    data: {
+                        labels: clientLabels.length > 0 ? clientLabels : ['Sin Reincidentes'],
+                        datasets: [{ label: 'Incidencias Registradas', data: clientValues.length > 0 ? clientValues : [0], backgroundColor: '#ef4444', borderRadius: 6 }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { grid: { display: false } } },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
         }
 
         function sortTable(col) {
@@ -1247,7 +1651,6 @@
             const accBox = document.getElementById('modal-accesorios-box');
             const accList = document.getElementById('modal-accesorios-list');
 
-            // SELECTOR INTERACTIVO ACCESORIOS
             if (isAccesorioModal) {
                 let sumC = 0, sumCP = 0;
                 tasks.forEach(t => {
@@ -1350,7 +1753,9 @@
             }, 300);
         }
 
+        // INICIALIZACIÓN
         checkPinAuth();
+        switchEnvironment(window.activeEnvironment);
         setInterval(fetchClickUpData, 60000);
     </script>
 </body>
