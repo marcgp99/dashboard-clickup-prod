@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BI Producción & Soporte - Ixorigue</title>
+    <title>Ixorigue Hub - Producción & Soporte BI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -29,19 +29,15 @@
         body { background: radial-gradient(circle at top center, #0f172a 0%, #020617 100%); color: #cbd5e1; }
         .bi-panel { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 14px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4); }
         .bi-kpi-card { background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(21, 30, 46, 0.8) 100%); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
-        .bi-kpi-card:hover { transform: translateY(-4px); border-color: #3b82f6; box-shadow: 0 12px 20px -3px rgba(59, 130, 246, 0.25); }
-        .glow-amber { border-left: 4px solid #f59e0b !important; box-shadow: -4px 0 20px -2px rgba(245, 158, 11, 0.3) !important; }
-        .glow-orange { border-left: 4px solid #f97316 !important; box-shadow: -4px 0 20px -2px rgba(249, 115, 22, 0.3) !important; }
-        .glow-cyan { border-left: 4px solid #06b6d4 !important; box-shadow: -4px 0 20px -2px rgba(6, 182, 212, 0.3) !important; }
-        .glow-blue { border-left: 4px solid #3b82f6 !important; box-shadow: -4px 0 20px -2px rgba(59, 130, 246, 0.3) !important; }
-        .glow-purple { border-left: 4px solid #8b5cf6 !important; box-shadow: -4px 0 20px -2px rgba(139, 92, 246, 0.3) !important; }
+        .bi-kpi-card:hover { transform: translateY(-3px); border-color: #3b82f6; box-shadow: 0 12px 20px -3px rgba(59, 130, 246, 0.25); }
+        .hero-amber-card { background: linear-gradient(135deg, rgba(30, 23, 10, 0.95) 0%, rgba(20, 16, 7, 0.9) 100%); border: 2px solid rgba(245, 158, 11, 0.6) !important; box-shadow: 0 10px 25px -3px rgba(245, 158, 11, 0.25) !important; }
+        .hero-amber-card:hover { transform: translateY(-4px); border-color: #fbbf24 !important; box-shadow: 0 14px 28px -2px rgba(245, 158, 11, 0.4) !important; }
         .table-row-hover:hover { background-color: rgba(30, 41, 59, 0.7); }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #0b1329; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
         .tab-btn.active { background-color: #3b82f6; color: #ffffff; box-shadow: 0 0 12px rgba(59, 130, 246, 0.4); }
-        .subtab-btn.active { background-color: #8b5cf6; color: #ffffff; box-shadow: 0 0 12px rgba(139, 92, 246, 0.4); }
-        .client-chip.active { background-color: #3b82f6 !important; border-color: #60a5fa !important; color: #ffffff !important; }
+        .support-tab-btn.active { background-color: #8b5cf6; color: #ffffff; box-shadow: 0 0 14px rgba(139, 92, 246, 0.45); }
         .acc-chip { transition: all 0.2s ease; cursor: pointer; }
         .acc-chip:hover, .acc-chip.active { transform: scale(1.02); }
     </style>
@@ -64,13 +60,13 @@
         </div>
     </div>
 
-    <!-- CABECERA -->
+    <!-- CABECERA PRINCIPAL CON SELECTOR DE ENTORNO -->
     <header class="flex flex-col xl:flex-row justify-between items-start xl:items-center pb-5 mb-6 border-b border-slate-800/80 gap-5">
         
         <div class="flex items-center gap-4 flex-wrap">
             <div class="flex items-center gap-3">
-                <div id="app-logo-box" class="p-3 bg-blue-500/10 border border-blue-500/30 rounded-2xl text-brand-blue shadow-lg shadow-blue-500/10">
-                    <i class="fa-solid fa-chart-pie text-2xl" id="app-logo-icon"></i>
+                <div id="app-logo-box" class="p-3 bg-blue-500/10 border border-blue-500/30 rounded-2xl text-brand-blue shadow-lg shadow-blue-500/10 transition-colors">
+                    <i class="fa-solid fa-industry text-2xl" id="app-logo-icon"></i>
                 </div>
                 <div>
                     <h1 class="text-2xl font-extrabold tracking-tight text-white flex items-center gap-2" id="app-main-title">
@@ -91,156 +87,177 @@
             </div>
         </div>
 
-        <!-- MONITORES DE CAPACIDAD SEMANAL (SÓLO PRODUCCIÓN) -->
+        <!-- MONITORES DE CAPACIDAD SEMANAL (PRODUCCIÓN) -->
         <div id="header-capacity-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full xl:w-auto flex-1 max-w-3xl xl:mx-4">
-            <div class="flex items-center justify-between gap-4 bg-gradient-to-r from-emerald-950/70 via-slate-900/95 to-slate-900/95 border-2 border-emerald-500/60 p-3.5 px-5 rounded-2xl shadow-xl shadow-emerald-950/30">
+            <div class="flex items-center justify-between gap-4 bg-gradient-to-r from-emerald-950/70 via-slate-900/95 to-slate-900/95 border-2 border-emerald-500/60 p-3 px-5 rounded-2xl shadow-xl shadow-emerald-950/30">
                 <div class="flex flex-col">
-                    <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
-                        <i class="fa-solid fa-calendar-check text-emerald-400 text-sm"></i> Capacidad semanal
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-calendar-check text-xs"></i> Capacidad semanal
                     </span>
-                    <strong id="header-soporte-thisweek" class="text-white text-sm sm:text-base font-mono font-extrabold tracking-tight mt-1">
+                    <strong id="header-soporte-thisweek" class="text-white text-xs sm:text-sm font-mono font-extrabold tracking-tight mt-0.5">
                         Ixo: 0/150 | Pro: 0/300 | Cow: 0/1000
                     </strong>
                 </div>
-                <span id="header-soporte-thisweek-status" class="text-xs px-3 py-1 rounded-xl font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 whitespace-nowrap shadow-sm">Disponible</span>
+                <span id="header-soporte-thisweek-status" class="text-[10px] px-2.5 py-1 rounded-xl font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 whitespace-nowrap shadow-sm">Disponible</span>
             </div>
 
-            <div class="flex items-center justify-between gap-4 bg-gradient-to-r from-[#031c13] via-slate-900/95 to-slate-900/95 border-2 border-emerald-800/80 p-3.5 px-5 rounded-2xl shadow-xl shadow-emerald-950/50">
+            <div class="flex items-center justify-between gap-4 bg-gradient-to-r from-[#031c13] via-slate-900/95 to-slate-900/95 border-2 border-emerald-800/80 p-3 px-5 rounded-2xl shadow-xl shadow-emerald-950/50">
                 <div class="flex flex-col">
-                    <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-600 flex items-center gap-2">
-                        <i class="fa-solid fa-calendar-plus text-emerald-600 text-sm"></i> Capacidad próxima semana
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-600 flex items-center gap-1.5">
+                        <i class="fa-solid fa-calendar-plus text-xs"></i> Capacidad próxima semana
                     </span>
-                    <strong id="header-soporte-nextweek" class="text-emerald-100/90 text-sm sm:text-base font-mono font-extrabold tracking-tight mt-1">
+                    <strong id="header-soporte-nextweek" class="text-emerald-100/90 text-xs sm:text-sm font-mono font-extrabold tracking-tight mt-0.5">
                         Ixo: 0/150 | Pro: 0/300 | Cow: 0/1000
                     </strong>
                 </div>
-                <span id="header-soporte-nextweek-status" class="text-xs px-3 py-1 rounded-xl font-mono font-bold bg-emerald-950/80 text-emerald-500 border border-emerald-800/80 whitespace-nowrap shadow-sm">Disponible</span>
+                <span id="header-soporte-nextweek-status" class="text-[10px] px-2.5 py-1 rounded-xl font-mono font-bold bg-emerald-950/80 text-emerald-500 border border-emerald-800/80 whitespace-nowrap shadow-sm">Disponible</span>
             </div>
         </div>
 
         <!-- CONTROLES GLOBALES -->
         <div class="flex items-center gap-3 self-end xl:self-auto">
-            <div class="flex items-center gap-2 bg-slate-900 px-3.5 py-2.5 rounded-xl border border-slate-800 text-xs text-slate-400 font-mono">
+            <div class="flex items-center gap-2 bg-slate-900 px-3 py-2 rounded-xl border border-slate-800 text-xs text-slate-400 font-mono">
                 <span class="relative flex h-2 w-2">
                   <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
                 <span id="last-update">Calculando...</span>
             </div>
-            <button onclick="fetchClickUpData()" class="bg-brand-blue hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-lg shadow-blue-500/20 flex items-center gap-2">
+            <button onclick="fetchClickUpData()" class="bg-brand-blue hover:bg-blue-600 text-white px-3.5 py-2 rounded-xl text-xs font-semibold transition shadow-lg shadow-blue-500/20 flex items-center gap-2">
                 <i class="fa-solid fa-rotate"></i> Actualizar
             </button>
-            <button onclick="logoutPin()" title="Cerrar Sesión" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white p-2.5 rounded-xl text-xs transition">
+            <button onclick="logoutPin()" title="Cerrar Sesión" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white p-2 rounded-xl text-xs transition">
                 <i class="fa-solid fa-power-off"></i>
             </button>
         </div>
     </header>
 
     <!-- ========================================================================= -->
-    <!-- CONTENIDO 1: MODO PRODUCCIÓN (TALLER / CAPTURAS) -->
+    <!-- 1. ENTORNO DE PRODUCCIÓN (TALLER / CAPTURAS) -->
     <!-- ========================================================================= -->
     <div id="env-produccion-section" class="space-y-6 max-w-[1700px] mx-auto">
-        <!-- 7 TARJETAS KPIS -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
-            <div onclick="openModal('A Fabricar (Próx. 7 Días Lab.)', window.allTasks.filter(t => t.dateInfo.isWithinWindow && !t.esSoloRecibir && !t.esAccesorio && !isTaskCompleted(t)))" class="bi-kpi-card rounded-2xl p-5">
-                <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 flex items-center justify-between">
-                    <span>A Fabricar (7 Días)</span><i class="fa-solid fa-calendar-week text-slate-500"></i>
-                </p>
-                <div class="flex justify-between items-baseline"><h2 id="kpi-semana" class="text-3xl font-extrabold text-white font-mono">0</h2><span class="text-xs text-slate-500 font-medium">unidades</span></div>
-            </div>
-
-            <div onclick="openModal('A Fabricar (Hoy)', window.allTasks.filter(t => t.dateInfo.isTodayOrOverdue && !t.esSoloRecibir && !t.esAccesorio && !isTaskCompleted(t)), true)" class="bi-kpi-card rounded-2xl p-5 glow-amber">
-                <div class="flex justify-between items-start mb-2">
-                    <p class="text-amber-400 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-                        <span>A Fabricar (Hoy)</span>
-                        <span id="kpi-sugerencia-badge" class="hidden bg-amber-500/20 text-amber-300 text-[10px] px-2 py-0.5 rounded-full border border-amber-500/40 animate-pulse font-mono"><i class="fa-solid fa-bolt"></i> Lotes</span>
-                    </p>
-                    <i class="fa-solid fa-stopwatch text-amber-400"></i>
+        
+        <!-- VIÑETAS HERO: FOCO PRINCIPAL EN "A FABRICAR (HOY)" -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            
+            <!-- TARJETA HERO: A FABRICAR HOY (FOCO PRINCIPAL) -->
+            <div onclick="openModal('A Fabricar (Hoy)', window.allTasks.filter(t => t.dateInfo.isTodayOrOverdue && !t.esSoloRecibir && !t.esAccesorio && !isTaskCompleted(t)), true)" 
+                 class="lg:col-span-7 hero-amber-card rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all">
+                <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="w-3 h-3 rounded-full bg-amber-400 animate-ping"></span>
+                            <span class="text-xs font-black uppercase tracking-widest text-amber-400">FOCO PRINCIPAL DE PRODUCCIÓN</span>
+                        </div>
+                        <h2 class="text-2xl font-black text-white flex items-center gap-2">
+                            A FABRICAR (HOY)
+                            <span id="kpi-sugerencia-badge" class="hidden bg-amber-500/20 text-amber-300 text-xs px-3 py-1 rounded-full border border-amber-500/50 animate-pulse font-mono font-bold">
+                                <i class="fa-solid fa-bolt"></i> Oportunidad Lotes
+                            </span>
+                        </h2>
+                    </div>
+                    <div class="p-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-amber-400 text-2xl">
+                        <i class="fa-solid fa-stopwatch"></i>
+                    </div>
                 </div>
-                <div class="flex justify-between items-baseline"><h2 id="kpi-hoy" class="text-3xl font-extrabold text-amber-400 font-mono">0</h2><span class="text-xs text-amber-500/80 font-medium">pendientes</span></div>
+
+                <div class="flex items-baseline justify-between mt-4">
+                    <div class="flex items-baseline gap-3">
+                        <span id="kpi-hoy" class="text-6xl font-black text-amber-400 font-mono tracking-tight">0</span>
+                        <span class="text-sm font-bold text-amber-300/80 uppercase tracking-wider">Unidades Pendientes</span>
+                    </div>
+                    <div class="hidden sm:flex items-center gap-2 bg-amber-500/15 border border-amber-500/40 px-3 py-1.5 rounded-xl text-xs text-amber-200 font-medium">
+                        <i class="fa-solid fa-arrow-pointer text-amber-400"></i> Clic para ver desglose y lotes
+                    </div>
+                </div>
             </div>
 
-            <div onclick="openModal('Tiquets en curso', window.allTasks.filter(t => t.estado === 'EN CURSO' && !t.esSoloRecibir))" class="bi-kpi-card rounded-2xl p-5">
-                <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 flex items-center justify-between"><span>Tiquets en curso</span><i class="fa-solid fa-gears text-emerald-400"></i></p>
-                <div class="flex justify-between items-baseline"><h2 id="kpi-encurso" class="text-3xl font-extrabold text-emerald-400 font-mono">0</h2><span class="text-xs text-emerald-500/80 font-medium">en mesa</span></div>
+            <!-- TARJETA DEMANDA: A FABRICAR (7 DÍAS) -->
+            <div onclick="openModal('A Fabricar (Próx. 7 Días Lab.)', window.allTasks.filter(t => t.dateInfo.isWithinWindow && !t.esSoloRecibir && !t.esAccesorio && !isTaskCompleted(t)))" 
+                 class="lg:col-span-5 bi-kpi-card rounded-2xl p-6 flex flex-col justify-between">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span class="text-xs font-extrabold uppercase tracking-widest text-slate-400">DEMANDA PLANIFICADA</span>
+                        <h3 class="text-xl font-bold text-white mt-1">A FABRICAR (7 DÍAS)</h3>
+                    </div>
+                    <div class="p-3 bg-blue-500/10 border border-blue-500/30 rounded-2xl text-blue-400 text-2xl">
+                        <i class="fa-solid fa-calendar-week"></i>
+                    </div>
+                </div>
+
+                <div class="flex items-baseline justify-between mt-4">
+                    <div class="flex items-baseline gap-3">
+                        <span id="kpi-semana" class="text-5xl font-black text-white font-mono tracking-tight">0</span>
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">unidades totales</span>
+                    </div>
+                    <span class="text-xs text-blue-400 font-mono font-medium">Ventana 7d hábiles</span>
+                </div>
             </div>
 
-            <div onclick="openModal('Kits Solares y Gateways a Preparar (Próx 7 Días)', window.allTasks.filter(t => t.kitsSolaresGW > 0 && t.dateInfo.isWithinWindow && !t.esSoloRecibir && !isTaskCompleted(t)), false, true)" class="bi-kpi-card rounded-2xl p-5 glow-blue">
-                <p class="text-blue-400 text-xs font-bold uppercase tracking-wider mb-2 flex items-center justify-between"><span>Kits Solares & GWs</span><i class="fa-solid fa-solar-panel text-blue-400"></i></p>
-                <div class="flex justify-between items-baseline"><h2 id="kpi-kits" class="text-3xl font-extrabold text-blue-400 font-mono">0</h2><span class="text-xs text-blue-500/80 font-medium">a preparar</span></div>
-            </div>
-
-            <div onclick="openModal('Incidencias GW', window.allTasks.filter(t => t.modeloInfo.nombre === 'Gateway' && isTaskCompleted(t)))" class="bi-kpi-card rounded-2xl p-5 glow-orange">
-                <p class="text-orange-400 text-xs font-bold uppercase tracking-wider mb-2 flex items-center justify-between"><span>Incidencias GW</span><i class="fa-solid fa-router text-orange-400"></i></p>
-                <div class="flex justify-between items-baseline"><h2 id="kpi-gw" class="text-3xl font-extrabold text-orange-400 font-mono">0</h2><span class="text-xs text-orange-500/80 font-medium">listos</span></div>
-            </div>
-
-            <div onclick="openModal('Reemplazos de Correas y Contrapesos', window.allTasks.filter(t => t.esAccesorio), false, false, true)" class="bi-kpi-card rounded-2xl p-5 glow-cyan">
-                <p class="text-cyan-400 text-xs font-bold uppercase tracking-wider mb-2 flex items-center justify-between"><span>Correas / Contrapesos</span><i class="fa-solid fa-weight-hanging text-cyan-400"></i></p>
-                <div class="flex justify-between items-baseline"><h2 id="kpi-accesorios" class="text-3xl font-extrabold text-cyan-400 font-mono">0</h2><span class="text-xs text-cyan-500/80 font-medium">unidades</span></div>
-            </div>
-
-            <div onclick="openModal('Pendientes por Recibir (Bloqueados)', window.allTasks.filter(t => t.esSoloRecibir && t.estado.includes('BLOQUEAD')))" class="bi-kpi-card rounded-2xl p-5 glow-purple">
-                <p class="text-purple-400 text-xs font-bold uppercase tracking-wider mb-2 flex items-center justify-between"><span>Pendiente Recibir</span><i class="fa-solid fa-box-open text-purple-400"></i></p>
-                <div class="flex justify-between items-baseline"><h2 id="kpi-pendientes-recibir" class="text-3xl font-extrabold text-purple-400 font-mono">0</h2><span class="text-xs text-purple-500/80 font-medium">dispositivos</span></div>
-            </div>
         </div>
 
-        <!-- 4 GRÁFICOS -->
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-            <div class="bi-panel p-5 flex flex-col justify-between min-h-[260px]">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2"><i class="fa-solid fa-chart-pie text-emerald-400"></i> Distribución por Modelo</h3>
-                <div class="w-full h-44 relative flex items-center justify-center"><canvas id="chartModelos"></canvas></div>
-            </div>
-            <div class="bi-panel p-5 flex flex-col justify-between min-h-[260px]">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2"><i class="fa-solid fa-chart-simple text-blue-400"></i> Proyección Carga (L-V)</h3>
-                <div class="w-full h-44 relative"><canvas id="chartTiempos"></canvas></div>
-            </div>
-            <div class="bi-panel p-5 flex flex-col justify-between min-h-[260px]">
-                <div class="flex items-center justify-between mb-2">
-                    <h3 class="text-xs font-bold text-brand-purple uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-tags"></i> Distribución por Etiquetas</h3>
-                    <span id="chart-etiquetas-hint" class="text-[10px] text-slate-500 font-mono">Clic para filtrar</span>
-                </div>
-                <div class="w-full h-44 relative cursor-pointer"><canvas id="chartEtiquetas"></canvas></div>
-            </div>
-            <div class="bi-panel p-5 flex flex-col justify-between min-h-[260px]">
-                <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2 flex items-center justify-between">
-                    <span><i class="fa-solid fa-truck-ramp-box"></i> Envíos Semanales <span class="text-[10px] text-slate-500 font-mono font-normal">(Meta: 600 uds/sem)</span></span>
-                    <span class="text-[10px] text-slate-500 font-mono">Clic para explorar</span>
+        <!-- BANDA DE DISPOSITIVOS POR MODELO (5 CAJAS CLICABLES) -->
+        <div>
+            <div class="flex items-center justify-between mb-3 px-1">
+                <h3 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-microchip text-brand-blue"></i> Unidades por Modelo a Fabricar (Próx. 7 Días)
                 </h3>
-                <div class="w-full h-44 relative"><canvas id="chartRendimiento"></canvas></div>
+                <span class="text-[11px] text-slate-500 font-mono">Haz clic en cualquier modelo para ver sus tiquets</span>
             </div>
-        </div>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3.5">
+                <div onclick="openModal('Ixotrack (7 Días Lab)', window.allTasks.filter(t => t.modeloInfo.nombre === 'Ixotrack' && !t.esSoloRecibir && !t.esAccesorio && t.dateInfo.isWithinWindow && !isTaskCompleted(t)))" 
+                     class="bi-panel p-4 rounded-xl flex justify-between items-center cursor-pointer hover:border-emerald-500/60 hover:bg-emerald-950/20 transition">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-3.5 h-3.5 rounded-full bg-brand-emerald shadow-sm shadow-emerald-500/50"></span>
+                        <span class="text-xs font-bold text-slate-200">Ixotrack</span>
+                    </div>
+                    <span id="mod-ixo" class="text-2xl font-black font-mono text-white">0</span>
+                </div>
 
-        <!-- CAJAS NUMÉRICAS POR MODELO -->
-        <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
-            <div onclick="openModal('Ixotrack (7 Días Lab)', window.allTasks.filter(t => t.modeloInfo.nombre === 'Ixotrack' && !t.esSoloRecibir && !t.esAccesorio && t.dateInfo.isWithinWindow && !isTaskCompleted(t)))" class="bi-panel p-4 flex justify-between items-center cursor-pointer hover:bg-slate-800/80 transition">
-                <div class="flex items-center gap-2.5"><span class="w-3 h-3 rounded-full bg-brand-emerald"></span><span class="text-sm font-semibold text-slate-200">Ixotrack</span></div>
-                <span id="mod-ixo" class="text-2xl font-bold font-mono text-white">0</span>
-            </div>
-            <div onclick="openModal('Ixotrack pro (7 Días Lab)', window.allTasks.filter(t => t.modeloInfo.nombre === 'Ixotrack pro' && !t.esSoloRecibir && !t.esAccesorio && t.dateInfo.isWithinWindow && !isTaskCompleted(t)))" class="bi-panel p-4 flex justify-between items-center cursor-pointer hover:bg-slate-800/80 transition">
-                <div class="flex items-center gap-2.5"><span class="w-3 h-3 rounded-full bg-brand-blue"></span><span class="text-sm font-semibold text-slate-200">Ixotrack pro</span></div>
-                <span id="mod-pro" class="text-2xl font-bold font-mono text-white">0</span>
-            </div>
-            <div onclick="openModal('IxotrackproM10 (7 Días Lab)', window.allTasks.filter(t => t.modeloInfo.nombre === 'IxotrackproM10' && !t.esSoloRecibir && !t.esAccesorio && t.dateInfo.isWithinWindow && !isTaskCompleted(t)))" class="bi-panel p-4 flex justify-between items-center cursor-pointer hover:bg-slate-800/80 transition">
-                <div class="flex items-center gap-2.5"><span class="w-3 h-3 rounded-full bg-blue-700"></span><span class="text-sm font-semibold text-slate-200">IxotrackproM10</span></div>
-                <span id="mod-m10" class="text-2xl font-bold font-mono text-white">0</span>
-            </div>
-            <div onclick="openModal('IxotrackproM10LR (7 Días Lab)', window.allTasks.filter(t => t.modeloInfo.nombre === 'IxotrackproM10LR' && !t.esSoloRecibir && !t.esAccesorio && t.dateInfo.isWithinWindow && !isTaskCompleted(t)))" class="bi-panel p-4 flex justify-between items-center cursor-pointer hover:bg-slate-800/80 transition">
-                <div class="flex items-center gap-2.5"><span class="w-3 h-3 rounded-full bg-brand-purple"></span><span class="text-sm font-semibold text-slate-200">IxotrackproM10LR</span></div>
-                <span id="mod-m10lr" class="text-2xl font-bold font-mono text-white">0</span>
-            </div>
-            <div onclick="openModal('Cowpro v2 (7 Días Lab)', window.allTasks.filter(t => t.modeloInfo.nombre === 'Cowpro v2' && !t.esSoloRecibir && !t.esAccesorio && t.dateInfo.isWithinWindow && !isTaskCompleted(t)))" class="bi-panel p-4 flex justify-between items-center cursor-pointer hover:bg-slate-800/80 transition">
-                <div class="flex items-center gap-2.5"><span class="w-3 h-3 rounded-full bg-red-500"></span><span class="text-sm font-semibold text-slate-200">Cowpro v2</span></div>
-                <span id="mod-cowpro" class="text-2xl font-bold font-mono text-white">0</span>
+                <div onclick="openModal('Ixotrack pro (7 Días Lab)', window.allTasks.filter(t => t.modeloInfo.nombre === 'Ixotrack pro' && !t.esSoloRecibir && !t.esAccesorio && t.dateInfo.isWithinWindow && !isTaskCompleted(t)))" 
+                     class="bi-panel p-4 rounded-xl flex justify-between items-center cursor-pointer hover:border-blue-500/60 hover:bg-blue-950/20 transition">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-3.5 h-3.5 rounded-full bg-brand-blue shadow-sm shadow-blue-500/50"></span>
+                        <span class="text-xs font-bold text-slate-200">Ixotrack pro</span>
+                    </div>
+                    <span id="mod-pro" class="text-2xl font-black font-mono text-white">0</span>
+                </div>
+
+                <div onclick="openModal('IxotrackproM10 (7 Días Lab)', window.allTasks.filter(t => t.modeloInfo.nombre === 'IxotrackproM10' && !t.esSoloRecibir && !t.esAccesorio && t.dateInfo.isWithinWindow && !isTaskCompleted(t)))" 
+                     class="bi-panel p-4 rounded-xl flex justify-between items-center cursor-pointer hover:border-indigo-500/60 hover:bg-indigo-950/20 transition">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-3.5 h-3.5 rounded-full bg-indigo-500 shadow-sm shadow-indigo-500/50"></span>
+                        <span class="text-xs font-bold text-slate-200">IxotrackproM10</span>
+                    </div>
+                    <span id="mod-m10" class="text-2xl font-black font-mono text-white">0</span>
+                </div>
+
+                <div onclick="openModal('IxotrackproM10LR (7 Días Lab)', window.allTasks.filter(t => t.modeloInfo.nombre === 'IxotrackproM10LR' && !t.esSoloRecibir && !t.esAccesorio && t.dateInfo.isWithinWindow && !isTaskCompleted(t)))" 
+                     class="bi-panel p-4 rounded-xl flex justify-between items-center cursor-pointer hover:border-purple-500/60 hover:bg-purple-950/20 transition">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-3.5 h-3.5 rounded-full bg-brand-purple shadow-sm shadow-purple-500/50"></span>
+                        <span class="text-xs font-bold text-slate-200">IxotrackproM10LR</span>
+                    </div>
+                    <span id="mod-m10lr" class="text-2xl font-black font-mono text-white">0</span>
+                </div>
+
+                <div onclick="openModal('Cowpro v2 (7 Días Lab)', window.allTasks.filter(t => t.modeloInfo.nombre === 'Cowpro v2' && !t.esSoloRecibir && !t.esAccesorio && t.dateInfo.isWithinWindow && !isTaskCompleted(t)))" 
+                     class="bi-panel p-4 rounded-xl flex justify-between items-center cursor-pointer hover:border-red-500/60 hover:bg-red-950/20 transition">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-3.5 h-3.5 rounded-full bg-red-500 shadow-sm shadow-red-500/50"></span>
+                        <span class="text-xs font-bold text-slate-200">Cowpro v2</span>
+                    </div>
+                    <span id="mod-cowpro" class="text-2xl font-black font-mono text-white">0</span>
+                </div>
             </div>
         </div>
 
         <!-- TABLA PRINCIPAL DE PRODUCCIÓN -->
-        <section class="bi-panel overflow-hidden flex flex-col h-[520px]" id="seccion-tabla-principal">
+        <section class="bi-panel overflow-hidden flex flex-col h-[540px]" id="seccion-tabla-principal">
             <div class="p-4 border-b border-slate-800/80 bg-slate-900/90 flex flex-col lg:flex-row gap-3 justify-between items-start lg:items-center">
                 <div class="flex items-center gap-3 flex-wrap">
-                    <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-list-check text-brand-blue"></i> Tiquets Activos</h2>
+                    <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-list-check text-brand-blue"></i> Tiquets Activos de Taller</h2>
                     <span id="task-count-badge" class="px-2.5 py-0.5 bg-slate-800 text-slate-400 text-xs rounded-full border border-slate-700 font-mono">0 ACTIVOS</span>
                     
                     <div id="active-tag-chip-container" class="hidden items-center gap-1.5 bg-purple-500/20 border border-purple-500/40 text-purple-300 px-2.5 py-1 rounded-xl text-xs font-mono shadow-sm">
@@ -288,96 +305,122 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- CONTENIDO 2: MODO SOPORTE & ANÁLISIS DE DATOS -->
+    <!-- 2. ENTORNO DE SOPORTE & ANALÍTICA DE DATOS -->
     <!-- ========================================================================= -->
     <div id="env-soporte-section" class="hidden space-y-6 max-w-[1700px] mx-auto">
         
-        <!-- SUB-NAVEGACIÓN DE SOPORTE -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800">
+        <!-- SELECTOR DE LOS 3 BLOQUES ANALÍTICOS DE SOPORTE -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
             <div class="flex items-center gap-2 flex-wrap">
-                <button type="button" onclick="setSupportSubTab('GW_INCIDENCIAS')" id="subtab-GW_INCIDENCIAS" class="subtab-btn active px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-300">
-                    <i class="fa-solid fa-router"></i> Incidencias GW & Hardware
+                <button type="button" onclick="setSupportSubTab('GW_INCIDENCIAS')" id="subtab-GW_INCIDENCIAS" 
+                        class="support-tab-btn active px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                    <i class="fa-solid fa-router"></i> 1. Incidencias GW & Kits Solares
                 </button>
-                <button type="button" onclick="setSupportSubTab('ACCESORIOS')" id="subtab-ACCESORIOS" class="subtab-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white">
-                    <i class="fa-solid fa-weight-hanging"></i> Correas & Contrapesos
+                <button type="button" onclick="setSupportSubTab('ACCESORIOS')" id="subtab-ACCESORIOS" 
+                        class="support-tab-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-weight-hanging"></i> 2. Correas & Contrapesos
                 </button>
-                <button type="button" onclick="setSupportSubTab('BLOQUEADOS')" id="subtab-BLOQUEADOS" class="subtab-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white">
-                    <i class="fa-solid fa-inbox"></i> Pendiente Recibir (Bloqueados)
-                </button>
-                <button type="button" onclick="setSupportSubTab('KITS_SOLARES')" id="subtab-KITS_SOLARES" class="subtab-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white">
-                    <i class="fa-solid fa-solar-panel"></i> Kits Solares
+                <button type="button" onclick="setSupportSubTab('BLOQUEADOS')" id="subtab-BLOQUEADOS" 
+                        class="support-tab-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-inbox"></i> 3. Pendientes de Recibir
                 </button>
             </div>
 
-            <!-- BUSCADOR EN VIVO DE SOPORTE -->
+            <!-- BUSCADOR GLOBAL DE SOPORTE -->
             <div class="relative w-full sm:w-80">
-                <input type="text" id="support-search-input" oninput="renderSupportView()" placeholder="Buscar cliente, fallo, equipo..." 
+                <input type="text" id="support-search-input" oninput="renderSupportView()" placeholder="Buscar cliente, causa, tiquet..." 
                        class="w-full bg-slate-950 border border-slate-700/80 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition shadow-inner">
                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-500"></i>
             </div>
         </div>
 
-        <!-- 4 KPIS ANALÍTICOS DE SOPORTE -->
+        <!-- 4 SUB-VIÑETAS / KPIS ANALÍTICOS (TODAS 100% CLICABLES) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bi-panel p-5 border-l-4 border-l-purple-500">
-                <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 flex items-center justify-between">
-                    <span>Total Registros Módulo</span><i class="fa-solid fa-clipboard-list text-purple-400"></i>
-                </p>
-                <div class="flex items-baseline justify-between mt-2">
+            
+            <!-- 1. Total Registros -->
+            <div onclick="openSupportKpiModal('TOTAL')" 
+                 class="bi-kpi-card rounded-2xl p-5 border-l-4 border-l-purple-500 group" title="Haz clic para ver el listado completo de este módulo">
+                <div class="flex items-center justify-between text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
+                    <span>Total Registros Módulo</span>
+                    <i class="fa-solid fa-folder-open text-purple-400 group-hover:scale-125 transition-transform"></i>
+                </div>
+                <div class="flex items-baseline justify-between">
                     <h2 id="sup-kpi-total" class="text-3xl font-extrabold text-white font-mono">0</h2>
-                    <span class="text-xs text-slate-500 font-mono">tiquets</span>
+                    <span class="text-xs text-purple-400 font-mono flex items-center gap-1">Ver tiquets <i class="fa-solid fa-chevron-right text-[10px]"></i></span>
                 </div>
             </div>
 
-            <div class="bi-panel p-5 border-l-4 border-l-amber-500">
-                <p class="text-amber-400 text-xs font-bold uppercase tracking-wider mb-1 flex items-center justify-between">
-                    <span>Incidencia Más Común</span><i class="fa-solid fa-chart-column text-amber-400"></i>
-                </p>
-                <div class="mt-2">
+            <!-- 2. Incidencia Más Común -->
+            <div onclick="openSupportKpiModal('TOP_CAUSA')" 
+                 class="bi-kpi-card rounded-2xl p-5 border-l-4 border-l-amber-500 group" title="Haz clic para ver los tiquets con esta causa específica">
+                <div class="flex items-center justify-between text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
+                    <span>Causa Más Común</span>
+                    <i class="fa-solid fa-triangle-exclamation text-amber-400 group-hover:scale-125 transition-transform"></i>
+                </div>
+                <div>
                     <h3 id="sup-kpi-top-problema" class="text-base font-extrabold text-white truncate">Calculando...</h3>
-                    <p id="sup-kpi-top-problema-sub" class="text-xs text-amber-400/80 font-mono mt-0.5">0% del total</p>
+                    <div class="flex items-baseline justify-between mt-1">
+                        <span id="sup-kpi-top-problema-sub" class="text-xs text-amber-400/80 font-mono">0% del total</span>
+                        <span class="text-xs text-amber-300 font-mono flex items-center gap-1">Explorar causa <i class="fa-solid fa-chevron-right text-[10px]"></i></span>
+                    </div>
                 </div>
             </div>
 
-            <div class="bi-panel p-5 border-l-4 border-l-red-500">
-                <p class="text-red-400 text-xs font-bold uppercase tracking-wider mb-1 flex items-center justify-between">
-                    <span>Clientes Recurrentes</span><i class="fa-solid fa-triangle-exclamation text-red-400"></i>
-                </p>
-                <div class="flex items-baseline justify-between mt-2">
-                    <h2 id="sup-kpi-recurrentes" class="text-3xl font-extrabold text-red-400 font-mono">0</h2>
-                    <span class="text-xs text-red-400/80 font-mono">&gt;1 incidencia</span>
+            <!-- 3. Clientes Reincidentes -->
+            <div onclick="openSupportKpiModal('RECURRENTES')" 
+                 class="bi-kpi-card rounded-2xl p-5 border-l-4 border-l-red-500 group" title="Haz clic para ver los clientes con 2 o más incidencias">
+                <div class="flex items-center justify-between text-red-400 text-xs font-bold uppercase tracking-wider mb-2">
+                    <span>Clientes Reincidentes</span>
+                    <i class="fa-solid fa-users-rays text-red-400 group-hover:scale-125 transition-transform"></i>
+                </div>
+                <div class="flex items-baseline justify-between">
+                    <div>
+                        <h2 id="sup-kpi-recurrentes" class="text-3xl font-extrabold text-red-400 font-mono">0</h2>
+                        <span class="text-[11px] text-red-400/80 font-mono">&ge;2 incidencias</span>
+                    </div>
+                    <span class="text-xs text-red-300 font-mono flex items-center gap-1">Ver clientes <i class="fa-solid fa-chevron-right text-[10px]"></i></span>
                 </div>
             </div>
 
-            <div class="bi-panel p-5 border-l-4 border-l-cyan-500">
-                <p class="text-cyan-400 text-xs font-bold uppercase tracking-wider mb-1 flex items-center justify-between">
-                    <span>Pendientes de Resolución</span><i class="fa-solid fa-hourglass-half text-cyan-400"></i>
-                </p>
-                <div class="flex items-baseline justify-between mt-2">
+            <!-- 4. Pendientes de Resolución -->
+            <div onclick="openSupportKpiModal('PENDIENTES')" 
+                 class="bi-kpi-card rounded-2xl p-5 border-l-4 border-l-cyan-500 group" title="Haz clic para ver las incidencias activas en curso">
+                <div class="flex items-center justify-between text-cyan-400 text-xs font-bold uppercase tracking-wider mb-2">
+                    <span>En Gestión / Pendientes</span>
+                    <i class="fa-solid fa-clock text-cyan-400 group-hover:scale-125 transition-transform"></i>
+                </div>
+                <div class="flex items-baseline justify-between">
                     <h2 id="sup-kpi-pendientes" class="text-3xl font-extrabold text-cyan-400 font-mono">0</h2>
-                    <span class="text-xs text-cyan-400/80 font-mono">en gestión</span>
+                    <span class="text-xs text-cyan-300 font-mono flex items-center gap-1">Ver activos <i class="fa-solid fa-chevron-right text-[10px]"></i></span>
                 </div>
             </div>
+
         </div>
 
-        <!-- 2 GRÁFICOS ANALÍTICOS DE SOPORTE -->
+        <!-- 2 GRÁFICOS ANALÍTICOS (100% CLICABLES) -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div class="bi-panel p-5">
-                <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <i class="fa-solid fa-pie-chart text-purple-400"></i> Desglose por Causa / Tipo de Problema
-                </h3>
-                <div class="w-full h-52 relative"><canvas id="chartSupportCausas"></canvas></div>
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-purple-400"></i> Desglose por Causa / Tipo de Problema
+                    </h3>
+                    <span class="text-[10px] text-slate-500 font-mono">Haz clic en una porción para ver tiquets</span>
+                </div>
+                <div class="w-full h-52 relative cursor-pointer"><canvas id="chartSupportCausas"></canvas></div>
             </div>
 
             <div class="bi-panel p-5">
-                <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <i class="fa-solid fa-users-rays text-red-400"></i> Top Clientes con Incidencias Reincidentes
-                </h3>
-                <div class="w-full h-52 relative"><canvas id="chartSupportClientes"></canvas></div>
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-ranking-star text-red-400"></i> Top Clientes Afectados / Reincidentes
+                    </h3>
+                    <span class="text-[10px] text-slate-500 font-mono">Haz clic en una barra para ver tiquets del cliente</span>
+                </div>
+                <div class="w-full h-52 relative cursor-pointer"><canvas id="chartSupportClientes"></canvas></div>
             </div>
         </div>
 
-        <!-- TABLA ANALÍTICA DE SOPORTE CON BUSCADOR -->
+        <!-- TABLA ANALÍTICA DE DETALLE CON BUSCADOR -->
         <section class="bi-panel overflow-hidden flex flex-col h-[520px]">
             <div class="p-4 border-b border-slate-800/80 bg-slate-900/90 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div class="flex items-center gap-3">
@@ -390,7 +433,7 @@
                 <div class="flex items-center gap-3">
                     <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 hover:border-slate-700">
                         <input type="checkbox" id="support-recurrent-toggle" onchange="renderSupportView()" class="rounded border-slate-700 text-purple-600 focus:ring-0">
-                        <span>Solo Reincidentes (&ge;2)</span>
+                        <span>Solo Clientes Reincidentes (&ge;2)</span>
                     </label>
                 </div>
             </div>
@@ -408,7 +451,7 @@
                         </tr>
                     </thead>
                     <tbody id="support-table-body" class="divide-y divide-slate-800/60 font-sans">
-                        <tr><td colspan="6" class="text-center py-12 text-slate-500 font-mono">Cargando módulo de soporte...</td></tr>
+                        <tr><td colspan="6" class="text-center py-12 text-slate-500 font-mono">Cargando datos del módulo de soporte...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -416,7 +459,7 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- MODAL EMERGENTE COMPARTIDO -->
+    <!-- MODAL EMERGENTE UNIVERSAL (DESGLOSES Y KPIS) -->
     <!-- ========================================================================= -->
     <div id="detail-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 opacity-0 transition-opacity duration-300">
         <div class="absolute inset-0 bg-slate-950/85 backdrop-blur-md" onclick="closeModal()"></div>
@@ -427,13 +470,15 @@
                 <button onclick="closeModal()" class="text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 w-8 h-8 rounded-lg flex items-center justify-center transition"><i class="fa-solid fa-times"></i></button>
             </div>
 
+            <!-- FILTRO INTERACTIVO CORREAS / CONTRAPESOS -->
             <div id="modal-accesorios-box" class="hidden bg-cyan-950/40 border-b border-cyan-500/20 p-4 px-5">
                 <h4 class="text-cyan-400 font-bold mb-2.5 flex items-center gap-2 text-xs uppercase tracking-wide">
-                    <i class="fa-solid fa-weight-hanging"></i> Desglose por Accesorio (Haz clic para ver tiquets y clientes):
+                    <i class="fa-solid fa-weight-hanging"></i> Desglose por Accesorio (Haz clic para filtrar):
                 </h4>
                 <div id="modal-accesorios-list" class="flex flex-wrap gap-2.5"></div>
             </div>
 
+            <!-- FILTRO POR CLIENTE -->
             <div id="modal-kits-client-box" class="hidden bg-blue-950/40 border-b border-blue-500/20 p-4 px-5">
                 <div class="flex justify-between items-center mb-2.5">
                     <h4 class="text-blue-400 font-bold text-xs uppercase tracking-wide"><i class="fa-solid fa-users"></i> Filtrar por Cliente:</h4>
@@ -442,10 +487,12 @@
                 <div id="modal-kits-client-list" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-1"></div>
             </div>
 
+            <!-- RESUMEN MODELOS -->
             <div id="modal-summary-models-box" class="bg-slate-950/60 border-b border-slate-800/80 p-4 px-5">
                 <div id="modal-summary-models-list" class="flex flex-wrap gap-2.5"></div>
             </div>
 
+            <!-- RECOMENDACIÓN LEAN CON SECCIÓN INTERACTIVA DE FABRICAR HOY POR LOTE -->
             <div id="modal-recommendation-box" class="hidden bg-amber-500/10 border-b border-amber-500/30 p-5">
                 <h4 class="text-amber-400 font-bold mb-3 flex items-center gap-2 text-sm uppercase tracking-wide"><i class="fa-solid fa-bolt"></i> Oportunidades de Producción en Serie</h4>
                 <div id="modal-recommendation-list" class="space-y-3"></div>
@@ -456,7 +503,7 @@
                     <thead class="sticky top-0 bg-slate-900">
                         <tr class="border-b border-slate-800 text-xs text-slate-400 uppercase tracking-wider font-semibold">
                             <th class="pb-3 pr-4">Tiquet / Etiquetas</th>
-                            <th class="pb-3 px-4">Modelo / Accesorio</th>
+                            <th class="pb-3 px-4">Modelo / Accesorio / Causa</th>
                             <th class="pb-3 px-4 text-center">Uds</th>
                             <th class="pb-3 pl-4 text-right">Deadline</th>
                         </tr>
@@ -524,10 +571,8 @@
             const btnSop = document.getElementById('tab-nav-soporte');
             const secProd = document.getElementById('env-produccion-section');
             const secSop = document.getElementById('env-soporte-section');
-            const capBox = document.getElementById('header-capacity-container');
             const mainTitle = document.getElementById('app-main-title');
             const subTitle = document.getElementById('app-subtitle');
-            const badgeVer = document.getElementById('app-version-badge');
             const logoIcon = document.getElementById('app-logo-icon');
             const logoBox = document.getElementById('app-logo-box');
 
@@ -536,18 +581,16 @@
                 btnSop.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white";
                 secProd.classList.remove('hidden');
                 secSop.classList.add('hidden');
-                capBox.classList.remove('hidden');
 
                 mainTitle.innerHTML = `PANEL DE PRODUCCIÓN <span class="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30 font-mono" id="app-version-badge">v4.5 LEAN</span>`;
                 subTitle.innerText = "Sincronización en vivo ClickUp";
-                logoIcon.className = "fa-solid fa-chart-pie text-2xl";
+                logoIcon.className = "fa-solid fa-industry text-2xl";
                 logoBox.className = "p-3 bg-blue-500/10 border border-blue-500/30 rounded-2xl text-brand-blue shadow-lg shadow-blue-500/10";
             } else {
                 btnSop.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all bg-brand-purple text-white shadow-lg shadow-purple-500/25";
                 btnProd.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white";
                 secProd.classList.add('hidden');
                 secSop.classList.remove('hidden');
-                capBox.classList.add('hidden');
 
                 mainTitle.innerHTML = `SOPORTE & ANALÍTICA <span class="text-xs px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 font-mono">DATA BI</span>`;
                 subTitle.innerText = "Control de RMA, Causas Raíz e Incidencias Recurrentes";
@@ -560,7 +603,7 @@
 
         function setSupportSubTab(tab) {
             window.activeSupportSubTab = tab;
-            document.querySelectorAll('.subtab-btn').forEach(b => {
+            document.querySelectorAll('.support-tab-btn').forEach(b => {
                 b.classList.remove('active', 'text-white', 'bg-brand-purple');
                 b.classList.add('text-slate-400');
             });
@@ -572,7 +615,7 @@
             renderSupportView();
         }
 
-        // MOTOR DE ANÁLISIS DE FALLO Y CAUSA RAÍZ PARA SOPORTE
+        // MOTOR DE CLASIFICACIÓN DE PROBLEMAS DE SOPORTE
         function analyzeSupportIssue(task) {
             const raw = ((task.nombre || '') + ' ' + (task.description || '') + ' ' + (task.etiquetas || []).join(' ')).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             
@@ -582,14 +625,17 @@
             if (raw.includes('cable') || raw.includes('conector') || raw.includes('alimentacion') || raw.includes('borne') || raw.includes('cables')) {
                 return { tipo: 'Cables / Conectores', hex: '#3b82f6', color: 'blue', icon: 'fa-plug' };
             }
-            if (raw.includes('panel') || raw.includes('solar') || raw.includes('placa')) {
-                return { tipo: 'Panel Solar', hex: '#10b981', color: 'emerald', icon: 'fa-solar-panel' };
+            if (raw.includes('panel') || raw.includes('solar') || raw.includes('placa') || raw.includes('kit solar') || raw.includes('as') || raw.includes('ae')) {
+                return { tipo: 'Panel Solar / Kit', hex: '#10b981', color: 'emerald', icon: 'fa-solar-panel' };
             }
-            if (raw.includes('antena') || raw.includes('cobertura') || raw.includes('lora') || raw.includes('alcance') || raw.includes('desconectad')) {
+            if (raw.includes('antena') || raw.includes('cobertura') || raw.includes('lora') || raw.includes('alcance') || raw.includes('desconectad') || raw.includes('senal') || raw.includes('señal')) {
                 return { tipo: 'Antena / Cobertura', hex: '#06b6d4', color: 'cyan', icon: 'fa-tower-broadcast' };
             }
             if (raw.includes('gw') || raw.includes('gateway') || raw.includes('no enciende') || raw.includes('roto') || raw.includes('reinicio') || raw.includes('fallo') || raw.includes('placa base')) {
                 return { tipo: 'Hardware / Fallo GW', hex: '#f97316', color: 'orange', icon: 'fa-microchip' };
+            }
+            if (raw.includes('correa') || raw.includes('contrapeso') || raw.includes('collar')) {
+                return { tipo: 'Recambio Accesorio', hex: '#14b8a6', color: 'teal', icon: 'fa-weight-hanging' };
             }
             return { tipo: 'General / Otro', hex: '#8b5cf6', color: 'purple', icon: 'fa-circle-question' };
         }
@@ -824,14 +870,6 @@
             return { isTodayOrOverdue, isFutureRolling, isWithinWindow, category };
         }
 
-        function getWeekBoundaries(weeksAgo = 0) {
-            const now = new Date();
-            const day = now.getDay() || 7; 
-            const mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (day - 1) - (weeksAgo * 7), 0, 0, 0, 0);
-            const sun = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 6, 23, 59, 59, 999);
-            return { start: mon.getTime(), end: sun.getTime() };
-        }
-
         function normalizeTasks(rawTasks) {
             return rawTasks.map(task => {
                 const esSoloRecibir = checkSoloRecibir(task);
@@ -947,7 +985,6 @@
 
             const chipBox = document.getElementById('active-tag-chip-container');
             const chipName = document.getElementById('active-tag-chip-name');
-            const chartHint = document.getElementById('chart-etiquetas-hint');
 
             if (window.selectedTagFilter) {
                 if (chipBox && chipName) {
@@ -955,40 +992,14 @@
                     chipBox.classList.remove('hidden');
                     chipBox.classList.add('inline-flex');
                 }
-                if (chartHint) {
-                    chartHint.innerHTML = `<span class="text-brand-purple font-bold">Filtro: ${window.selectedTagFilter} <i class="fa-solid fa-xmark ml-1 cursor-pointer hover:text-red-400" onclick="event.stopPropagation(); filterByTag('')" title="Quitar filtro"></i></span>`;
-                }
             } else {
                 if (chipBox) {
                     chipBox.classList.add('hidden');
                     chipBox.classList.remove('inline-flex');
                 }
-                if (chartHint) {
-                    chartHint.innerText = 'Clic para filtrar';
-                }
-            }
-
-            const modal = document.getElementById('detail-modal');
-            if (modal && !modal.classList.contains('hidden')) {
-                closeModal();
             }
 
             renderMainTable();
-
-            if (charts.etiquetas && charts.etiquetas.data) {
-                const labels = charts.etiquetas.data.labels;
-                charts.etiquetas.data.datasets[0].backgroundColor = labels.map(tag => {
-                    const base = getTagColorHex(tag);
-                    if (window.selectedTagFilter) {
-                        return tag.toUpperCase() === window.selectedTagFilter.toUpperCase() ? base : base + '35';
-                    }
-                    return base;
-                });
-                charts.etiquetas.data.datasets[0].borderWidth = labels.map(tag => 
-                    (window.selectedTagFilter && tag.toUpperCase() === window.selectedTagFilter.toUpperCase()) ? 2 : 0
-                );
-                charts.etiquetas.update();
-            }
         }
 
         window.toggleTodayBatchBox = function(safeId) {
@@ -1086,90 +1097,11 @@
                 }
             }
             const badge = document.getElementById('kpi-sugerencia-badge');
-            if (suggestions.length > 0) badge.classList.remove('hidden');
-            else badge.classList.add('hidden');
+            if (badge) {
+                if (suggestions.length > 0) badge.classList.remove('hidden');
+                else badge.classList.add('hidden');
+            }
             return suggestions;
-        }
-
-        function renderCharts(agrupacionModelos, agrupacionTiempos, agrupacionEtiquetas, historialProduccion) {
-            if(charts.modelos) charts.modelos.destroy();
-            if(charts.tiempos) charts.tiempos.destroy();
-            if(charts.etiquetas) charts.etiquetas.destroy();
-            if(charts.rendimiento) charts.rendimiento.destroy();
-
-            const modelosLabels = Object.keys(agrupacionModelos);
-            const modelosColors = modelosLabels.map(m => getModelColorHex(m));
-
-            charts.modelos = new Chart(document.getElementById('chartModelos').getContext('2d'), {
-                type: 'doughnut',
-                data: { labels: modelosLabels, datasets: [{ data: Object.values(agrupacionModelos), backgroundColor: modelosColors, borderWidth: 0, hoverOffset: 6 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } } }
-            });
-
-            charts.tiempos = new Chart(document.getElementById('chartTiempos').getContext('2d'), {
-                type: 'bar',
-                data: { labels: Object.keys(agrupacionTiempos), datasets: [{ label: 'Unidades Requeridas', data: Object.values(agrupacionTiempos), backgroundColor: '#3b82f6', borderRadius: 6 }] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } }
-            });
-
-            const etiquetasLabels = Object.keys(agrupacionEtiquetas);
-            const etiquetasColors = etiquetasLabels.map(tag => {
-                const baseColor = getTagColorHex(tag);
-                if (window.selectedTagFilter) {
-                    return tag.toUpperCase() === window.selectedTagFilter.toUpperCase() ? baseColor : baseColor + '35';
-                }
-                return baseColor;
-            });
-
-            charts.etiquetas = new Chart(document.getElementById('chartEtiquetas').getContext('2d'), {
-                type: 'bar',
-                data: { 
-                    labels: etiquetasLabels, 
-                    datasets: [{ 
-                        label: 'Tiquets por Etiqueta', 
-                        data: Object.values(agrupacionEtiquetas), 
-                        backgroundColor: etiquetasColors, 
-                        borderRadius: 6,
-                        borderWidth: etiquetasLabels.map(tag => (window.selectedTagFilter && tag.toUpperCase() === window.selectedTagFilter.toUpperCase()) ? 2 : 0),
-                        borderColor: '#ffffff'
-                    }] 
-                },
-                options: { 
-                    indexAxis: 'y', 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    scales: { 
-                        x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, 
-                        y: { grid: { display: false } } 
-                    }, 
-                    plugins: { legend: { display: false } },
-                    onClick: (e, activeElements) => {
-                        if (activeElements.length > 0) {
-                            const clickedTag = etiquetasLabels[activeElements[0].index];
-                            filterByTag(clickedTag);
-                            const tableSection = document.getElementById('seccion-tabla-principal');
-                            if (tableSection) tableSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                        }
-                    }
-                }
-            });
-
-            charts.rendimiento = new Chart(document.getElementById('chartRendimiento').getContext('2d'), {
-                type: 'bar',
-                data: { labels: ['Sem -3', 'Sem -2', 'Sem Pasada', 'Esta Sem'], datasets: [{ label: 'Envíos Realizados (Uds)', data: historialProduccion, backgroundColor: ['#6366f1', '#3b82f6', '#8b5cf6', '#10b981'], borderRadius: 6 }] },
-                options: { 
-                    responsive: true, maintainAspectRatio: false, 
-                    scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } }, 
-                    plugins: { legend: { display: false } },
-                    onClick: (e, activeElements) => {
-                        if (activeElements.length > 0) {
-                            const weekKeys = ['w3', 'w2', 'w1', 'w0'];
-                            const weekTitles = ['Envíos Hace 3 Semanas', 'Envíos Hace 2 Semanas', 'Envíos Semana Pasada', 'Envíos Esta Semana'];
-                            openModal(weekTitles[activeElements[0].index], window.weekTasksMap[weekKeys[activeElements[0].index]] || []);
-                        }
-                    }
-                }
-            });
         }
 
         function updateSoporteBadge(elementTextId, elementStatusId, data, isNextWeek = false) {
@@ -1185,40 +1117,26 @@
                 if (data.pro >= CAPACIDAD_PRO_SERIES) saturated.push('Pro');
                 if (data.cow >= CAPACIDAD_COWPRO) saturated.push('Cowpro v2');
                 statusEl.innerText = `Cupo Lleno (${saturated.join(', ')})`;
-                statusEl.className = `text-xs px-3 py-1 rounded-xl font-mono font-bold bg-red-500/20 text-red-300 border border-red-500/40 animate-pulse whitespace-nowrap shadow-sm`;
+                statusEl.className = `text-[10px] px-2.5 py-1 rounded-xl font-mono font-bold bg-red-500/20 text-red-300 border border-red-500/40 animate-pulse whitespace-nowrap shadow-sm`;
             } else if (pctIxo >= 80 || pctPro >= 80 || pctCow >= 80) {
                 statusEl.innerText = "Cerca del Límite";
-                statusEl.className = `text-xs px-3 py-1 rounded-xl font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 whitespace-nowrap shadow-sm`;
+                statusEl.className = `text-[10px] px-2.5 py-1 rounded-xl font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 whitespace-nowrap shadow-sm`;
             } else {
                 statusEl.innerText = "Disponible";
-                statusEl.className = isNextWeek ? `text-xs px-3 py-1 rounded-xl font-mono font-bold bg-emerald-950/80 text-emerald-500 border border-emerald-800/80 whitespace-nowrap shadow-sm` : `text-xs px-3 py-1 rounded-xl font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 whitespace-nowrap shadow-sm`;
+                statusEl.className = isNextWeek ? `text-[10px] px-2.5 py-1 rounded-xl font-mono font-bold bg-emerald-950/80 text-emerald-500 border border-emerald-800/80 whitespace-nowrap shadow-sm` : `text-[10px] px-2.5 py-1 rounded-xl font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 whitespace-nowrap shadow-sm`;
             }
         }
 
         function updateDashboard() {
-            let totalSemana = 0, totalHoy = 0, totalGWListos = 0, totalAccesorios = 0, totalKitsGWs = 0, totalPendientesRecibir = 0, enCursoCount = 0;
+            let totalSemana = 0, totalHoy = 0;
             let statsModelos = { 'Ixotrack': 0, 'Ixotrack pro': 0, 'IxotrackproM10': 0, 'IxotrackproM10LR': 0, 'Cowpro v2': 0, 'Gateway': 0, 'Otro': 0 };
-            let statsTiempos = { 'Hoy/Atrasado': 0, 'Próx. 7 Días Lab.': 0, 'Futuro': 0, 'Sin Fecha': 0 };
             let statsEtiquetas = {}; 
-
-            const w0 = getWeekBoundaries(0), w1 = getWeekBoundaries(1), w2 = getWeekBoundaries(2), w3 = getWeekBoundaries(3);
-            window.weekTasksMap = { w0: [], w1: [], w2: [], w3: [] };
-            let outputW0 = 0, outputW1 = 0, outputW2 = 0, outputW3 = 0;
 
             const workWeeks = getCalendarWorkWeeks();
             let thisWeekFamilies = { ixo: 0, pro: 0, cow: 0 }, nextWeekFamilies = { ixo: 0, pro: 0, cow: 0 };
 
             window.allTasks.forEach(t => {
                 const completed = isTaskCompleted(t);
-                if (completed && !t.esSoloRecibir && !t.esAccesorio && t.closedTimestamp > 0) {
-                    if (t.closedTimestamp >= w0.start && t.closedTimestamp <= w0.end) { outputW0 += t.unidadesBrutas; window.weekTasksMap.w0.push(t); }
-                    else if (t.closedTimestamp >= w1.start && t.closedTimestamp <= w1.end) { outputW1 += t.unidadesBrutas; window.weekTasksMap.w1.push(t); }
-                    else if (t.closedTimestamp >= w2.start && t.closedTimestamp <= w2.end) { outputW2 += t.unidadesBrutas; window.weekTasksMap.w2.push(t); }
-                    else if (t.closedTimestamp >= w3.start && t.closedTimestamp <= w3.end) { outputW3 += t.unidadesBrutas; window.weekTasksMap.w3.push(t); }
-                }
-
-                if (!completed && !t.esSoloRecibir && t.dateInfo.isWithinWindow && t.kitsSolaresGW > 0) totalKitsGWs += t.kitsSolaresGW;
-                if (t.esSoloRecibir && t.estado.includes('BLOQUEAD')) totalPendientesRecibir += t.unidadesBrutas;
 
                 if (!t.esSoloRecibir && !t.esAccesorio && !completed) {
                     if (t.dateInfo.isWithinWindow) totalSemana += t.unidades;
@@ -1240,13 +1158,7 @@
                             else if (name === 'Cowpro v2') nextWeekFamilies.cow += m.unidades;
                         }
                     });
-
-                    if (statsTiempos[t.dateInfo.category] !== undefined) statsTiempos[t.dateInfo.category] += t.unidades;
                 }
-
-                if (t.esAccesorio) totalAccesorios += t.unidadesBrutas;
-                if (t.modeloInfo.nombre === 'Gateway' && completed) totalGWListos += (t.esSoloRecibir ? t.unidadesBrutas : t.unidades);
-                if (t.estado === 'EN CURSO' && !t.esSoloRecibir && !completed) enCursoCount++;
 
                 if (!completed) {
                     if (t.etiquetas.length > 0) t.etiquetas.forEach(tag => statsEtiquetas[tag] = (statsEtiquetas[tag] || 0) + 1);
@@ -1259,11 +1171,6 @@
 
             document.getElementById('kpi-semana').innerText = totalSemana;
             document.getElementById('kpi-hoy').innerText = totalHoy;
-            document.getElementById('kpi-encurso').innerText = enCursoCount;
-            document.getElementById('kpi-gw').innerText = totalGWListos;
-            document.getElementById('kpi-accesorios').innerText = totalAccesorios;
-            document.getElementById('kpi-kits').innerText = totalKitsGWs;
-            document.getElementById('kpi-pendientes-recibir').innerText = totalPendientesRecibir;
 
             document.getElementById('mod-ixo').innerText = statsModelos['Ixotrack'];
             document.getElementById('mod-pro').innerText = statsModelos['Ixotrack pro'];
@@ -1287,9 +1194,6 @@
 
             checkBatchingRecommendations();
             renderMainTable();
-            
-            Object.keys(statsModelos).forEach(k => { if(statsModelos[k] === 0) delete statsModelos[k]; });
-            renderCharts(statsModelos, statsTiempos, statsEtiquetas, [outputW3, outputW2, outputW1, outputW0]);
         }
 
         function renderMainTable() {
@@ -1357,68 +1261,72 @@
         }
 
         // =========================================================================
-        // MOTOR DE RENDERIZADO ANALÍTICO DE SOPORTE
+        // MOTOR DE SOPORTE & ANALÍTICA DE DATOS
         // =========================================================================
+        function getSupportCurrentDataset() {
+            const currentTab = window.activeSupportSubTab;
+            if (currentTab === 'GW_INCIDENCIAS') {
+                return window.allTasks.filter(t => 
+                    t.modeloInfo.nombre === 'Gateway' || 
+                    t.kitsSolaresGW > 0 || 
+                    t.nombre.toLowerCase().includes('gw') || 
+                    t.nombre.toLowerCase().includes('kit') || 
+                    t.nombre.toLowerCase().includes('solar') || 
+                    t.etiquetas.some(e => e.includes('INCIDENCIA') || e.includes('SOLAR') || e.includes('GW'))
+                );
+            } else if (currentTab === 'ACCESORIOS') {
+                return window.allTasks.filter(t => t.esAccesorio);
+            } else if (currentTab === 'BLOQUEADOS') {
+                return window.allTasks.filter(t => t.esSoloRecibir);
+            }
+            return [];
+        }
+
         function renderSupportView() {
+            const dataset = getSupportCurrentDataset();
             const searchVal = (document.getElementById('support-search-input')?.value || '').toLowerCase().trim();
             const onlyRecurrent = document.getElementById('support-recurrent-toggle')?.checked || false;
-            const currentTab = window.activeSupportSubTab;
 
-            // 1. Filtrar tareas según la subpestaña activa de soporte
-            let dataset = [];
-            let tabTitle = '';
-            if (currentTab === 'GW_INCIDENCIAS') {
-                tabTitle = '<i class="fa-solid fa-router text-orange-400"></i> Incidencias Gateways & Hardware';
-                dataset = window.allTasks.filter(t => t.modeloInfo.nombre === 'Gateway' || t.nombre.toLowerCase().includes('gw') || t.etiquetas.some(e => e.includes('INCIDENCIA')));
-            } else if (currentTab === 'ACCESORIOS') {
-                tabTitle = '<i class="fa-solid fa-weight-hanging text-cyan-400"></i> Reemplazos Correas / Contrapesos';
-                dataset = window.allTasks.filter(t => t.esAccesorio);
-            } else if (currentTab === 'BLOQUEADOS') {
-                tabTitle = '<i class="fa-solid fa-inbox text-purple-400"></i> Pendientes por Recibir (Bloqueados)';
-                dataset = window.allTasks.filter(t => t.esSoloRecibir);
-            } else if (currentTab === 'KITS_SOLARES') {
-                tabTitle = '<i class="fa-solid fa-solar-panel text-blue-400"></i> Kits Solares & Antenas';
-                dataset = window.allTasks.filter(t => t.kitsSolaresGW > 0);
-            }
+            const tabTitles = {
+                'GW_INCIDENCIAS': '<i class="fa-solid fa-router text-orange-400"></i> Incidencias GW & Kits Solares',
+                'ACCESORIOS': '<i class="fa-solid fa-weight-hanging text-cyan-400"></i> Reemplazos Correas / Contrapesos',
+                'BLOQUEADOS': '<i class="fa-solid fa-inbox text-purple-400"></i> Pendientes de Recibir (Bloqueados)'
+            };
+            document.getElementById('support-table-title').innerHTML = tabTitles[window.activeSupportSubTab] || 'Tiquets de Soporte';
 
-            document.getElementById('support-table-title').innerHTML = tabTitle;
-
-            // 2. Conteo de recurrencia por cliente en este conjunto
+            // Análisis de recurrencia y causas
             const clientCounts = {};
+            const causasStats = {};
+            let pendientesCount = 0;
+
             dataset.forEach(t => {
                 const c = t.cliente || 'Cliente General';
                 clientCounts[c] = (clientCounts[c] || 0) + 1;
-            });
 
-            // 3. Causas / Desglose analítico
-            const causasStats = {};
-            let pendientesCount = 0;
-            dataset.forEach(t => {
                 if (!isTaskCompleted(t)) pendientesCount++;
+
                 const causaName = t.causaSoporte.tipo;
                 causasStats[causaName] = (causasStats[causaName] || 0) + 1;
             });
 
-            // Top causa
             const causasEntries = Object.entries(causasStats).sort((a,b) => b[1] - a[1]);
             const topCausa = causasEntries[0] ? causasEntries[0][0] : 'N/A';
             const topCausaCount = causasEntries[0] ? causasEntries[0][1] : 0;
             const topCausaPct = dataset.length > 0 ? Math.round((topCausaCount / dataset.length) * 100) : 0;
 
-            // Clientes con >= 2 incidencias
             const recurrentClients = Object.entries(clientCounts).filter(([c, count]) => count >= 2);
 
-            // KPIs
+            // Rellenar valores en las 4 viñetas interactivas
             document.getElementById('sup-kpi-total').innerText = dataset.length;
             document.getElementById('sup-kpi-top-problema').innerText = topCausa;
             document.getElementById('sup-kpi-top-problema-sub').innerText = `${topCausaCount} tiquets (${topCausaPct}%)`;
             document.getElementById('sup-kpi-recurrentes').innerText = recurrentClients.length;
             document.getElementById('sup-kpi-pendientes').innerText = pendientesCount;
 
-            // Gráficos analíticos de soporte
+            // Renderizado de gráficos interactivos
             renderSupportCharts(causasStats, clientCounts);
 
-            // 4. Filtrar por buscador y toggle de recurrentes
+            // Filtrado de la tabla por buscador y toggle de clientes reincidentes
             let filtered = dataset.filter(t => {
                 const c = t.cliente || 'Cliente General';
                 const isRecurrent = (clientCounts[c] || 0) >= 2;
@@ -1426,20 +1334,19 @@
                 if (onlyRecurrent && !isRecurrent) return false;
 
                 if (searchVal) {
-                    const hayCoincidencia = 
+                    const match = 
                         t.nombre.toLowerCase().includes(searchVal) ||
                         c.toLowerCase().includes(searchVal) ||
                         t.causaSoporte.tipo.toLowerCase().includes(searchVal) ||
                         (t.description && t.description.toLowerCase().includes(searchVal)) ||
                         t.etiquetas.some(e => e.toLowerCase().includes(searchVal));
-                    if (!hayCoincidencia) return false;
+                    if (!match) return false;
                 }
                 return true;
             });
 
             document.getElementById('support-count-badge').innerText = `${filtered.length} / ${dataset.length} REGISTROS`;
 
-            // 5. Renderizado de tabla
             const tbody = document.getElementById('support-table-body');
             tbody.innerHTML = '';
 
@@ -1454,7 +1361,7 @@
                 const isRecurrent = countThisClient >= 2;
 
                 const recurrentBadge = isRecurrent 
-                    ? `<span class="bg-red-500/20 text-red-300 border border-red-500/40 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold flex items-center gap-1 mt-1 shadow-sm"><i class="fa-solid fa-triangle-exclamation text-red-400"></i> Reincidente (${countThisClient} incidencias)</span>`
+                    ? `<span onclick="openSupportClientTickets('${c.replace(/'/g, "\\'")}')" class="bg-red-500/20 text-red-300 border border-red-500/40 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold flex items-center gap-1 mt-1 cursor-pointer hover:bg-red-500/30 w-fit"><i class="fa-solid fa-triangle-exclamation text-red-400"></i> Reincidente (${countThisClient} avisos)</span>`
                     : '';
 
                 const f = new Date(t.timestamp);
@@ -1472,7 +1379,7 @@
                             <div class="flex flex-wrap gap-1">${t.etiquetas.map(getTagHtml).join('')}</div>
                         </td>
                         <td class="py-3.5 px-4 align-top">
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold" style="background-color: ${t.causaSoporte.hex}18; color: ${t.causaSoporte.hex}; border: 1px solid ${t.causaSoporte.hex}35">
+                            <span onclick="openSupportCausaTickets('${t.causaSoporte.tipo}')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer hover:opacity-80 transition" style="background-color: ${t.causaSoporte.hex}18; color: ${t.causaSoporte.hex}; border: 1px solid ${t.causaSoporte.hex}35" title="Clic para filtrar por esta causa">
                                 <i class="fa-solid ${t.causaSoporte.icon}"></i> ${t.causaSoporte.tipo}
                             </span>
                         </td>
@@ -1486,11 +1393,56 @@
             });
         }
 
+        // =========================================================================
+        // ACCIONES CLICABLES DE LAS 4 SUB-VIÑETAS Y GRÁFICOS DE SOPORTE
+        // =========================================================================
+        function openSupportKpiModal(kpiType) {
+            const dataset = getSupportCurrentDataset();
+            
+            if (kpiType === 'TOTAL') {
+                const titles = {
+                    'GW_INCIDENCIAS': 'Todos los Tiquets: Incidencias GW & Kits Solares',
+                    'ACCESORIOS': 'Todos los Tiquets: Correas & Contrapesos',
+                    'BLOQUEADOS': 'Todos los Tiquets: Pendientes de Recibir'
+                };
+                openModal(titles[window.activeSupportSubTab] || 'Tiquets de Soporte', dataset, false, false, window.activeSupportSubTab === 'ACCESORIOS');
+            } 
+            else if (kpiType === 'TOP_CAUSA') {
+                const causasStats = {};
+                dataset.forEach(t => causasStats[t.causaSoporte.tipo] = (causasStats[t.causaSoporte.tipo] || 0) + 1);
+                const topCausa = Object.entries(causasStats).sort((a,b) => b[1] - a[1])[0]?.[0];
+                if (!topCausa) return;
+                openSupportCausaTickets(topCausa);
+            } 
+            else if (kpiType === 'RECURRENTES') {
+                const clientCounts = {};
+                dataset.forEach(t => { const c = t.cliente || 'Cliente General'; clientCounts[c] = (clientCounts[c] || 0) + 1; });
+                const recurrentTasks = dataset.filter(t => (clientCounts[t.cliente || 'Cliente General'] || 0) >= 2);
+                openModal('Clientes Reincidentes (≥2 Incidencias registradas)', recurrentTasks, false, false, false);
+            } 
+            else if (kpiType === 'PENDIENTES') {
+                const pendientes = dataset.filter(t => !isTaskCompleted(t));
+                openModal('Incidencias Activas Pendientes de Resolución', pendientes, false, false, false);
+            }
+        }
+
+        function openSupportCausaTickets(causaName) {
+            const dataset = getSupportCurrentDataset();
+            const filtered = dataset.filter(t => t.causaSoporte.tipo === causaName);
+            openModal(`Incidencias por Causa: ${causaName}`, filtered, false, false, false);
+        }
+
+        function openSupportClientTickets(clientName) {
+            const dataset = getSupportCurrentDataset();
+            const filtered = dataset.filter(t => (t.cliente || 'Cliente General') === clientName);
+            openModal(`Historial de Incidencias: ${clientName}`, filtered, false, false, false);
+        }
+
         function renderSupportCharts(causasStats, clientCounts) {
             if (charts.supportCausas) charts.supportCausas.destroy();
             if (charts.supportClientes) charts.supportClientes.destroy();
 
-            // Gráfico 1: Causas
+            // Gráfico 1: Causas (clicable)
             const causasLabels = Object.keys(causasStats);
             const causasData = Object.values(causasStats);
             const causasColors = ['#f59e0b', '#3b82f6', '#10b981', '#06b6d4', '#f97316', '#8b5cf6', '#64748b'];
@@ -1501,19 +1453,26 @@
                     type: 'doughnut',
                     data: {
                         labels: causasLabels,
-                        datasets: [{ data: causasData, backgroundColor: causasColors.slice(0, causasLabels.length), borderWidth: 0 }]
+                        datasets: [{ data: causasData, backgroundColor: causasColors.slice(0, causasLabels.length), borderWidth: 0, hoverOffset: 6 }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } }
+                        plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } },
+                        onClick: (e, activeEls) => {
+                            if (activeEls.length > 0) {
+                                const clickedIndex = activeEls[0].index;
+                                const clickedCausa = causasLabels[clickedIndex];
+                                openSupportCausaTickets(clickedCausa);
+                            }
+                        }
                     }
                 });
             }
 
-            // Gráfico 2: Top Clientes Reincidentes
+            // Gráfico 2: Top Clientes Afectados (clicable)
             const sortedClients = Object.entries(clientCounts)
-                .filter(([c, count]) => count >= 2 && c !== 'Cliente General')
+                .filter(([c]) => c !== 'Cliente General')
                 .sort((a,b) => b[1] - a[1])
                 .slice(0, 5);
 
@@ -1525,15 +1484,21 @@
                 charts.supportClientes = new Chart(ctxClientes, {
                     type: 'bar',
                     data: {
-                        labels: clientLabels.length > 0 ? clientLabels : ['Sin Reincidentes'],
-                        datasets: [{ label: 'Incidencias Registradas', data: clientValues.length > 0 ? clientValues : [0], backgroundColor: '#ef4444', borderRadius: 6 }]
+                        labels: clientLabels.length > 0 ? clientLabels : ['Sin Registros'],
+                        datasets: [{ label: 'Incidencias', data: clientValues.length > 0 ? clientValues : [0], backgroundColor: '#ef4444', borderRadius: 6 }]
                     },
                     options: {
                         indexAxis: 'y',
                         responsive: true,
                         maintainAspectRatio: false,
                         scales: { x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { grid: { display: false } } },
-                        plugins: { legend: { display: false } }
+                        plugins: { legend: { display: false } },
+                        onClick: (e, activeEls) => {
+                            if (activeEls.length > 0 && clientLabels[0] !== 'Sin Registros') {
+                                const clickedClient = clientLabels[activeEls[0].index];
+                                openSupportClientTickets(clickedClient);
+                            }
+                        }
                     }
                 });
             }
@@ -1590,16 +1555,12 @@
             }
             
             tasksToRender.forEach(t => {
-                const isKitModal = window.isCurrentKitSolarModal;
                 const isAccModal = window.isCurrentAccesorioModal;
                 let unitsShow = t.unidades > 0 ? t.unidades : t.unidadesBrutas;
                 let displayModelName = t.modeloInfo.nombre;
                 let displayModelHex = t.modeloInfo.hex;
                 
-                if (isKitModal) {
-                    unitsShow = t.kitsSolaresGW > 0 ? t.kitsSolaresGW : 1;
-                    displayModelName = t.kitTipo || 'Kit Solar / Gateway';
-                } else if (isAccModal) {
+                if (isAccModal) {
                     if (window.activeAccesorioFilter) {
                         const targetPart = t.modelosDesglose.find(m => m.modeloInfo.nombre === window.activeAccesorioFilter);
                         unitsShow = targetPart ? targetPart.unidades : 0;
@@ -1610,6 +1571,8 @@
                         displayModelName = t.modelosDesglose.map(m => `${m.modeloInfo.nombre} (${m.unidades})`).join(' + ');
                         displayModelHex = '#06b6d4';
                     }
+                } else if (t.causaSoporte && t.causaSoporte.tipo !== 'General / Otro') {
+                    displayModelName = `${t.modeloInfo.nombre} • ${t.causaSoporte.tipo}`;
                 }
 
                 tUnidades += unitsShow;
@@ -1647,7 +1610,6 @@
             window.isCurrentAccesorioModal = isAccesorioModal;
 
             const clientBox = document.getElementById('modal-kits-client-box');
-            const clientList = document.getElementById('modal-kits-client-list');
             const accBox = document.getElementById('modal-accesorios-box');
             const accList = document.getElementById('modal-accesorios-list');
 
@@ -1675,24 +1637,7 @@
                 accBox.classList.add('hidden');
             }
 
-            if (isKitSolarModal) {
-                let clientMap = {};
-                tasks.forEach(t => {
-                    const cName = t.cliente || 'Cliente General';
-                    clientMap[cName] = (clientMap[cName] || 0) + (t.kitsSolaresGW > 0 ? t.kitsSolaresGW : 1);
-                });
-                const clients = Object.keys(clientMap);
-                if (clients.length > 0) {
-                    clientList.innerHTML = clients.map(c => `
-                        <button onclick="filterModalByClient('${c}')" data-client="${c}" class="client-chip bg-blue-900/60 border border-blue-500/30 px-3 py-1.5 rounded-xl text-xs flex items-center gap-2 text-slate-200">
-                            <i class="fa-solid fa-user text-blue-400"></i><span class="font-medium">${c}:</span><strong class="text-white font-mono">${clientMap[c]} kits/GWs</strong>
-                        </button>
-                    `).join('');
-                    clientBox.classList.remove('hidden');
-                } else clientBox.classList.add('hidden');
-            } else {
-                clientBox.classList.add('hidden');
-            }
+            clientBox.classList.add('hidden');
 
             const summaryContainer = document.getElementById('modal-summary-models-box');
             const summaryList = document.getElementById('modal-summary-models-list');
@@ -1706,7 +1651,7 @@
             });
 
             const activeModels = Object.keys(modelBreakdown);
-            if (activeModels.length > 0 && !isKitSolarModal && !isAccesorioModal) {
+            if (activeModels.length > 0 && !isAccesorioModal) {
                 summaryList.innerHTML = activeModels.map(m => `
                     <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3.5 py-1.5 rounded-xl shadow-sm">
                         <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${modelBreakdown[m].hex}"></span>
