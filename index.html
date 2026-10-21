@@ -38,8 +38,7 @@
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
         .tab-btn.active { background-color: #3b82f6; color: #ffffff; box-shadow: 0 0 12px rgba(59, 130, 246, 0.4); }
         .support-tab-btn.active { background-color: #8b5cf6; color: #ffffff; box-shadow: 0 0 14px rgba(139, 92, 246, 0.45); }
-        .acc-chip { transition: all 0.2s ease; cursor: pointer; }
-        .acc-chip:hover, .acc-chip.active { transform: scale(1.02); }
+        .cause-chip.active { background-color: #8b5cf6 !important; border-color: #c084fc !important; color: #ffffff !important; }
     </style>
 </head>
 <body class="min-h-screen font-sans antialiased p-4 md:p-6 overflow-x-hidden">
@@ -62,7 +61,6 @@
 
     <!-- CABECERA PRINCIPAL CON SELECTOR DE ENTORNO -->
     <header class="flex flex-col xl:flex-row justify-between items-start xl:items-center pb-5 mb-6 border-b border-slate-800/80 gap-5">
-        
         <div class="flex items-center gap-4 flex-wrap">
             <div class="flex items-center gap-3">
                 <div id="app-logo-box" class="p-3 bg-blue-500/10 border border-blue-500/30 rounded-2xl text-brand-blue shadow-lg shadow-blue-500/10 transition-colors">
@@ -133,14 +131,12 @@
     </header>
 
     <!-- ========================================================================= -->
-    <!-- 1. ENTORNO DE PRODUCCIÓN (TALLER / CAPTURAS) -->
+    <!-- 1. ENTORNO DE PRODUCCIÓN (TALLER) -->
     <!-- ========================================================================= -->
     <div id="env-produccion-section" class="space-y-6 max-w-[1700px] mx-auto">
         
         <!-- VIÑETAS HERO: FOCO PRINCIPAL EN "A FABRICAR (HOY)" -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-            
-            <!-- TARJETA HERO: A FABRICAR HOY (FOCO PRINCIPAL) -->
             <div onclick="openModal('A Fabricar (Hoy)', window.allTasks.filter(t => t.dateInfo.isTodayOrOverdue && !t.esSoloRecibir && !t.esAccesorio && !isTaskCompleted(t)), true)" 
                  class="lg:col-span-7 hero-amber-card rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all">
                 <div class="flex justify-between items-start mb-3">
@@ -172,7 +168,6 @@
                 </div>
             </div>
 
-            <!-- TARJETA DEMANDA: A FABRICAR (7 DÍAS) -->
             <div onclick="openModal('A Fabricar (Próx. 7 Días Lab.)', window.allTasks.filter(t => t.dateInfo.isWithinWindow && !t.esSoloRecibir && !t.esAccesorio && !isTaskCompleted(t)))" 
                  class="lg:col-span-5 bi-kpi-card rounded-2xl p-6 flex flex-col justify-between">
                 <div class="flex justify-between items-start">
@@ -193,7 +188,6 @@
                     <span class="text-xs text-blue-400 font-mono font-medium">Ventana 7d hábiles</span>
                 </div>
             </div>
-
         </div>
 
         <!-- BANDA DE DISPOSITIVOS POR MODELO (5 CAJAS CLICABLES) -->
@@ -334,93 +328,17 @@
             </div>
         </div>
 
-        <!-- 4 SUB-VIÑETAS / KPIS ANALÍTICOS (TODAS 100% CLICABLES) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            
-            <!-- 1. Total Registros -->
-            <div onclick="openSupportKpiModal('TOTAL')" 
-                 class="bi-kpi-card rounded-2xl p-5 border-l-4 border-l-purple-500 group" title="Haz clic para ver el listado completo de este módulo">
-                <div class="flex items-center justify-between text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
-                    <span>Total Registros Módulo</span>
-                    <i class="fa-solid fa-folder-open text-purple-400 group-hover:scale-125 transition-transform"></i>
-                </div>
-                <div class="flex items-baseline justify-between">
-                    <h2 id="sup-kpi-total" class="text-3xl font-extrabold text-white font-mono">0</h2>
-                    <span class="text-xs text-purple-400 font-mono flex items-center gap-1">Ver tiquets <i class="fa-solid fa-chevron-right text-[10px]"></i></span>
-                </div>
-            </div>
-
-            <!-- 2. Incidencia Más Común -->
-            <div onclick="openSupportKpiModal('TOP_CAUSA')" 
-                 class="bi-kpi-card rounded-2xl p-5 border-l-4 border-l-amber-500 group" title="Haz clic para ver los tiquets con esta causa específica">
-                <div class="flex items-center justify-between text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
-                    <span>Causa Más Común</span>
-                    <i class="fa-solid fa-triangle-exclamation text-amber-400 group-hover:scale-125 transition-transform"></i>
-                </div>
-                <div>
-                    <h3 id="sup-kpi-top-problema" class="text-base font-extrabold text-white truncate">Calculando...</h3>
-                    <div class="flex items-baseline justify-between mt-1">
-                        <span id="sup-kpi-top-problema-sub" class="text-xs text-amber-400/80 font-mono">0% del total</span>
-                        <span class="text-xs text-amber-300 font-mono flex items-center gap-1">Explorar causa <i class="fa-solid fa-chevron-right text-[10px]"></i></span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 3. Clientes Reincidentes -->
-            <div onclick="openSupportKpiModal('RECURRENTES')" 
-                 class="bi-kpi-card rounded-2xl p-5 border-l-4 border-l-red-500 group" title="Haz clic para ver los clientes con 2 o más incidencias">
-                <div class="flex items-center justify-between text-red-400 text-xs font-bold uppercase tracking-wider mb-2">
-                    <span>Clientes Reincidentes</span>
-                    <i class="fa-solid fa-users-rays text-red-400 group-hover:scale-125 transition-transform"></i>
-                </div>
-                <div class="flex items-baseline justify-between">
-                    <div>
-                        <h2 id="sup-kpi-recurrentes" class="text-3xl font-extrabold text-red-400 font-mono">0</h2>
-                        <span class="text-[11px] text-red-400/80 font-mono">&ge;2 incidencias</span>
-                    </div>
-                    <span class="text-xs text-red-300 font-mono flex items-center gap-1">Ver clientes <i class="fa-solid fa-chevron-right text-[10px]"></i></span>
-                </div>
-            </div>
-
-            <!-- 4. Pendientes de Resolución -->
-            <div onclick="openSupportKpiModal('PENDIENTES')" 
-                 class="bi-kpi-card rounded-2xl p-5 border-l-4 border-l-cyan-500 group" title="Haz clic para ver las incidencias activas en curso">
-                <div class="flex items-center justify-between text-cyan-400 text-xs font-bold uppercase tracking-wider mb-2">
-                    <span>En Gestión / Pendientes</span>
-                    <i class="fa-solid fa-clock text-cyan-400 group-hover:scale-125 transition-transform"></i>
-                </div>
-                <div class="flex items-baseline justify-between">
-                    <h2 id="sup-kpi-pendientes" class="text-3xl font-extrabold text-cyan-400 font-mono">0</h2>
-                    <span class="text-xs text-cyan-300 font-mono flex items-center gap-1">Ver activos <i class="fa-solid fa-chevron-right text-[10px]"></i></span>
-                </div>
-            </div>
-
+        <!-- CONTENEDOR DINÁMICO DE KPIS (SEGÚN BLOQUE ACTIVO) -->
+        <div id="support-dynamic-kpis" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Rellenado por JS -->
         </div>
 
-        <!-- 2 GRÁFICOS ANALÍTICOS (100% CLICABLES) -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div class="bi-panel p-5">
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-chart-pie text-purple-400"></i> Desglose por Causa / Tipo de Problema
-                    </h3>
-                    <span class="text-[10px] text-slate-500 font-mono">Haz clic en una porción para ver tiquets</span>
-                </div>
-                <div class="w-full h-52 relative cursor-pointer"><canvas id="chartSupportCausas"></canvas></div>
-            </div>
-
-            <div class="bi-panel p-5">
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-ranking-star text-red-400"></i> Top Clientes Afectados / Reincidentes
-                    </h3>
-                    <span class="text-[10px] text-slate-500 font-mono">Haz clic en una barra para ver tiquets del cliente</span>
-                </div>
-                <div class="w-full h-52 relative cursor-pointer"><canvas id="chartSupportClientes"></canvas></div>
-            </div>
+        <!-- CONTENEDOR DINÁMICO DE GRÁFICOS (SEGÚN BLOQUE ACTIVO) -->
+        <div id="support-dynamic-charts" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <!-- Rellenado por JS -->
         </div>
 
-        <!-- TABLA ANALÍTICA DE DETALLE CON BUSCADOR -->
+        <!-- TABLA ANALÍTICA DE DETALLE -->
         <section class="bi-panel overflow-hidden flex flex-col h-[520px]">
             <div class="p-4 border-b border-slate-800/80 bg-slate-900/90 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div class="flex items-center gap-3">
@@ -430,11 +348,8 @@
                     <span id="support-count-badge" class="px-2.5 py-0.5 bg-slate-800 text-purple-300 text-xs rounded-full border border-slate-700 font-mono">0 REGISTROS</span>
                 </div>
                 
-                <div class="flex items-center gap-3">
-                    <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 hover:border-slate-700">
-                        <input type="checkbox" id="support-recurrent-toggle" onchange="renderSupportView()" class="rounded border-slate-700 text-purple-600 focus:ring-0">
-                        <span>Solo Clientes Reincidentes (&ge;2)</span>
-                    </label>
+                <div class="flex items-center gap-3" id="support-table-controls">
+                    <!-- Checkbox de solo reincidentes (solo en bloque 1) -->
                 </div>
             </div>
 
@@ -444,7 +359,7 @@
                         <tr class="text-xs text-slate-400 uppercase tracking-wider font-semibold">
                             <th class="py-3.5 px-4 w-48">Cliente</th>
                             <th class="py-3.5 px-4">Tiquet / Asunto</th>
-                            <th class="py-3.5 px-4 w-44">Causa / Clasificación</th>
+                            <th class="py-3.5 px-4 w-48">Clasificación / Modelo</th>
                             <th class="py-3.5 px-4 text-center w-20">Uds</th>
                             <th class="py-3.5 px-4 w-28">Estado</th>
                             <th class="py-3.5 px-4 w-28 text-right">Deadline</th>
@@ -470,21 +385,23 @@
                 <button onclick="closeModal()" class="text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 w-8 h-8 rounded-lg flex items-center justify-center transition"><i class="fa-solid fa-times"></i></button>
             </div>
 
-            <!-- FILTRO INTERACTIVO CORREAS / CONTRAPESOS -->
-            <div id="modal-accesorios-box" class="hidden bg-cyan-950/40 border-b border-cyan-500/20 p-4 px-5">
-                <h4 class="text-cyan-400 font-bold mb-2.5 flex items-center gap-2 text-xs uppercase tracking-wide">
-                    <i class="fa-solid fa-weight-hanging"></i> Desglose por Accesorio (Haz clic para filtrar):
+            <!-- CONTENEDOR DE SELECTOR DE CAUSAS DE GW DENTRO DEL MODAL -->
+            <div id="modal-gw-causas-box" class="hidden bg-slate-950/70 border-b border-purple-500/20 p-4 px-5">
+                <h4 class="text-purple-400 font-bold mb-2.5 flex items-center gap-2 text-xs uppercase tracking-wide">
+                    <i class="fa-solid fa-tags"></i> Filtrar por Causa de Incidencia:
                 </h4>
-                <div id="modal-accesorios-list" class="flex flex-wrap gap-2.5"></div>
+                <div id="modal-gw-causas-list" class="flex flex-wrap gap-2"></div>
             </div>
 
-            <!-- FILTRO POR CLIENTE -->
-            <div id="modal-kits-client-box" class="hidden bg-blue-950/40 border-b border-blue-500/20 p-4 px-5">
-                <div class="flex justify-between items-center mb-2.5">
-                    <h4 class="text-blue-400 font-bold text-xs uppercase tracking-wide"><i class="fa-solid fa-users"></i> Filtrar por Cliente:</h4>
-                    <button onclick="filterModalByClient(null)" id="btn-client-all" class="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded border border-blue-500/30">Ver Todos</button>
+            <!-- CONTENEDOR EXCLUSIVO PARA LISTA DE CLIENTES REINCIDENTES (SIN TIQUETS) -->
+            <div id="modal-recurrentes-clients-view" class="hidden p-5 overflow-auto flex-1">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-800">
+                    <span class="text-xs font-bold text-red-400 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-users-rays text-base"></i> Resumen de Clientes Reincidentes (&ge;2 Incidencias GW & Kits)
+                    </span>
+                    <span id="modal-recurrentes-count-badge" class="px-2.5 py-0.5 bg-red-500/20 text-red-300 border border-red-500/40 rounded-full text-xs font-mono font-bold">0 CLIENTES</span>
                 </div>
-                <div id="modal-kits-client-list" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-1"></div>
+                <div id="modal-recurrentes-clients-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
             </div>
 
             <!-- RESUMEN MODELOS -->
@@ -492,18 +409,19 @@
                 <div id="modal-summary-models-list" class="flex flex-wrap gap-2.5"></div>
             </div>
 
-            <!-- RECOMENDACIÓN LEAN CON SECCIÓN INTERACTIVA DE FABRICAR HOY POR LOTE -->
+            <!-- RECOMENDACIÓN LEAN EN PRODUCCIÓN -->
             <div id="modal-recommendation-box" class="hidden bg-amber-500/10 border-b border-amber-500/30 p-5">
                 <h4 class="text-amber-400 font-bold mb-3 flex items-center gap-2 text-sm uppercase tracking-wide"><i class="fa-solid fa-bolt"></i> Oportunidades de Producción en Serie</h4>
                 <div id="modal-recommendation-list" class="space-y-3"></div>
             </div>
 
-            <div class="overflow-auto flex-1 p-5">
+            <!-- TABLA ESTÁNDAR DENTRO DEL MODAL -->
+            <div id="modal-standard-table-container" class="overflow-auto flex-1 p-5">
                 <table class="w-full text-left border-collapse text-sm">
                     <thead class="sticky top-0 bg-slate-900">
                         <tr class="border-b border-slate-800 text-xs text-slate-400 uppercase tracking-wider font-semibold">
                             <th class="pb-3 pr-4">Tiquet / Etiquetas</th>
-                            <th class="pb-3 px-4">Modelo / Accesorio / Causa</th>
+                            <th class="pb-3 px-4">Clasificación / Causa</th>
                             <th class="pb-3 px-4 text-center">Uds</th>
                             <th class="pb-3 pl-4 text-right">Deadline</th>
                         </tr>
@@ -512,7 +430,7 @@
                 </table>
             </div>
             
-            <div class="p-4 border-t border-slate-800 bg-slate-950/80 flex justify-between items-center">
+            <div id="modal-standard-footer" class="p-4 border-t border-slate-800 bg-slate-950/80 flex justify-between items-center">
                 <span class="text-xs text-slate-500 font-mono" id="modal-total-tickets">0 ROWS</span>
                 <div class="text-right flex items-baseline gap-2">
                     <span class="text-xs text-slate-400 uppercase font-semibold">Suma Unidades:</span>
@@ -551,10 +469,7 @@
         }
 
         window.allTasks = [];
-        window.weekTasksMap = { w0: [], w1: [], w2: [], w3: [] }; 
         window.currentModalTasks = [];
-        window.activeClientFilter = null;
-        window.activeAccesorioFilter = null;
         window.selectedTagFilter = '';
         let currentSort = { column: 'fecha', dir: 'asc' };
         let currentTableFilter = 'ALL';
@@ -571,6 +486,7 @@
             const btnSop = document.getElementById('tab-nav-soporte');
             const secProd = document.getElementById('env-produccion-section');
             const secSop = document.getElementById('env-soporte-section');
+            const capBox = document.getElementById('header-capacity-container');
             const mainTitle = document.getElementById('app-main-title');
             const subTitle = document.getElementById('app-subtitle');
             const logoIcon = document.getElementById('app-logo-icon');
@@ -581,6 +497,7 @@
                 btnSop.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white";
                 secProd.classList.remove('hidden');
                 secSop.classList.add('hidden');
+                capBox.classList.remove('hidden');
 
                 mainTitle.innerHTML = `PANEL DE PRODUCCIÓN <span class="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30 font-mono" id="app-version-badge">v4.5 LEAN</span>`;
                 subTitle.innerText = "Sincronización en vivo ClickUp";
@@ -591,6 +508,7 @@
                 btnProd.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white";
                 secProd.classList.add('hidden');
                 secSop.classList.remove('hidden');
+                capBox.classList.add('hidden');
 
                 mainTitle.innerHTML = `SOPORTE & ANALÍTICA <span class="text-xs px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 font-mono">DATA BI</span>`;
                 subTitle.innerText = "Control de RMA, Causas Raíz e Incidencias Recurrentes";
@@ -615,29 +533,50 @@
             renderSupportView();
         }
 
-        // MOTOR DE CLASIFICACIÓN DE PROBLEMAS DE SOPORTE
+        // =========================================================================
+        // FILTRADO ESTRICTO DE GATEWAYS Y KITS SOLARES (SIN IXOTRACKS NI COLARES)
+        // =========================================================================
+        function isStrictlyGWOrKit(t) {
+            if (t.esAccesorio || t.esSoloRecibir) return false;
+
+            const nameLower = (t.nombre || '').toLowerCase();
+            const descLower = (t.description || '').toLowerCase();
+            const fullText = nameLower + ' ' + descLower;
+
+            const hasGWKeyword = /\b(gw|gateway|gateways|milesight|rak|antena|antenas)\b/i.test(fullText);
+            const hasSolarKeyword = /\b(solar|solars|panel\s*solar|panels\s*solares|placa\s*solar|kit\s*solar|kits\s*solares|1as|2as|3as|1ae|2ae|3ae)\b/i.test(fullText);
+            const isGatewayModel = t.modeloInfo.nombre === 'Gateway';
+            const hasKitQty = (t.kitsSolaresGW > 0);
+
+            // Si es un collar (Ixotrack o Cowpro) y NO especifica gateway ni kit solar, queda descartado
+            const isCollarModel = t.modeloInfo.nombre.includes('Ixo') || t.modeloInfo.nombre.includes('Cow');
+            if (isCollarModel && !hasGWKeyword && !hasSolarKeyword && !hasKitQty) {
+                return false;
+            }
+
+            return isGatewayModel || hasKitQty || hasGWKeyword || hasSolarKeyword;
+        }
+
+        // MOTOR DE CLASIFICACIÓN DE PROBLEMAS EN GW Y KITS SOLARES
         function analyzeSupportIssue(task) {
             const raw = ((task.nombre || '') + ' ' + (task.description || '') + ' ' + (task.etiquetas || []).join(' ')).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             
             if (raw.includes('bateria') || raw.includes('pila') || raw.includes('carga') || raw.includes('descarga') || raw.includes('battery')) {
-                return { tipo: 'Cambio Batería', hex: '#f59e0b', color: 'amber', icon: 'fa-battery-quarter' };
+                return { tipo: 'Cambio Batería', hex: '#f59e0b', icon: 'fa-battery-quarter' };
             }
             if (raw.includes('cable') || raw.includes('conector') || raw.includes('alimentacion') || raw.includes('borne') || raw.includes('cables')) {
-                return { tipo: 'Cables / Conectores', hex: '#3b82f6', color: 'blue', icon: 'fa-plug' };
+                return { tipo: 'Cables / Conectores', hex: '#3b82f6', icon: 'fa-plug' };
             }
-            if (raw.includes('panel') || raw.includes('solar') || raw.includes('placa') || raw.includes('kit solar') || raw.includes('as') || raw.includes('ae')) {
-                return { tipo: 'Panel Solar / Kit', hex: '#10b981', color: 'emerald', icon: 'fa-solar-panel' };
+            if (raw.includes('panel') || raw.includes('solar') || raw.includes('placa') || raw.includes('kit solar') || raw.includes('1as') || raw.includes('2as')) {
+                return { tipo: 'Panel Solar / Kit', hex: '#10b981', icon: 'fa-solar-panel' };
             }
             if (raw.includes('antena') || raw.includes('cobertura') || raw.includes('lora') || raw.includes('alcance') || raw.includes('desconectad') || raw.includes('senal') || raw.includes('señal')) {
-                return { tipo: 'Antena / Cobertura', hex: '#06b6d4', color: 'cyan', icon: 'fa-tower-broadcast' };
+                return { tipo: 'Antena / Cobertura', hex: '#06b6d4', icon: 'fa-tower-broadcast' };
             }
-            if (raw.includes('gw') || raw.includes('gateway') || raw.includes('no enciende') || raw.includes('roto') || raw.includes('reinicio') || raw.includes('fallo') || raw.includes('placa base')) {
-                return { tipo: 'Hardware / Fallo GW', hex: '#f97316', color: 'orange', icon: 'fa-microchip' };
+            if (raw.includes('no enciende') || raw.includes('roto') || raw.includes('reinicio') || raw.includes('hardware') || raw.includes('placa base') || raw.includes('gateway') || raw.includes('gw')) {
+                return { tipo: 'Hardware / Propio GW', hex: '#f97316', icon: 'fa-microchip' };
             }
-            if (raw.includes('correa') || raw.includes('contrapeso') || raw.includes('collar')) {
-                return { tipo: 'Recambio Accesorio', hex: '#14b8a6', color: 'teal', icon: 'fa-weight-hanging' };
-            }
-            return { tipo: 'General / Otro', hex: '#8b5cf6', color: 'purple', icon: 'fa-circle-question' };
+            return { tipo: 'Incidencia General GW', hex: '#8b5cf6', icon: 'fa-circle-question' };
         }
 
         function checkPinAuth() {
@@ -1219,7 +1158,7 @@
             const badgeEl = document.getElementById('task-count-badge');
             if (badgeEl) {
                 if (window.selectedTagFilter || currentTableFilter !== 'ALL') {
-                    badgeEl.innerText = `${visibleTasks.length} / ${totalActivos} ACTIVOS`;
+                    badgeEl.innerText = `${visibleTasks.length} /${totalActivos} ACTIVOS`;
                 } else {
                     badgeEl.innerText = `${totalActivos} ACTIVOS`;
                 }
@@ -1252,7 +1191,7 @@
                             ${task.esSoloRecibir || task.esAccesorio ? `0 (${task.unidadesBrutas})` : task.unidades}
                         </td>
                         <td class="py-3.5 px-4 align-top pt-4">
-                            <span class="px-2.5 py-0.5 text-[9px] rounded-md font-bold uppercase" style="background-color: ${task.estadoColor}15; color: ${task.estadoColor}; border: 1px solid ${task.estadoColor}30">${task.estado}</span>
+                            <span class="px-2.5 py-0.5 text-[9px] rounded-md font-bold uppercase" style="background-color: ${task.estadoColor}15; color:${task.estadoColor}; border: 1px solid ${task.estadoColor}30">${task.estado}</span>
                         </td>
                         <td class="py-3.5 px-4 align-top pt-4 text-xs ${highlightClass} font-mono">${fechaText}</td>
                     </tr>
@@ -1261,19 +1200,12 @@
         }
 
         // =========================================================================
-        // MOTOR DE SOPORTE & ANALÍTICA DE DATOS
+        // MOTOR DE RENDERIZADO ANALÍTICO DE SOPORTE (3 BLOQUES ESPECÍFICOS)
         // =========================================================================
-        function getSupportCurrentDataset() {
+        function getSupportDataset() {
             const currentTab = window.activeSupportSubTab;
             if (currentTab === 'GW_INCIDENCIAS') {
-                return window.allTasks.filter(t => 
-                    t.modeloInfo.nombre === 'Gateway' || 
-                    t.kitsSolaresGW > 0 || 
-                    t.nombre.toLowerCase().includes('gw') || 
-                    t.nombre.toLowerCase().includes('kit') || 
-                    t.nombre.toLowerCase().includes('solar') || 
-                    t.etiquetas.some(e => e.includes('INCIDENCIA') || e.includes('SOLAR') || e.includes('GW'))
-                );
+                return window.allTasks.filter(t => isStrictlyGWOrKit(t));
             } else if (currentTab === 'ACCESORIOS') {
                 return window.allTasks.filter(t => t.esAccesorio);
             } else if (currentTab === 'BLOQUEADOS') {
@@ -1283,55 +1215,353 @@
         }
 
         function renderSupportView() {
-            const dataset = getSupportCurrentDataset();
+            const currentTab = window.activeSupportSubTab;
+            const dataset = getSupportDataset();
             const searchVal = (document.getElementById('support-search-input')?.value || '').toLowerCase().trim();
             const onlyRecurrent = document.getElementById('support-recurrent-toggle')?.checked || false;
 
-            const tabTitles = {
-                'GW_INCIDENCIAS': '<i class="fa-solid fa-router text-orange-400"></i> Incidencias GW & Kits Solares',
-                'ACCESORIOS': '<i class="fa-solid fa-weight-hanging text-cyan-400"></i> Reemplazos Correas / Contrapesos',
-                'BLOQUEADOS': '<i class="fa-solid fa-inbox text-purple-400"></i> Pendientes de Recibir (Bloqueados)'
-            };
-            document.getElementById('support-table-title').innerHTML = tabTitles[window.activeSupportSubTab] || 'Tiquets de Soporte';
+            const kpiContainer = document.getElementById('support-dynamic-kpis');
+            const chartsContainer = document.getElementById('support-dynamic-charts');
+            const tableControls = document.getElementById('support-table-controls');
+            
+            // Destruir instancias previas de Chart.js
+            if (charts.support1) charts.support1.destroy();
+            if (charts.support2) charts.support2.destroy();
 
-            // Análisis de recurrencia y causas
-            const clientCounts = {};
-            const causasStats = {};
-            let pendientesCount = 0;
+            // -------------------------------------------------------------
+            // BLOQUE 1: INCIDENCIAS GW & KITS SOLARES (3 KPIS + 2 CHARTS)
+            // -------------------------------------------------------------
+            if (currentTab === 'GW_INCIDENCIAS') {
+                document.getElementById('support-table-title').innerHTML = `<i class="fa-solid fa-router text-orange-400"></i> Incidencias GW & Kits Solares`;
+                tableControls.innerHTML = `
+                    <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 hover:border-slate-700">
+                        <input type="checkbox" id="support-recurrent-toggle" onchange="renderSupportView()" class="rounded border-slate-700 text-purple-600 focus:ring-0" ${onlyRecurrent ? 'checked' : ''}>
+                        <span>Solo Clientes Reincidentes (&ge;2)</span>
+                    </label>
+                `;
 
-            dataset.forEach(t => {
-                const c = t.cliente || 'Cliente General';
-                clientCounts[c] = (clientCounts[c] || 0) + 1;
+                // Conteo de causas y reincidentes
+                const clientCounts = {};
+                const causasStats = {};
+                dataset.forEach(t => {
+                    const c = t.cliente || 'Cliente General';
+                    clientCounts[c] = (clientCounts[c] || 0) + 1;
+                    const causa = t.causaSoporte.tipo;
+                    causasStats[causa] = (causasStats[causa] || 0) + 1;
+                });
 
-                if (!isTaskCompleted(t)) pendientesCount++;
+                const sortedCausas = Object.entries(causasStats).sort((a,b) => b[1] - a[1]);
+                const topCausa = sortedCausas[0] ? sortedCausas[0][0] : 'N/A';
+                const topCausaCount = sortedCausas[0] ? sortedCausas[0][1] : 0;
+                const topCausaPct = dataset.length > 0 ? Math.round((topCausaCount / dataset.length) * 100) : 0;
+                const recurrentCount = Object.entries(clientCounts).filter(([c, n]) => n >= 2 && c !== 'Cliente General').length;
 
-                const causaName = t.causaSoporte.tipo;
-                causasStats[causaName] = (causasStats[causaName] || 0) + 1;
-            });
+                // 3 KPIs Clicables (Sin 'En Gestión')
+                kpiContainer.className = "grid grid-cols-1 md:grid-cols-3 gap-4";
+                kpiContainer.innerHTML = `
+                    <div onclick="openSupportModalSimple('Todos los Tiquets: Incidencias GW & Kits', getSupportDataset())" 
+                         class="bi-kpi-card rounded-2xl p-5 border-l-4 border-l-purple-500 group" title="Haz clic para ver todos los tiquets">
+                        <div class="flex items-center justify-between text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
+                            <span>Total Registros Módulo</span>
+                            <i class="fa-solid fa-folder-open text-purple-400 group-hover:scale-125 transition-transform"></i>
+                        </div>
+                        <div class="flex items-baseline justify-between">
+                            <h2 class="text-3xl font-extrabold text-white font-mono">${dataset.length}</h2>
+                            <span class="text-xs text-purple-400 font-mono flex items-center gap-1">Ver tiquets <i class="fa-solid fa-chevron-right text-[10px]"></i></span>
+                        </div>
+                    </div>
 
-            const causasEntries = Object.entries(causasStats).sort((a,b) => b[1] - a[1]);
-            const topCausa = causasEntries[0] ? causasEntries[0][0] : 'N/A';
-            const topCausaCount = causasEntries[0] ? causasEntries[0][1] : 0;
-            const topCausaPct = dataset.length > 0 ? Math.round((topCausaCount / dataset.length) * 100) : 0;
+                    <div onclick="openGWCausasModal()" 
+                         class="bi-kpi-card rounded-2xl p-5 border-l-4 border-l-amber-500 group" title="Haz clic para desglosar por causas y ver sus tiquets">
+                        <div class="flex items-center justify-between text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
+                            <span>Causa Más Común</span>
+                            <i class="fa-solid fa-triangle-exclamation text-amber-400 group-hover:scale-125 transition-transform"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-extrabold text-white truncate">${topCausa}</h3>
+                            <div class="flex items-baseline justify-between mt-1">
+                                <span class="text-xs text-amber-400/80 font-mono">${topCausaCount} tiquets (${topCausaPct}%)</span>
+                                <span class="text-xs text-amber-300 font-mono flex items-center gap-1">Desglosar causas <i class="fa-solid fa-chevron-right text-[10px]"></i></span>
+                            </div>
+                        </div>
+                    </div>
 
-            const recurrentClients = Object.entries(clientCounts).filter(([c, count]) => count >= 2);
+                    <div onclick="openGWReincidentesModal()" 
+                         class="bi-kpi-card rounded-2xl p-5 border-l-4 border-l-red-500 group" title="Haz clic para ver el resumen de clientes reincidentes">
+                        <div class="flex items-center justify-between text-red-400 text-xs font-bold uppercase tracking-wider mb-2">
+                            <span>Clientes Reincidentes</span>
+                            <i class="fa-solid fa-users-rays text-red-400 group-hover:scale-125 transition-transform"></i>
+                        </div>
+                        <div class="flex items-baseline justify-between">
+                            <div>
+                                <h2 class="text-3xl font-extrabold text-red-400 font-mono">${recurrentCount}</h2>
+                                <span class="text-[11px] text-red-400/80 font-mono">&ge;2 incidencias</span>
+                            </div>
+                            <span class="text-xs text-red-300 font-mono flex items-center gap-1">Ver clientes <i class="fa-solid fa-chevron-right text-[10px]"></i></span>
+                        </div>
+                    </div>
+                `;
 
-            // Rellenar valores en las 4 viñetas interactivas
-            document.getElementById('sup-kpi-total').innerText = dataset.length;
-            document.getElementById('sup-kpi-top-problema').innerText = topCausa;
-            document.getElementById('sup-kpi-top-problema-sub').innerText = `${topCausaCount} tiquets (${topCausaPct}%)`;
-            document.getElementById('sup-kpi-recurrentes').innerText = recurrentClients.length;
-            document.getElementById('sup-kpi-pendientes').innerText = pendientesCount;
+                // 2 Gráficos: Causas + Top Clientes
+                chartsContainer.className = "grid grid-cols-1 lg:grid-cols-2 gap-4";
+                chartsContainer.innerHTML = `
+                    <div class="bi-panel p-5">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-chart-pie text-purple-400"></i> Desglose por Causa de Avería
+                            </h3>
+                            <span class="text-[10px] text-slate-500 font-mono">Clic para explorar</span>
+                        </div>
+                        <div class="w-full h-52 relative cursor-pointer"><canvas id="chartSupport1"></canvas></div>
+                    </div>
+                    <div class="bi-panel p-5">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-ranking-star text-red-400"></i> Top Clientes con Incidencias Reincidentes
+                            </h3>
+                            <span class="text-[10px] text-slate-500 font-mono">Clic para ver tiquets</span>
+                        </div>
+                        <div class="w-full h-52 relative cursor-pointer"><canvas id="chartSupport2"></canvas></div>
+                    </div>
+                `;
 
-            // Renderizado de gráficos interactivos
-            renderSupportCharts(causasStats, clientCounts);
+                // Render Chart Causas
+                const ctx1 = document.getElementById('chartSupport1').getContext('2d');
+                charts.support1 = new Chart(ctx1, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(causasStats),
+                        datasets: [{ data: Object.values(causasStats), backgroundColor: ['#f59e0b', '#3b82f6', '#10b981', '#06b6d4', '#f97316', '#8b5cf6'], borderWidth: 0 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } },
+                        onClick: (e, activeEls) => {
+                            if (activeEls.length > 0) {
+                                const causa = Object.keys(causasStats)[activeEls[0].index];
+                                openSupportModalSimple(`Incidencias Causa: ${causa}`, dataset.filter(t => t.causaSoporte.tipo === causa));
+                            }
+                        }
+                    }
+                });
 
-            // Filtrado de la tabla por buscador y toggle de clientes reincidentes
+                // Render Chart Clientes Reincidentes
+                const sortedClients = Object.entries(clientCounts)
+                    .filter(([c, n]) => n >= 2 && c !== 'Cliente General')
+                    .sort((a,b) => b[1] - a[1]).slice(0, 5);
+
+                const ctx2 = document.getElementById('chartSupport2').getContext('2d');
+                charts.support2 = new Chart(ctx2, {
+                    type: 'bar',
+                    data: {
+                        labels: sortedClients.length > 0 ? sortedClients.map(c => c[0]) : ['Sin reincidentes'],
+                        datasets: [{ label: 'Incidencias', data: sortedClients.length > 0 ? sortedClients.map(c => c[1]) : [0], backgroundColor: '#ef4444', borderRadius: 6 }]
+                    },
+                    options: {
+                        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                        scales: { x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { grid: { display: false } } },
+                        plugins: { legend: { display: false } },
+                        onClick: (e, activeEls) => {
+                            if (activeEls.length > 0 && sortedClients.length > 0) {
+                                const client = sortedClients[activeEls[0].index][0];
+                                openSupportModalSimple(`Tiquets de Cliente: ${client}`, dataset.filter(t => t.cliente === client));
+                            }
+                        }
+                    }
+                });
+            }
+
+            // -------------------------------------------------------------
+            // BLOQUE 2: CORREAS & CONTRAPESOS (DESGLOSE DIRECTO EN PANTALLA)
+            // -------------------------------------------------------------
+            else if (currentTab === 'ACCESORIOS') {
+                document.getElementById('support-table-title').innerHTML = `<i class="fa-solid fa-weight-hanging text-cyan-400"></i> Reemplazos de Correas & Contrapesos`;
+                tableControls.innerHTML = ``;
+
+                let sumCorreas = 0, sumContrapesos = 0;
+                dataset.forEach(t => {
+                    t.modelosDesglose.forEach(m => {
+                        if (m.modeloInfo.nombre === 'Correas') sumCorreas += m.unidades;
+                        if (m.modeloInfo.nombre === 'Contrapesos') sumContrapesos += m.unidades;
+                    });
+                });
+                const totalAcc = sumCorreas + sumContrapesos;
+
+                // 3 Tarjetas de Resumen General Directas (Reemplazan a las 4 viñetas)
+                kpiContainer.className = "grid grid-cols-1 sm:grid-cols-3 gap-4";
+                kpiContainer.innerHTML = `
+                    <div onclick="openSupportModalSimple('Todos los Tiquets: Correas y Contrapesos', getSupportDataset())" 
+                         class="bi-kpi-card rounded-2xl p-5 border-l-4 border-l-slate-400 group" title="Haz clic para ver todos los tiquets de accesorios">
+                        <div class="flex items-center justify-between text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
+                            <span>Total Accesorios Reemplazo</span>
+                            <i class="fa-solid fa-boxes-stacked text-slate-400 group-hover:scale-125 transition-transform"></i>
+                        </div>
+                        <div class="flex items-baseline justify-between">
+                            <h2 class="text-3xl font-extrabold text-white font-mono">${totalAcc}</h2>
+                            <span class="text-xs text-slate-400 font-mono flex items-center gap-1">Ver todos (${dataset.length} tiquets) <i class="fa-solid fa-chevron-right text-[10px]"></i></span>
+                        </div>
+                    </div>
+
+                    <div onclick="openAccesoriosPartModal('Correas')" 
+                         class="bi-kpi-card rounded-2xl p-5 border-l-4 border-l-cyan-400 group" title="Haz clic para ver los tiquets de correas">
+                        <div class="flex items-center justify-between text-cyan-400 text-xs font-bold uppercase tracking-wider mb-2">
+                            <span>Correas Solicitadas</span>
+                            <i class="fa-solid fa-link text-cyan-400 group-hover:scale-125 transition-transform"></i>
+                        </div>
+                        <div class="flex items-baseline justify-between">
+                            <h2 class="text-3xl font-extrabold text-cyan-400 font-mono">${sumCorreas}</h2>
+                            <span class="text-xs text-cyan-300 font-mono flex items-center gap-1">Ver tiquets <i class="fa-solid fa-chevron-right text-[10px]"></i></span>
+                        </div>
+                    </div>
+
+                    <div onclick="openAccesoriosPartModal('Contrapesos')" 
+                         class="bi-kpi-card rounded-2xl p-5 border-l-4 border-l-teal-400 group" title="Haz clic para ver los tiquets de contrapesos">
+                        <div class="flex items-center justify-between text-teal-400 text-xs font-bold uppercase tracking-wider mb-2">
+                            <span>Contrapesos Solicitados</span>
+                            <i class="fa-solid fa-weight-hanging text-teal-400 group-hover:scale-125 transition-transform"></i>
+                        </div>
+                        <div class="flex items-baseline justify-between">
+                            <h2 class="text-3xl font-extrabold text-teal-400 font-mono">${sumContrapesos}</h2>
+                            <span class="text-xs text-teal-300 font-mono flex items-center gap-1">Ver tiquets <i class="fa-solid fa-chevron-right text-[10px]"></i></span>
+                        </div>
+                    </div>
+                `;
+
+                // 1 Gráfico: Solo Correas vs Contrapesos (Top clientes borrado)
+                chartsContainer.className = "grid grid-cols-1 gap-4";
+                chartsContainer.innerHTML = `
+                    <div class="bi-panel p-5">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-chart-pie text-cyan-400"></i> Desglose por Accesorio: Correas vs Contrapesos
+                            </h3>
+                            <span class="text-[10px] text-slate-500 font-mono">Haz clic en una porción para ver tiquets</span>
+                        </div>
+                        <div class="w-full h-52 relative cursor-pointer"><canvas id="chartSupport1"></canvas></div>
+                    </div>
+                `;
+
+                const ctx1 = document.getElementById('chartSupport1').getContext('2d');
+                charts.support1 = new Chart(ctx1, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Correas', 'Contrapesos'],
+                        datasets: [{ data: [sumCorreas, sumContrapesos], backgroundColor: ['#06b6d4', '#14b8a6'], borderWidth: 0, hoverOffset: 6 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } } },
+                        onClick: (e, activeEls) => {
+                            if (activeEls.length > 0) {
+                                const accName = activeEls[0].index === 0 ? 'Correas' : 'Contrapesos';
+                                openAccesoriosPartModal(accName);
+                            }
+                        }
+                    }
+                });
+            }
+
+            // -------------------------------------------------------------
+            // BLOQUE 3: PENDIENTES DE RECIBIR (DESGLOSE POR MODELOS)
+            // -------------------------------------------------------------
+            else if (currentTab === 'BLOQUEADOS') {
+                document.getElementById('support-table-title').innerHTML = `<i class="fa-solid fa-inbox text-purple-400"></i> Dispositivos Pendientes de Recibir`;
+                tableControls.innerHTML = ``;
+
+                let totalRecibir = 0;
+                const modelsPending = {};
+
+                dataset.forEach(t => {
+                    const uds = t.unidadesBrutas > 0 ? t.unidadesBrutas : 1;
+                    totalRecibir += uds;
+                    const mName = t.modeloInfo.nombre;
+                    modelsPending[mName] = (modelsPending[mName] || 0) + uds;
+                });
+
+                // Viñetas directas: Total + Cada Modelo detectado
+                let modelCardsHtml = `
+                    <div onclick="openSupportModalSimple('Todos los Tiquets: Pendientes por Recibir', getSupportDataset())" 
+                         class="bi-kpi-card rounded-2xl p-5 border-l-4 border-l-purple-500 group" title="Haz clic para ver todos los tiquets bloqueados">
+                        <div class="flex items-center justify-between text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
+                            <span>Total Dispositivos a Recibir</span>
+                            <i class="fa-solid fa-box-open text-purple-400 group-hover:scale-125 transition-transform"></i>
+                        </div>
+                        <div class="flex items-baseline justify-between">
+                            <h2 class="text-3xl font-extrabold text-white font-mono">${totalRecibir}</h2>
+                            <span class="text-xs text-purple-400 font-mono flex items-center gap-1">Ver todos (${dataset.length} tiquets) <i class="fa-solid fa-chevron-right text-[10px]"></i></span>
+                        </div>
+                    </div>
+                `;
+
+                Object.entries(modelsPending).forEach(([mName, count]) => {
+                    const hex = getModelColorHex(mName);
+                    modelCardsHtml += `
+                        <div onclick="openSupportModalSimple('Pendiente Recibir: ${mName}', getSupportDataset().filter(t => t.modeloInfo.nombre === '${mName}'))" 
+                             class="bi-kpi-card rounded-2xl p-5 group" style="border-left: 4px solid ${hex} !important" title="Haz clic para ver tiquets de ${mName}">
+                            <div class="flex items-center justify-between text-slate-300 text-xs font-bold uppercase tracking-wider mb-2">
+                                <span>${mName}</span>
+                                <span class="w-3 h-3 rounded-full" style="background-color: ${hex}"></span>
+                            </div>
+                            <div class="flex items-baseline justify-between">
+                                <h2 class="text-3xl font-extrabold text-white font-mono">${count}</h2>
+                                <span class="text-xs text-slate-400 font-mono flex items-center gap-1">Ver tiquets <i class="fa-solid fa-chevron-right text-[10px]"></i></span>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                kpiContainer.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4";
+                kpiContainer.innerHTML = modelCardsHtml;
+
+                // 1 Gráfico: Modelos pendientes de recibir (Top clientes borrado)
+                chartsContainer.className = "grid grid-cols-1 gap-4";
+                chartsContainer.innerHTML = `
+                    <div class="bi-panel p-5">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-chart-pie text-purple-400"></i> Desglose por Modelo de Dispositivo Pendiente de Recibir
+                            </h3>
+                            <span class="text-[10px] text-slate-500 font-mono">Haz clic en un modelo para ver tiquets</span>
+                        </div>
+                        <div class="w-full h-52 relative cursor-pointer"><canvas id="chartSupport1"></canvas></div>
+                    </div>
+                `;
+
+                const ctx1 = document.getElementById('chartSupport1').getContext('2d');
+                const modelNames = Object.keys(modelsPending);
+                const modelValues = Object.values(modelsPending);
+                const modelColors = modelNames.map(m => getModelColorHex(m));
+
+                charts.support1 = new Chart(ctx1, {
+                    type: 'doughnut',
+                    data: {
+                        labels: modelNames,
+                        datasets: [{ data: modelValues, backgroundColor: modelColors, borderWidth: 0, hoverOffset: 6 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } },
+                        onClick: (e, activeEls) => {
+                            if (activeEls.length > 0) {
+                                const selectedModel = modelNames[activeEls[0].index];
+                                openSupportModalSimple(`Pendiente Recibir: ${selectedModel}`, dataset.filter(t => t.modeloInfo.nombre === selectedModel));
+                            }
+                        }
+                    }
+                });
+            }
+
+            // -------------------------------------------------------------
+            // RENDERIZADO DE LA TABLA INFERIOR DE SOPORTE CON BUSCADOR
+            // -------------------------------------------------------------
+            const clientCountsAll = {};
+            dataset.forEach(t => { const c = t.cliente || 'Cliente General'; clientCountsAll[c] = (clientCountsAll[c] || 0) + 1; });
+
             let filtered = dataset.filter(t => {
                 const c = t.cliente || 'Cliente General';
-                const isRecurrent = (clientCounts[c] || 0) >= 2;
+                const isRecurrent = (clientCountsAll[c] || 0) >= 2;
 
-                if (onlyRecurrent && !isRecurrent) return false;
+                if (currentTab === 'GW_INCIDENCIAS' && onlyRecurrent && !isRecurrent) return false;
 
                 if (searchVal) {
                     const match = 
@@ -1357,16 +1587,29 @@
 
             filtered.forEach(t => {
                 const c = t.cliente || 'Cliente General';
-                const countThisClient = clientCounts[c] || 1;
-                const isRecurrent = countThisClient >= 2;
+                const countThisClient = clientCountsAll[c] || 1;
+                const isRecurrent = countThisClient >= 2 && c !== 'Cliente General';
 
-                const recurrentBadge = isRecurrent 
-                    ? `<span onclick="openSupportClientTickets('${c.replace(/'/g, "\\'")}')" class="bg-red-500/20 text-red-300 border border-red-500/40 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold flex items-center gap-1 mt-1 cursor-pointer hover:bg-red-500/30 w-fit"><i class="fa-solid fa-triangle-exclamation text-red-400"></i> Reincidente (${countThisClient} avisos)</span>`
+                const recurrentBadge = (isRecurrent && currentTab === 'GW_INCIDENCIAS')
+                    ? `<span onclick="openSupportModalSimple('Historial: ${c.replace(/'/g, "\\'")}', getSupportDataset().filter(x => x.cliente === '${c.replace(/'/g, "\\'")}'))" class="bg-red-500/20 text-red-300 border border-red-500/40 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold flex items-center gap-1 mt-1 cursor-pointer hover:bg-red-500/30 w-fit"><i class="fa-solid fa-triangle-exclamation text-red-400"></i> Reincidente (${countThisClient} avisos)</span>`
                     : '';
 
                 const f = new Date(t.timestamp);
                 const fechaText = t.timestamp === 9999999999999 ? '-' : f.toLocaleDateString('es-ES', { day:'2-digit', month:'short' });
                 const unitsShow = t.unidadesBrutas > 0 ? t.unidadesBrutas : (t.kitsSolaresGW > 0 ? t.kitsSolaresGW : 1);
+
+                let badgeInfo = '';
+                if (currentTab === 'GW_INCIDENCIAS') {
+                    badgeInfo = `
+                        <span onclick="openSupportModalSimple('Causa: ${t.causaSoporte.tipo}', getSupportDataset().filter(x => x.causaSoporte.tipo === '${t.causaSoporte.tipo}'))" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer hover:opacity-80 transition" style="background-color: ${t.causaSoporte.hex}18; color: ${t.causaSoporte.hex}; border: 1px solid ${t.causaSoporte.hex}35">
+                            <i class="fa-solid ${t.causaSoporte.icon}"></i> ${t.causaSoporte.tipo}
+                        </span>
+                    `;
+                } else if (currentTab === 'ACCESORIOS') {
+                    badgeInfo = `<span class="text-xs text-cyan-300 font-medium">${t.modelosDesglose.map(m => `${m.modeloInfo.nombre} (${m.unidades})`).join(' + ')}</span>`;
+                } else {
+                    badgeInfo = `<span class="inline-flex items-center gap-2 text-xs text-slate-300"><span class="w-2 h-2 rounded-full" style="background-color: ${t.modeloInfo.hex}"></span>${t.modeloInfo.nombre}</span>`;
+                }
 
                 tbody.innerHTML += `
                     <tr class="table-row-hover border-b border-slate-800/60 transition-colors">
@@ -1378,11 +1621,7 @@
                             <div class="font-semibold text-slate-200 text-xs mb-1">${t.nombre}</div>
                             <div class="flex flex-wrap gap-1">${t.etiquetas.map(getTagHtml).join('')}</div>
                         </td>
-                        <td class="py-3.5 px-4 align-top">
-                            <span onclick="openSupportCausaTickets('${t.causaSoporte.tipo}')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer hover:opacity-80 transition" style="background-color: ${t.causaSoporte.hex}18; color: ${t.causaSoporte.hex}; border: 1px solid ${t.causaSoporte.hex}35" title="Clic para filtrar por esta causa">
-                                <i class="fa-solid ${t.causaSoporte.icon}"></i> ${t.causaSoporte.tipo}
-                            </span>
-                        </td>
+                        <td class="py-3.5 px-4 align-top">${badgeInfo}</td>
                         <td class="py-3.5 px-4 text-center align-top font-bold text-sm font-mono text-white">${unitsShow}</td>
                         <td class="py-3.5 px-4 align-top">
                             <span class="px-2.5 py-0.5 text-[9px] rounded-md font-bold uppercase" style="background-color: ${t.estadoColor}15; color: ${t.estadoColor}; border: 1px solid ${t.estadoColor}30">${t.estado}</span>
@@ -1394,116 +1633,142 @@
         }
 
         // =========================================================================
-        // ACCIONES CLICABLES DE LAS 4 SUB-VIÑETAS Y GRÁFICOS DE SOPORTE
+        // MODALES ESPECÍFICOS Y ANALÍTICOS DE SOPORTE
         // =========================================================================
-        function openSupportKpiModal(kpiType) {
-            const dataset = getSupportCurrentDataset();
+        
+        // Modal simple para listados filtrados
+        function openSupportModalSimple(title, tasks) {
+            openModal(title, tasks, false, false, window.activeSupportSubTab === 'ACCESORIOS');
+        }
+
+        // Modal para Correas o Contrapesos específicos
+        function openAccesoriosPartModal(partName) {
+            const dataset = getSupportDataset();
+            const filtered = dataset.filter(t => t.modelosDesglose.some(m => m.modeloInfo.nombre === partName));
+            openModal(`Accesorios: ${partName}`, filtered, false, false, true);
+            // Pre-activar el filtro del accesorio dentro del modal
+            filterModalByAccesorio(partName);
+        }
+
+        // Modal de "Causa Más Común": Permite ver y alternar entre todas las causas y sus tiquets
+        function openGWCausasModal() {
+            const dataset = getSupportDataset();
+            const causasStats = {};
+            dataset.forEach(t => {
+                const c = t.causaSoporte.tipo;
+                causasStats[c] = (causasStats[c] || 0) + 1;
+            });
+
+            const sortedCausas = Object.entries(causasStats).sort((a,b) => b[1] - a[1]);
+            const topCausa = sortedCausas[0] ? sortedCausas[0][0] : '';
+
+            // Mostrar el contenedor de causas dentro del modal
+            const causasBox = document.getElementById('modal-gw-causas-box');
+            const causasList = document.getElementById('modal-gw-causas-list');
+            causasBox.classList.remove('hidden');
+
+            causasList.innerHTML = `
+                <button onclick="filterModalByGWCausa('ALL')" id="btn-causa-ALL" 
+                        class="cause-chip active bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-xl text-xs font-semibold text-white">
+                    Todas las Causas (${dataset.length})
+                </button>
+            ` + sortedCausas.map(([cName, count]) => `
+                <button onclick="filterModalByGWCausa('${cName}')" id="btn-causa-${cName.replace(/[^a-zA-Z0-9]/g, '_')}" 
+                        class="cause-chip bg-slate-900 border border-slate-700/80 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white">
+                    ${cName} (${count})
+                </button>
+            `).join('');
+
+            window.gwModalDataset = dataset;
+            openModal(`Desglose de Causas de Avería - GW & Kits`, dataset, false, false, false);
             
-            if (kpiType === 'TOTAL') {
-                const titles = {
-                    'GW_INCIDENCIAS': 'Todos los Tiquets: Incidencias GW & Kits Solares',
-                    'ACCESORIOS': 'Todos los Tiquets: Correas & Contrapesos',
-                    'BLOQUEADOS': 'Todos los Tiquets: Pendientes de Recibir'
-                };
-                openModal(titles[window.activeSupportSubTab] || 'Tiquets de Soporte', dataset, false, false, window.activeSupportSubTab === 'ACCESORIOS');
-            } 
-            else if (kpiType === 'TOP_CAUSA') {
-                const causasStats = {};
-                dataset.forEach(t => causasStats[t.causaSoporte.tipo] = (causasStats[t.causaSoporte.tipo] || 0) + 1);
-                const topCausa = Object.entries(causasStats).sort((a,b) => b[1] - a[1])[0]?.[0];
-                if (!topCausa) return;
-                openSupportCausaTickets(topCausa);
-            } 
-            else if (kpiType === 'RECURRENTES') {
-                const clientCounts = {};
-                dataset.forEach(t => { const c = t.cliente || 'Cliente General'; clientCounts[c] = (clientCounts[c] || 0) + 1; });
-                const recurrentTasks = dataset.filter(t => (clientCounts[t.cliente || 'Cliente General'] || 0) >= 2);
-                openModal('Clientes Reincidentes (≥2 Incidencias registradas)', recurrentTasks, false, false, false);
-            } 
-            else if (kpiType === 'PENDIENTES') {
-                const pendientes = dataset.filter(t => !isTaskCompleted(t));
-                openModal('Incidencias Activas Pendientes de Resolución', pendientes, false, false, false);
+            // Si hay top causa, la activamos por defecto para mostrar su desglose directo
+            if (topCausa) {
+                filterModalByGWCausa(topCausa);
             }
         }
 
-        function openSupportCausaTickets(causaName) {
-            const dataset = getSupportCurrentDataset();
-            const filtered = dataset.filter(t => t.causaSoporte.tipo === causaName);
-            openModal(`Incidencias por Causa: ${causaName}`, filtered, false, false, false);
+        function filterModalByGWCausa(causaName) {
+            const dataset = window.gwModalDataset || getSupportDataset();
+            document.querySelectorAll('.cause-chip').forEach(b => b.classList.remove('active', 'bg-brand-purple'));
+            
+            let btnId = causaName === 'ALL' ? 'btn-causa-ALL' : `btn-causa-${causaName.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            const activeBtn = document.getElementById(btnId);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            if (causaName === 'ALL') {
+                window.currentModalTasks = dataset;
+            } else {
+                window.currentModalTasks = dataset.filter(t => t.causaSoporte.tipo === causaName);
+            }
+            renderModalTable();
         }
 
-        function openSupportClientTickets(clientName) {
-            const dataset = getSupportCurrentDataset();
-            const filtered = dataset.filter(t => (t.cliente || 'Cliente General') === clientName);
-            openModal(`Historial de Incidencias: ${clientName}`, filtered, false, false, false);
-        }
+        // Modal de "Clientes Reincidentes": Solo la lista y conteo de clientes (sin tiquets)
+        function openGWReincidentesModal() {
+            const dataset = getSupportDataset();
+            const clientCounts = {};
+            dataset.forEach(t => {
+                const c = t.cliente || 'Cliente General';
+                if (c !== 'Cliente General') {
+                    clientCounts[c] = (clientCounts[c] || 0) + 1;
+                }
+            });
 
-        function renderSupportCharts(causasStats, clientCounts) {
-            if (charts.supportCausas) charts.supportCausas.destroy();
-            if (charts.supportClientes) charts.supportClientes.destroy();
+            const recurrentes = Object.entries(clientCounts)
+                .filter(([c, n]) => n >= 2)
+                .sort((a,b) => b[1] - a[1]);
 
-            // Gráfico 1: Causas (clicable)
-            const causasLabels = Object.keys(causasStats);
-            const causasData = Object.values(causasStats);
-            const causasColors = ['#f59e0b', '#3b82f6', '#10b981', '#06b6d4', '#f97316', '#8b5cf6', '#64748b'];
+            document.getElementById('modal-title').innerHTML = `<i class="fa-solid fa-users-rays text-red-400"></i> Clientes Reincidentes (&ge;2 Incidencias)`;
+            document.getElementById('modal-gw-causas-box').classList.add('hidden');
+            document.getElementById('modal-summary-models-box').classList.add('hidden');
+            document.getElementById('modal-recommendation-box').classList.add('hidden');
+            document.getElementById('modal-accesorios-box').classList.add('hidden');
+            document.getElementById('modal-kits-client-box').classList.add('hidden');
+            
+            // Ocultar la tabla estándar y mostrar la vista exclusiva de clientes
+            document.getElementById('modal-standard-table-container').classList.add('hidden');
+            document.getElementById('modal-standard-footer').classList.add('hidden');
+            
+            const recurrentView = document.getElementById('modal-recurrentes-clients-view');
+            const grid = document.getElementById('modal-recurrentes-clients-grid');
+            const badge = document.getElementById('modal-recurrentes-count-badge');
+            recurrentView.classList.remove('hidden');
 
-            const ctxCausas = document.getElementById('chartSupportCausas')?.getContext('2d');
-            if (ctxCausas) {
-                charts.supportCausas = new Chart(ctxCausas, {
-                    type: 'doughnut',
-                    data: {
-                        labels: causasLabels,
-                        datasets: [{ data: causasData, backgroundColor: causasColors.slice(0, causasLabels.length), borderWidth: 0, hoverOffset: 6 }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } },
-                        onClick: (e, activeEls) => {
-                            if (activeEls.length > 0) {
-                                const clickedIndex = activeEls[0].index;
-                                const clickedCausa = causasLabels[clickedIndex];
-                                openSupportCausaTickets(clickedCausa);
-                            }
-                        }
-                    }
-                });
+            badge.innerText = `${recurrentes.length} CLIENTES AFECTADOS`;
+
+            if (recurrentes.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-10 text-center text-slate-500 font-mono">No hay clientes con incidencias reincidentes en este momento.</div>`;
+            } else {
+                grid.innerHTML = recurrentes.map(([client, count]) => `
+                    <div class="bg-slate-900/90 border border-red-500/30 p-4 rounded-xl flex items-center justify-between shadow-sm">
+                        <div>
+                            <h4 class="text-white font-bold text-sm">${client}</h4>
+                            <span class="text-[11px] text-red-400 font-mono flex items-center gap-1 mt-0.5">
+                                <i class="fa-solid fa-triangle-exclamation text-[10px]"></i> Cliente Reincidente
+                            </span>
+                        </div>
+                        <span class="text-lg font-black font-mono text-red-400 bg-red-500/10 border border-red-500/30 px-3 py-1.5 rounded-xl">
+                            ${count} <span class="text-[10px] font-normal">tiquets</span>
+                        </span>
+                    </div>
+                `).join('');
             }
 
-            // Gráfico 2: Top Clientes Afectados (clicable)
-            const sortedClients = Object.entries(clientCounts)
-                .filter(([c]) => c !== 'Cliente General')
-                .sort((a,b) => b[1] - a[1])
-                .slice(0, 5);
-
-            const clientLabels = sortedClients.map(c => c[0]);
-            const clientValues = sortedClients.map(c => c[1]);
-
-            const ctxClientes = document.getElementById('chartSupportClientes')?.getContext('2d');
-            if (ctxClientes) {
-                charts.supportClientes = new Chart(ctxClientes, {
-                    type: 'bar',
-                    data: {
-                        labels: clientLabels.length > 0 ? clientLabels : ['Sin Registros'],
-                        datasets: [{ label: 'Incidencias', data: clientValues.length > 0 ? clientValues : [0], backgroundColor: '#ef4444', borderRadius: 6 }]
-                    },
-                    options: {
-                        indexAxis: 'y',
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: { x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { grid: { display: false } } },
-                        plugins: { legend: { display: false } },
-                        onClick: (e, activeEls) => {
-                            if (activeEls.length > 0 && clientLabels[0] !== 'Sin Registros') {
-                                const clickedClient = clientLabels[activeEls[0].index];
-                                openSupportClientTickets(clickedClient);
-                            }
-                        }
-                    }
-                });
-            }
+            const modal = document.getElementById('detail-modal');
+            const modalContent = document.getElementById('modal-content-box');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
         }
 
+        // =========================================================================
+        // MODAL ESTÁNDAR UNIVERSAL
+        // =========================================================================
         function sortTable(col) {
             currentSort.dir = (currentSort.column === col && currentSort.dir === 'asc') ? 'desc' : 'asc';
             currentSort.column = col;
@@ -1571,7 +1836,7 @@
                         displayModelName = t.modelosDesglose.map(m => `${m.modeloInfo.nombre} (${m.unidades})`).join(' + ');
                         displayModelHex = '#06b6d4';
                     }
-                } else if (t.causaSoporte && t.causaSoporte.tipo !== 'General / Otro') {
+                } else if (t.causaSoporte && t.causaSoporte.tipo !== 'General / Otro' && window.activeEnvironment === 'soporte') {
                     displayModelName = `${t.modeloInfo.nombre} • ${t.causaSoporte.tipo}`;
                 }
 
@@ -1608,6 +1873,12 @@
             window.activeAccesorioFilter = null;
             window.isCurrentKitSolarModal = isKitSolarModal;
             window.isCurrentAccesorioModal = isAccesorioModal;
+
+            // Restaurar contenedores a su estado por defecto
+            document.getElementById('modal-recurrentes-clients-view').classList.add('hidden');
+            document.getElementById('modal-standard-table-container').classList.remove('hidden');
+            document.getElementById('modal-standard-footer').classList.remove('hidden');
+            document.getElementById('modal-gw-causas-box').classList.add('hidden');
 
             const clientBox = document.getElementById('modal-kits-client-box');
             const accBox = document.getElementById('modal-accesorios-box');
@@ -1651,7 +1922,7 @@
             });
 
             const activeModels = Object.keys(modelBreakdown);
-            if (activeModels.length > 0 && !isAccesorioModal) {
+            if (activeModels.length > 0 && !isAccesorioModal && window.activeEnvironment === 'produccion') {
                 summaryList.innerHTML = activeModels.map(m => `
                     <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3.5 py-1.5 rounded-xl shadow-sm">
                         <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${modelBreakdown[m].hex}"></span>
