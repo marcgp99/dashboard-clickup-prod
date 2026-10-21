@@ -35,7 +35,7 @@ async function handleClickUp(request, env) {
     });
   }
 
-  const apiKey = env.CLICKUP_API_KEY;
+  const apiKey = "pk_106536124_OR1XJNSHG56NZ674CXGVB3RKWMJX4Q1C";
   const teamId = "90151302562";
   const folderId = "901515642734";
 
