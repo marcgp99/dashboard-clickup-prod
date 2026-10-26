@@ -70,7 +70,7 @@
                     <h1 class="text-2xl font-extrabold tracking-tight text-white flex items-center gap-2" id="app-main-title">
                         PANEL DE PRODUCCIÓN <span class="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30 font-mono" id="app-version-badge">v4.5 LEAN</span>
                     </h1>
-                    <p class="text-[11px] text-slate-400 font-mono" id="app-subtitle">Sincronización en vivo ClickUp</p>
+                    <p class="text-[11px] text-slate-400 font-mono" id="app-subtitle">Sincronización manual bajo demanda</p>
                 </div>
             </div>
 
@@ -112,19 +112,20 @@
             </div>
         </div>
 
-        <!-- CONTROLES GLOBALES -->
+        <!-- CONTROLES GLOBALES CON SEMÁFORO DE ANTIGÜEDAD -->
         <div class="flex items-center gap-3 self-end xl:self-auto">
-            <div class="flex items-center gap-2 bg-slate-900 px-3 py-2 rounded-xl border border-slate-800 text-xs text-slate-400 font-mono">
-                <span class="relative flex h-2 w-2">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <div id="status-badge-container" class="flex items-center gap-2 bg-slate-900 px-3 py-2 rounded-xl border border-slate-800 text-xs text-slate-400 font-mono transition-colors">
+                <span id="status-ping-dot" class="relative flex h-2 w-2">
                   <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                <span id="last-update">Calculando...</span>
+                <span id="last-update">Cargando...</span>
             </div>
-            <button onclick="fetchClickUpData()" class="bg-brand-blue hover:bg-blue-600 text-white px-3.5 py-2 rounded-xl text-xs font-semibold transition shadow-lg shadow-blue-500/20 flex items-center gap-2">
-                <i class="fa-solid fa-rotate"></i> Actualizar
+            
+            <button id="btn-manual-refresh" onclick="fetchClickUpData()" class="bg-brand-blue hover:bg-blue-600 text-white px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2 cursor-pointer active:scale-95">
+                <i class="fa-solid fa-rotate" id="refresh-spinner-icon"></i> Actualizar
             </button>
-            <button onclick="logoutPin()" title="Cerrar Sesión" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white p-2 rounded-xl text-xs transition">
+            
+            <button onclick="logoutPin()" title="Cerrar Sesión" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white p-2 rounded-xl text-xs transition cursor-pointer">
                 <i class="fa-solid fa-power-off"></i>
             </button>
         </div>
@@ -134,8 +135,6 @@
     <!-- 1. ENTORNO DE PRODUCCIÓN (TALLER) -->
     <!-- ========================================================================= -->
     <div id="env-produccion-section" class="space-y-6 max-w-[1700px] mx-auto">
-        
-        <!-- VIÑETAS HERO: FOCO PRINCIPAL EN "A FABRICAR (HOY)" -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
             <div onclick="openModal('A Fabricar (Hoy)', window.allTasks.filter(t => t.dateInfo && t.dateInfo.isTodayOrOverdue && !t.esSoloRecibir && !t.esAccesorio && !isTaskCompleted(t)), true)" 
                  class="lg:col-span-7 hero-amber-card rounded-2xl p-6 relative overflow-hidden transition-all">
@@ -190,7 +189,6 @@
             </div>
         </div>
 
-        <!-- BANDA DE DISPOSITIVOS POR MODELO (5 CAJAS CLICABLES) -->
         <div>
             <div class="flex items-center justify-between mb-3 px-1">
                 <h3 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-2">
@@ -247,7 +245,6 @@
             </div>
         </div>
 
-        <!-- TABLA PRINCIPAL DE PRODUCCIÓN -->
         <section class="bi-panel overflow-hidden flex flex-col h-[540px]" id="seccion-tabla-principal">
             <div class="p-4 border-b border-slate-800/80 bg-slate-900/90 flex flex-col lg:flex-row gap-3 justify-between items-start lg:items-center">
                 <div class="flex items-center gap-3 flex-wrap">
@@ -302,8 +299,6 @@
     <!-- 2. ENTORNO DE SOPORTE & ANALÍTICA DE DATOS -->
     <!-- ========================================================================= -->
     <div id="env-soporte-section" class="hidden space-y-6 max-w-[1700px] mx-auto">
-        
-        <!-- SELECTOR DE LOS 3 BLOQUES ANALÍTICOS DE SOPORTE -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
             <div class="flex items-center gap-2 flex-wrap">
                 <button type="button" onclick="setSupportSubTab('GW_INCIDENCIAS')" id="subtab-GW_INCIDENCIAS" 
@@ -320,21 +315,16 @@
                 </button>
             </div>
 
-            <!-- BUSCADOR GLOBAL DE SOPORTE -->
             <div class="relative w-full sm:w-80">
-                <input type="text" id="support-search-input" oninput="renderSupportView()" placeholder="Buscar cliente, causa, tiquet..." 
+                <input type="text" id="support-search-input" oninput="renderSupportView()" placeholder="Buscar cliente, causa, RAK, SG..." 
                        class="w-full bg-slate-950 border border-slate-700/80 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition shadow-inner">
                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-500"></i>
             </div>
         </div>
 
-        <!-- CONTENEDOR DINÁMICO DE KPIS (SEGÚN BLOQUE ACTIVO) -->
-        <div id="support-dynamic-kpis" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        <div id="support-dynamic-kpis" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+        <div id="support-dynamic-charts" class="grid grid-cols-1 lg:grid-cols-3 gap-4"></div>
 
-        <!-- CONTENEDOR DINÁMICO DE GRÁFICOS (SEGÚN BLOQUE ACTIVO) -->
-        <div id="support-dynamic-charts" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
-
-        <!-- TABLA ANALÍTICA DE DETALLE -->
         <section class="bi-panel overflow-hidden flex flex-col h-[520px]">
             <div class="p-4 border-b border-slate-800/80 bg-slate-900/90 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div class="flex items-center gap-3">
@@ -353,7 +343,7 @@
                         <tr class="text-xs text-slate-400 uppercase tracking-wider font-semibold">
                             <th class="py-3.5 px-4 w-48">Cliente</th>
                             <th class="py-3.5 px-4">Tiquet / Asunto</th>
-                            <th class="py-3.5 px-4 w-48">Clasificación / Modelo</th>
+                            <th class="py-3.5 px-4 w-52">Causa / Modelo GW</th>
                             <th class="py-3.5 px-4 text-center w-20">Uds</th>
                             <th class="py-3.5 px-4 w-28">Estado</th>
                             <th class="py-3.5 px-4 w-28 text-right">Deadline</th>
@@ -379,7 +369,6 @@
                 <button onclick="closeModal()" class="text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 w-8 h-8 rounded-lg flex items-center justify-center transition cursor-pointer"><i class="fa-solid fa-times"></i></button>
             </div>
 
-            <!-- CONTENEDOR DE SELECTOR DE CAUSAS DE GW DENTRO DEL MODAL -->
             <div id="modal-gw-causas-box" class="hidden bg-slate-950/70 border-b border-purple-500/20 p-4 px-5">
                 <h4 class="text-purple-400 font-bold mb-2.5 flex items-center gap-2 text-xs uppercase tracking-wide">
                     <i class="fa-solid fa-tags"></i> Filtrar por Causa de Incidencia:
@@ -387,7 +376,6 @@
                 <div id="modal-gw-causas-list" class="flex flex-wrap gap-2"></div>
             </div>
 
-            <!-- CONTENEDOR EXCLUSIVO PARA LISTA DE CLIENTES REINCIDENTES (SIN TIQUETS) -->
             <div id="modal-recurrentes-clients-view" class="hidden p-5 overflow-auto flex-1">
                 <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-800">
                     <span class="text-xs font-bold text-red-400 uppercase tracking-wider flex items-center gap-2">
@@ -398,18 +386,15 @@
                 <div id="modal-recurrentes-clients-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
             </div>
 
-            <!-- RESUMEN MODELOS EN PRODUCCIÓN -->
             <div id="modal-summary-models-box" class="hidden bg-slate-950/60 border-b border-slate-800/80 p-4 px-5">
                 <div id="modal-summary-models-list" class="flex flex-wrap gap-2.5"></div>
             </div>
 
-            <!-- RECOMENDACIÓN LEAN EN PRODUCCIÓN -->
             <div id="modal-recommendation-box" class="hidden bg-amber-500/10 border-b border-amber-500/30 p-5">
                 <h4 class="text-amber-400 font-bold mb-3 flex items-center gap-2 text-sm uppercase tracking-wide"><i class="fa-solid fa-bolt"></i> Oportunidades de Producción en Serie</h4>
                 <div id="modal-recommendation-list" class="space-y-3"></div>
             </div>
 
-            <!-- TABLA ESTÁNDAR DENTRO DEL MODAL -->
             <div id="modal-standard-table-container" class="overflow-auto flex-1 p-5">
                 <table class="w-full text-left border-collapse text-sm">
                     <thead class="sticky top-0 bg-slate-900">
@@ -468,6 +453,49 @@
         let currentSort = { column: 'fecha', dir: 'asc' };
         let currentTableFilter = 'ALL';
 
+        // CONTROL DE TIEMPO Y FRESCO DE DATOS (OPCIÓN 2: 100% MANUAL)
+        let lastFetchTimestamp = null;
+
+        function updateFreshnessIndicator() {
+            if (!lastFetchTimestamp) return;
+            const diffMs = Date.now() - lastFetchTimestamp;
+            const diffMins = Math.floor(diffMs / 60000);
+            
+            const lastUpdateEl = document.getElementById('last-update');
+            const dotEl = document.getElementById('status-ping-dot');
+            const refreshBtn = document.getElementById('btn-manual-refresh');
+            const badgeContainer = document.getElementById('status-badge-container');
+
+            if (!lastUpdateEl) return;
+
+            if (diffMins < 1) {
+                lastUpdateEl.innerText = "Al día (hace un momento)";
+                if (dotEl) dotEl.innerHTML = '<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>';
+                if (badgeContainer) badgeContainer.className = "flex items-center gap-2 bg-slate-900 px-3 py-2 rounded-xl border border-slate-800 text-xs text-slate-300 font-mono transition-colors";
+                if (refreshBtn) refreshBtn.classList.remove('ring-2', 'ring-amber-400', 'animate-pulse');
+            } else if (diffMins < 20) {
+                lastUpdateEl.innerText = `Actualizado hace ${diffMins} min`;
+                if (dotEl) dotEl.innerHTML = '<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>';
+                if (badgeContainer) badgeContainer.className = "flex items-center gap-2 bg-slate-900 px-3 py-2 rounded-xl border border-slate-800 text-xs text-slate-300 font-mono transition-colors";
+                if (refreshBtn) refreshBtn.classList.remove('ring-2', 'ring-amber-400', 'animate-pulse');
+            } else if (diffMins < 45) {
+                lastUpdateEl.innerText = `Actualizado hace ${diffMins} min (Revisar)`;
+                if (dotEl) dotEl.innerHTML = '<span class="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>';
+                if (badgeContainer) badgeContainer.className = "flex items-center gap-2 bg-amber-950/40 px-3 py-2 rounded-xl border border-amber-500/40 text-xs text-amber-300 font-mono transition-colors";
+                if (refreshBtn) {
+                    refreshBtn.classList.add('ring-2', 'ring-amber-400');
+                    refreshBtn.classList.remove('animate-pulse');
+                }
+            } else {
+                lastUpdateEl.innerText = `Actualizado hace ${diffMins} min (Desactualizado)`;
+                if (dotEl) dotEl.innerHTML = '<span class="relative inline-flex rounded-full h-2 w-2 bg-red-500 animate-pulse"></span>';
+                if (badgeContainer) badgeContainer.className = "flex items-center gap-2 bg-red-950/40 px-3 py-2 rounded-xl border border-red-500/40 text-xs text-red-300 font-mono transition-colors";
+                if (refreshBtn) {
+                    refreshBtn.classList.add('ring-2', 'ring-amber-400', 'animate-pulse');
+                }
+            }
+        }
+
         // ESTADO DE VISTAS (PRODUCCIÓN / SOPORTE)
         window.activeEnvironment = localStorage.getItem('ixorigue_env') || 'produccion';
         window.activeSupportSubTab = 'GW_INCIDENCIAS';
@@ -494,7 +522,7 @@
                 if (capBox) capBox.classList.remove('hidden');
 
                 if (mainTitle) mainTitle.innerHTML = `PANEL DE PRODUCCIÓN <span class="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30 font-mono" id="app-version-badge">v4.5 LEAN</span>`;
-                if (subTitle) subTitle.innerText = "Sincronización en vivo ClickUp";
+                if (subTitle) subTitle.innerText = "Sincronización manual bajo demanda";
                 if (logoIcon) logoIcon.className = "fa-solid fa-industry text-2xl";
                 if (logoBox) logoBox.className = "p-3 bg-blue-500/10 border border-blue-500/30 rounded-2xl text-brand-blue shadow-lg shadow-blue-500/10";
             } else {
@@ -527,9 +555,6 @@
             renderSupportView();
         }
 
-        // =========================================================================
-        // FILTRADO ESTRICTO DE GATEWAYS Y KITS SOLARES (SIN IXOTRACKS NI COLLARES)
-        // =========================================================================
         function isStrictlyGWOrKit(t) {
             if (t.esAccesorio || t.esSoloRecibir) return false;
 
@@ -537,7 +562,7 @@
             const descLower = (t.description || '').toLowerCase();
             const fullText = nameLower + ' ' + descLower;
 
-            const hasGWKeyword = /\b(gw|gateway|gateways|milesight|rak|antena|antenas)\b/i.test(fullText);
+            const hasGWKeyword = /\b(gw|gateway|gateways|milesight|rak|raak|antena|antenas)\b/i.test(fullText);
             const hasSolarKeyword = /\b(solar|solars|panel\s*solar|panels\s*solares|placa\s*solar|kit\s*solar|kits\s*solares|1as|2as|3as|1ae|2ae|3ae)\b/i.test(fullText);
             const isGatewayModel = t.modeloInfo && t.modeloInfo.nombre === 'Gateway';
             const hasKitQty = (t.kitsSolaresGW > 0);
@@ -550,8 +575,20 @@
             return isGatewayModel || hasKitQty || hasGWKeyword || hasSolarKeyword;
         }
 
+        function detectGatewayBrand(task) {
+            const raw = ((task.nombre || '') + ' ' + (task.description || '') + ' ' + ((task.tags || []).map(x=>x.name).join(' '))).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            
+            const hasRak = /\b(rak|raak|rakwireless|rak\d+)\b/i.test(raw);
+            const hasMilesight = /\b(milesight|mileshit|sg|sg\d+|ug\d+|ug65|ug67|sg50)\b/i.test(raw);
+
+            if (hasRak && !hasMilesight) return 'RAK';
+            if (hasMilesight && !hasRak) return 'Milesight (SG)';
+            if (hasRak && hasMilesight) return 'Ambos / Híbrido';
+            return 'Sin especificar';
+        }
+
         function analyzeSupportIssue(task) {
-            const raw = ((task.nombre || '') + ' ' + (task.description || '') + ' ' + (task.etiquetas || []).join(' ')).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const raw = ((task.nombre || '') + ' ' + (task.description || '') + ' ' + ((task.tags || []).map(x=>x.name).join(' '))).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             
             if (raw.includes('bateria') || raw.includes('pila') || raw.includes('carga') || raw.includes('descarga') || raw.includes('battery')) {
                 return { tipo: 'Cambio Batería', hex: '#f59e0b', icon: 'fa-battery-quarter' };
@@ -834,6 +871,7 @@
                 const closedTimestamp = task.date_closed ? parseInt(task.date_closed, 10) : (task.date_updated ? parseInt(task.date_updated, 10) : 0);
 
                 const causaInfo = analyzeSupportIssue(task);
+                const gwBrand = detectGatewayBrand(task);
 
                 return {
                     id: task.id,
@@ -856,7 +894,8 @@
                     closedTimestamp: closedTimestamp,
                     prioridadNum: priorityNum,
                     prioridadLevel: priorityLevel,
-                    causaSoporte: causaInfo
+                    causaSoporte: causaInfo,
+                    gwBrand: gwBrand
                 };
             });
         }
@@ -864,6 +903,9 @@
         async function fetchClickUpData() {
             const pin = localStorage.getItem('ixorigue_pin');
             const pinError = document.getElementById('pin-error');
+            const spinner = document.getElementById('refresh-spinner-icon');
+            if (spinner) spinner.classList.add('fa-spin');
+
             try {
                 const response = await fetch('/api/clickup?t=' + Date.now(), { 
                     cache: 'no-store',
@@ -888,12 +930,17 @@
                 if (window.activeEnvironment === 'soporte') {
                     renderSupportView();
                 }
-                const lastUpdateEl = document.getElementById('last-update');
-                if (lastUpdateEl) lastUpdateEl.innerText = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+                // Guardar instante del último refresco exitoso
+                lastFetchTimestamp = Date.now();
+                updateFreshnessIndicator();
+
             } catch (error) {
                 console.error(error);
                 const lastUpdateEl = document.getElementById('last-update');
                 if (lastUpdateEl) lastUpdateEl.innerText = 'Fallo de Red';
+            } finally {
+                if (spinner) spinner.classList.remove('fa-spin');
             }
         }
 
@@ -1164,7 +1211,7 @@
             const badgeEl = document.getElementById('task-count-badge');
             if (badgeEl) {
                 if (window.selectedTagFilter || currentTableFilter !== 'ALL') {
-                    badgeEl.innerText = `${visibleTasks.length} /${totalActivos} ACTIVOS`;
+                    badgeEl.innerText = `${visibleTasks.length} / ${totalActivos} ACTIVOS`;
                 } else {
                     badgeEl.innerText = `${totalActivos} ACTIVOS`;
                 }
@@ -1197,7 +1244,7 @@
                             ${task.esSoloRecibir || task.esAccesorio ? `0 (${task.unidadesBrutas})` : task.unidades}
                         </td>
                         <td class="py-3.5 px-4 align-top pt-4">
-                            <span class="px-2.5 py-0.5 text-[9px] rounded-md font-bold uppercase" style="background-color: ${task.estadoColor}15; color:${task.estadoColor}; border: 1px solid ${task.estadoColor}30">${task.estado}</span>
+                            <span class="px-2.5 py-0.5 text-[9px] rounded-md font-bold uppercase" style="background-color: ${task.estadoColor}15; color: ${task.estadoColor}; border: 1px solid ${task.estadoColor}30">${task.estado}</span>
                         </td>
                         <td class="py-3.5 px-4 align-top pt-4 text-xs ${highlightClass} font-mono">${fechaText}</td>
                     </tr>
@@ -1232,9 +1279,10 @@
             
             if (charts.support1) { charts.support1.destroy(); charts.support1 = null; }
             if (charts.support2) { charts.support2.destroy(); charts.support2 = null; }
+            if (charts.support3) { charts.support3.destroy(); charts.support3 = null; }
 
             // -------------------------------------------------------------
-            // BLOQUE 1: INCIDENCIAS GW & KITS SOLARES (3 KPIS + 2 CHARTS)
+            // BLOQUE 1: INCIDENCIAS GW & KITS SOLARES (4 KPIS + 3 CHARTS)
             // -------------------------------------------------------------
             if (currentTab === 'GW_INCIDENCIAS') {
                 const titleEl = document.getElementById('support-table-title');
@@ -1251,11 +1299,17 @@
 
                 const clientCounts = {};
                 const causasStats = {};
+                const brandStats = { 'RAK': 0, 'Milesight (SG)': 0, 'Sin especificar': 0 };
+
                 dataset.forEach(t => {
                     const c = t.cliente || 'Cliente General';
                     clientCounts[c] = (clientCounts[c] || 0) + 1;
+                    
                     const causa = t.causaSoporte ? t.causaSoporte.tipo : 'General';
                     causasStats[causa] = (causasStats[causa] || 0) + 1;
+
+                    const brand = t.gwBrand || 'Sin especificar';
+                    brandStats[brand] = (brandStats[brand] || 0) + 1;
                 });
 
                 const sortedCausas = Object.entries(causasStats).sort((a,b) => b[1] - a[1]);
@@ -1264,8 +1318,12 @@
                 const topCausaPct = dataset.length > 0 ? Math.round((topCausaCount / dataset.length) * 100) : 0;
                 const recurrentCount = Object.entries(clientCounts).filter(([c, n]) => n >= 2 && c !== 'Cliente General').length;
 
+                const totalGW = dataset.length || 1;
+                const pctRak = Math.round(((brandStats['RAK'] || 0) / totalGW) * 100);
+                const pctMilesight = Math.round(((brandStats['Milesight (SG)'] || 0) / totalGW) * 100);
+
                 if (kpiContainer) {
-                    kpiContainer.className = "grid grid-cols-1 md:grid-cols-3 gap-4";
+                    kpiContainer.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4";
                     kpiContainer.innerHTML = `
                         <div onclick="openSupportModalSimple('Todos los Tiquets: Incidencias GW & Kits', getSupportDataset())" 
                              class="bi-kpi-card rounded-2xl p-5 border-l-4 border-l-purple-500 group" title="Haz clic para ver todos los tiquets">
@@ -1308,29 +1366,58 @@
                                 <span class="text-xs text-red-300 font-mono flex items-center gap-1">Ver clientes <i class="fa-solid fa-chevron-right text-[10px]"></i></span>
                             </div>
                         </div>
+
+                        <!-- 4. COMPARATIVA RAK vs MILESIGHT -->
+                        <div class="bi-kpi-card rounded-2xl p-5 border-l-4 border-l-cyan-500">
+                            <div class="flex items-center justify-between text-cyan-400 text-xs font-bold uppercase tracking-wider mb-2">
+                                <span>Modelos: RAK vs Milesight</span>
+                                <i class="fa-solid fa-scale-balanced text-cyan-400"></i>
+                            </div>
+                            <div class="space-y-1.5 mt-1">
+                                <div onclick="openSupportModalSimple('Incidencias Gateway: RAK', getSupportDataset().filter(x => x.gwBrand === 'RAK'))" 
+                                     class="flex justify-between items-center bg-slate-900/80 hover:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-800 transition cursor-pointer" title="Clic para ver tiquets RAK">
+                                    <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400"></span> RAK</span>
+                                    <span class="text-xs font-mono font-bold text-white">${brandStats['RAK'] || 0} uds <span class="text-amber-400/80 text-[10px]">(${pctRak}%)</span></span>
+                                </div>
+                                <div onclick="openSupportModalSimple('Incidencias Gateway: Milesight (SG)', getSupportDataset().filter(x => x.gwBrand === 'Milesight (SG)'))" 
+                                     class="flex justify-between items-center bg-slate-900/80 hover:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-800 transition cursor-pointer" title="Clic para ver tiquets Milesight">
+                                    <span class="text-xs font-bold text-blue-300 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-blue-400"></span> Milesight (SG)</span>
+                                    <span class="text-xs font-mono font-bold text-white">${brandStats['Milesight (SG)'] || 0} uds <span class="text-blue-400/80 text-[10px]">(${pctMilesight}%)</span></span>
+                                </div>
+                            </div>
+                        </div>
                     `;
                 }
 
                 if (chartsContainer) {
-                    chartsContainer.className = "grid grid-cols-1 lg:grid-cols-2 gap-4";
+                    chartsContainer.className = "grid grid-cols-1 lg:grid-cols-3 gap-4";
                     chartsContainer.innerHTML = `
                         <div class="bi-panel p-5">
                             <div class="flex items-center justify-between mb-3">
                                 <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                                    <i class="fa-solid fa-chart-pie text-purple-400"></i> Desglose por Causa de Avería
+                                    <i class="fa-solid fa-chart-pie text-purple-400"></i> Causas de Avería
                                 </h3>
-                                <span class="text-[10px] text-slate-500 font-mono">Clic para explorar</span>
+                                <span class="text-[10px] text-slate-500 font-mono">Clic para filtrar</span>
                             </div>
                             <div class="w-full h-52 relative cursor-pointer"><canvas id="chartSupport1"></canvas></div>
                         </div>
                         <div class="bi-panel p-5">
                             <div class="flex items-center justify-between mb-3">
                                 <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                                    <i class="fa-solid fa-ranking-star text-red-400"></i> Top Clientes con Incidencias Reincidentes
+                                    <i class="fa-solid fa-chart-pie text-cyan-400"></i> Incidencias RAK vs Milesight
                                 </h3>
-                                <span class="text-[10px] text-slate-500 font-mono">Clic para ver tiquets</span>
+                                <span class="text-[10px] text-slate-500 font-mono">Clic para explorar</span>
                             </div>
                             <div class="w-full h-52 relative cursor-pointer"><canvas id="chartSupport2"></canvas></div>
+                        </div>
+                        <div class="bi-panel p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                                    <i class="fa-solid fa-ranking-star text-red-400"></i> Top Reincidentes
+                                </h3>
+                                <span class="text-[10px] text-slate-500 font-mono">Clic para ver</span>
+                            </div>
+                            <div class="w-full h-52 relative cursor-pointer"><canvas id="chartSupport3"></canvas></div>
                         </div>
                     `;
 
@@ -1355,13 +1442,39 @@
                         });
                     }
 
+                    const canvas2 = document.getElementById('chartSupport2');
+                    if (canvas2) {
+                        const brandsFiltered = Object.entries(brandStats).filter(([_, count]) => count > 0);
+                        const bLabels = brandsFiltered.map(x => x[0]);
+                        const bValues = brandsFiltered.map(x => x[1]);
+                        const bColors = bLabels.map(b => b === 'RAK' ? '#f59e0b' : (b.includes('Milesight') ? '#3b82f6' : '#64748b'));
+
+                        charts.support2 = new Chart(canvas2.getContext('2d'), {
+                            type: 'doughnut',
+                            data: {
+                                labels: bLabels.map((b, idx) => `${b} (${Math.round((bValues[idx]/totalGW)*100)}%)`),
+                                datasets: [{ data: bValues, backgroundColor: bColors, borderWidth: 0 }]
+                            },
+                            options: {
+                                responsive: true, maintainAspectRatio: false,
+                                plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } },
+                                onClick: (e, activeEls) => {
+                                    if (activeEls.length > 0) {
+                                        const brand = bLabels[activeEls[0].index];
+                                        openSupportModalSimple(`Incidencias Gateway: ${brand}`, dataset.filter(t => t.gwBrand === brand));
+                                    }
+                                }
+                            }
+                        });
+                    }
+
                     const sortedClients = Object.entries(clientCounts)
                         .filter(([c, n]) => n >= 2 && c !== 'Cliente General')
                         .sort((a,b) => b[1] - a[1]).slice(0, 5);
 
-                    const canvas2 = document.getElementById('chartSupport2');
-                    if (canvas2) {
-                        charts.support2 = new Chart(canvas2.getContext('2d'), {
+                    const canvas3 = document.getElementById('chartSupport3');
+                    if (canvas3) {
+                        charts.support3 = new Chart(canvas3.getContext('2d'), {
                             type: 'bar',
                             data: {
                                 labels: sortedClients.length > 0 ? sortedClients.map(c => c[0]) : ['Sin reincidentes'],
@@ -1384,7 +1497,7 @@
             }
 
             // -------------------------------------------------------------
-            // BLOQUE 2: CORREAS & CONTRAPESOS (DESGLOSE DIRECTO EN PANTALLA)
+            // BLOQUE 2: CORREAS & CONTRAPESOS
             // -------------------------------------------------------------
             else if (currentTab === 'ACCESORIOS') {
                 const titleEl = document.getElementById('support-table-title');
@@ -1479,7 +1592,7 @@
             }
 
             // -------------------------------------------------------------
-            // BLOQUE 3: PENDIENTES DE RECIBIR (DESGLOSE POR MODELOS)
+            // BLOQUE 3: PENDIENTES DE RECIBIR
             // -------------------------------------------------------------
             else if (currentTab === 'BLOQUEADOS') {
                 const titleEl = document.getElementById('support-table-title');
@@ -1499,7 +1612,7 @@
                 let modelCardsHtml = `
                     <div onclick="openSupportModalSimple('Todos los Tiquets: Pendientes por Recibir', getSupportDataset())" 
                          class="bi-kpi-card rounded-2xl p-5 border-l-4 border-l-purple-500 group" title="Haz clic para ver todos los tiquets bloqueados">
-                        <div class="flex items-center justify-between text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
+                            <div class="flex items-center justify-between text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
                             <span>Total Dispositivos a Recibir</span>
                             <i class="fa-solid fa-box-open text-purple-400 group-hover:scale-125 transition-transform"></i>
                         </div>
@@ -1574,7 +1687,7 @@
             }
 
             // -------------------------------------------------------------
-            // RENDERIZADO DE LA TABLA INFERIOR DE SOPORTE CON BUSCADOR
+            // TABLA INFERIOR DE SOPORTE
             // -------------------------------------------------------------
             const clientCountsAll = {};
             dataset.forEach(t => { const c = t.cliente || 'Cliente General'; clientCountsAll[c] = (clientCountsAll[c] || 0) + 1; });
@@ -1589,6 +1702,7 @@
                     const match = 
                         t.nombre.toLowerCase().includes(searchVal) ||
                         c.toLowerCase().includes(searchVal) ||
+                        (t.gwBrand && t.gwBrand.toLowerCase().includes(searchVal)) ||
                         (t.causaSoporte && t.causaSoporte.tipo.toLowerCase().includes(searchVal)) ||
                         (t.description && t.description.toLowerCase().includes(searchVal)) ||
                         t.etiquetas.some(e => e.toLowerCase().includes(searchVal));
@@ -1624,10 +1738,19 @@
 
                 let badgeInfo = '';
                 if (currentTab === 'GW_INCIDENCIAS') {
+                    const brandBadge = t.gwBrand === 'RAK' 
+                        ? `<span onclick="openSupportModalSimple('Incidencias Gateway: RAK', getSupportDataset().filter(x => x.gwBrand === 'RAK'))" class="cursor-pointer px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:border-amber-400">RAK</span>`
+                        : (t.gwBrand === 'Milesight (SG)'
+                            ? `<span onclick="openSupportModalSimple('Incidencias Gateway: Milesight (SG)', getSupportDataset().filter(x => x.gwBrand === 'Milesight (SG)'))" class="cursor-pointer px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30 hover:border-blue-400">Milesight (SG)</span>`
+                            : `<span class="px-2 py-0.5 rounded text-[10px] font-mono text-slate-500 border border-slate-700/50">GW Genérico</span>`);
+
                     badgeInfo = `
-                        <span onclick="openSupportModalSimple('Causa: ${t.causaSoporte.tipo}', getSupportDataset().filter(x => x.causaSoporte && x.causaSoporte.tipo === '${t.causaSoporte.tipo}'))" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer hover:opacity-80 transition" style="background-color: ${t.causaSoporte.hex}18; color: ${t.causaSoporte.hex}; border: 1px solid ${t.causaSoporte.hex}35">
-                            <i class="fa-solid ${t.causaSoporte.icon}"></i> ${t.causaSoporte.tipo}
-                        </span>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span onclick="openSupportModalSimple('Causa: ${t.causaSoporte.tipo}', getSupportDataset().filter(x => x.causaSoporte && x.causaSoporte.tipo === '${t.causaSoporte.tipo}'))" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer hover:opacity-80 transition" style="background-color: ${t.causaSoporte.hex}18; color: ${t.causaSoporte.hex}; border: 1px solid ${t.causaSoporte.hex}35">
+                                <i class="fa-solid ${t.causaSoporte.icon}"></i> ${t.causaSoporte.tipo}
+                            </span>
+                            ${brandBadge}
+                        </div>
                     `;
                 } else if (currentTab === 'ACCESORIOS') {
                     badgeInfo = `<span class="text-xs text-cyan-300 font-medium">${t.modelosDesglose.map(m => `${m.modeloInfo.nombre} (${m.unidades})`).join(' + ')}</span>`;
@@ -1796,7 +1919,7 @@
         }
 
         // =========================================================================
-        // MODAL ESTÁNDAR UNIVERSAL (100% BLINDADO)
+        // MODAL ESTÁNDAR UNIVERSAL (BLINDADO)
         // =========================================================================
         function sortTable(col) {
             currentSort.dir = (currentSort.column === col && currentSort.dir === 'asc') ? 'desc' : 'asc';
@@ -1974,7 +2097,6 @@
             }, 300);
         }
 
-        // Cerrar modal con la tecla Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') closeModal();
         });
@@ -1982,7 +2104,9 @@
         // INICIALIZACIÓN
         checkPinAuth();
         switchEnvironment(window.activeEnvironment);
-        setInterval(fetchClickUpData, 60000);
+
+        // RELOJ LOCAL DE INTERFAZ (NO HACE PETICIONES DE RED, CONSUMO 0 DE CPU)
+        setInterval(updateFreshnessIndicator, 30000);
     </script>
 </body>
 </html>
