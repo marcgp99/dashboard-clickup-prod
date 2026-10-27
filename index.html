@@ -453,7 +453,6 @@
         let currentSort = { column: 'fecha', dir: 'asc' };
         let currentTableFilter = 'ALL';
 
-        // CONTROL DE TIEMPO Y FRESCO DE DATOS (OPCIÓN 2: 100% MANUAL)
         let lastFetchTimestamp = null;
 
         function updateFreshnessIndicator() {
@@ -496,7 +495,6 @@
             }
         }
 
-        // ESTADO DE VISTAS (PRODUCCIÓN / SOPORTE)
         window.activeEnvironment = localStorage.getItem('ixorigue_env') || 'produccion';
         window.activeSupportSubTab = 'GW_INCIDENCIAS';
 
@@ -931,7 +929,6 @@
                     renderSupportView();
                 }
 
-                // Guardar instante del último refresco exitoso
                 lastFetchTimestamp = Date.now();
                 updateFreshnessIndicator();
 
@@ -1262,7 +1259,8 @@
             } else if (currentTab === 'ACCESORIOS') {
                 return window.allTasks.filter(t => t.esAccesorio);
             } else if (currentTab === 'BLOQUEADOS') {
-                return window.allTasks.filter(t => t.esSoloRecibir);
+                // FILTRO CORREGIDO: Tiquets con la etiqueta 'SOLO RECIBIR' que están actualmente en la columna 'BLOQUEADO' y no cerrados
+                return window.allTasks.filter(t => t.esSoloRecibir && !isTaskCompleted(t) && t.estado.includes('BLOQUEAD'));
             }
             return [];
         }
@@ -1367,7 +1365,6 @@
                             </div>
                         </div>
 
-                        <!-- 4. COMPARATIVA RAK vs MILESIGHT -->
                         <div class="bi-kpi-card rounded-2xl p-5 border-l-4 border-l-cyan-500">
                             <div class="flex items-center justify-between text-cyan-400 text-xs font-bold uppercase tracking-wider mb-2">
                                 <span>Modelos: RAK vs Milesight</span>
@@ -1592,7 +1589,7 @@
             }
 
             // -------------------------------------------------------------
-            // BLOQUE 3: PENDIENTES DE RECIBIR
+            // BLOQUE 3: PENDIENTES DE RECIBIR (FILTRADO EXACTO POR COLUMNA)
             // -------------------------------------------------------------
             else if (currentTab === 'BLOQUEADOS') {
                 const titleEl = document.getElementById('support-table-title');
@@ -1612,7 +1609,7 @@
                 let modelCardsHtml = `
                     <div onclick="openSupportModalSimple('Todos los Tiquets: Pendientes por Recibir', getSupportDataset())" 
                          class="bi-kpi-card rounded-2xl p-5 border-l-4 border-l-purple-500 group" title="Haz clic para ver todos los tiquets bloqueados">
-                            <div class="flex items-center justify-between text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
+                        <div class="flex items-center justify-between text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
                             <span>Total Dispositivos a Recibir</span>
                             <i class="fa-solid fa-box-open text-purple-400 group-hover:scale-125 transition-transform"></i>
                         </div>
@@ -2105,7 +2102,7 @@
         checkPinAuth();
         switchEnvironment(window.activeEnvironment);
 
-        // RELOJ LOCAL DE INTERFAZ (NO HACE PETICIONES DE RED, CONSUMO 0 DE CPU)
+        // RELOJ LOCAL DE INTERFAZ (CONSUMO 0 EN CLOUDFLARE)
         setInterval(updateFreshnessIndicator, 30000);
     </script>
 </body>
