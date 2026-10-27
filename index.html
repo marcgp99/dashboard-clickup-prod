@@ -30,8 +30,7 @@
         .bi-panel { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 14px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4); }
         .bi-kpi-card { background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(21, 30, 46, 0.8) 100%); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
         .bi-kpi-card:hover { transform: translateY(-3px); border-color: #3b82f6; box-shadow: 0 12px 20px -3px rgba(59, 130, 246, 0.25); }
-        .hero-amber-card { background: linear-gradient(135deg, rgba(30, 23, 10, 0.95) 0%, rgba(20, 16, 7, 0.9) 100%); border: 2px solid rgba(245, 158, 11, 0.6) !important; box-shadow: 0 10px 25px -3px rgba(245, 158, 11, 0.25) !important; cursor: pointer; }
-        .hero-amber-card:hover { transform: translateY(-4px); border-color: #fbbf24 !important; box-shadow: 0 14px 28px -2px rgba(245, 158, 11, 0.4) !important; }
+        .hero-amber-card { background: linear-gradient(135deg, rgba(30, 23, 10, 0.95) 0%, rgba(20, 16, 7, 0.9) 100%); border: 2px solid rgba(245, 158, 11, 0.6) !important; box-shadow: 0 10px 25px -3px rgba(245, 158, 11, 0.25) !important; }
         .table-row-hover:hover { background-color: rgba(30, 41, 59, 0.7); }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #0b1329; }
@@ -135,40 +134,62 @@
     <!-- 1. ENTORNO DE PRODUCCIÓN (TALLER) -->
     <!-- ========================================================================= -->
     <div id="env-produccion-section" class="space-y-6 max-w-[1700px] mx-auto">
+        
+        <!-- OPCIÓN 2: TARJETA HERO "A FABRICAR (HOY)" DIVIDIDA EN VENTAS VS REEMPLAZOS -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-            <div onclick="openModal('A Fabricar (Hoy)', window.allTasks.filter(t => t.dateInfo && t.dateInfo.isTodayOrOverdue && !t.esSoloRecibir && !t.esAccesorio && !isTaskCompleted(t)), true)" 
-                 class="lg:col-span-7 hero-amber-card rounded-2xl p-6 relative overflow-hidden transition-all">
-                <div class="flex justify-between items-start mb-3">
-                    <div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="w-3 h-3 rounded-full bg-amber-400 animate-ping"></span>
-                            <span class="text-xs font-black uppercase tracking-widest text-amber-400">FOCO PRINCIPAL DE PRODUCCIÓN</span>
-                        </div>
-                        <h2 class="text-2xl font-black text-white flex items-center gap-2">
-                            A FABRICAR (HOY)
-                            <span id="kpi-sugerencia-badge" class="hidden bg-amber-500/20 text-amber-300 text-xs px-3 py-1 rounded-full border border-amber-500/50 animate-pulse font-mono font-bold">
-                                <i class="fa-solid fa-bolt"></i> Oportunidad Lotes
-                            </span>
-                        </h2>
+            
+            <!-- BLOQUE HERO DIVIDIDO EN 2 COLUMNAS INTERNAS -->
+            <div class="lg:col-span-8 hero-amber-card rounded-2xl p-5 flex flex-col justify-between">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-amber-400 animate-ping"></span>
+                        <span class="text-xs font-black uppercase tracking-widest text-amber-400">FOCO PRINCIPAL: A FABRICAR (HOY)</span>
                     </div>
-                    <div class="p-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-amber-400 text-2xl">
-                        <i class="fa-solid fa-stopwatch"></i>
-                    </div>
+                    <span id="kpi-sugerencia-badge" class="hidden bg-amber-500/20 text-amber-300 text-xs px-2.5 py-0.5 rounded-full border border-amber-500/50 animate-pulse font-mono font-bold">
+                        <i class="fa-solid fa-bolt"></i> Oportunidad Lotes
+                    </span>
                 </div>
 
-                <div class="flex items-baseline justify-between mt-4">
-                    <div class="flex items-baseline gap-3">
-                        <span id="kpi-hoy" class="text-6xl font-black text-amber-400 font-mono tracking-tight">0</span>
-                        <span class="text-sm font-bold text-amber-300/80 uppercase tracking-wider">Unidades Pendientes</span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
+                    <!-- SUB-TARJETA VENTAS HOY -->
+                    <div onclick="openModal('Tiquets de Ventas (Hoy)', window.allTasks.filter(t => t.dateInfo && t.dateInfo.isTodayOrOverdue && !t.esSoloRecibir && !isTaskCompleted(t) && isVentaTask(t)))"
+                         class="bg-slate-900/90 hover:bg-slate-800 border border-blue-500/40 hover:border-blue-400 p-4 rounded-xl transition cursor-pointer group shadow-lg">
+                        <div class="flex items-center justify-between text-blue-400 text-xs font-bold uppercase tracking-wider mb-2">
+                            <span class="flex items-center gap-1.5"><i class="fa-solid fa-bag-shopping"></i> Ventas (Hoy)</span>
+                            <i class="fa-solid fa-arrow-pointer opacity-0 group-hover:opacity-100 transition-opacity text-[10px]"></i>
+                        </div>
+                        <div class="flex items-baseline justify-between">
+                            <span id="kpi-ventas-hoy" class="text-4xl font-black text-blue-400 font-mono tracking-tight">0</span>
+                            <span class="text-[11px] text-blue-300/80 font-mono font-bold">uds hoy</span>
+                        </div>
+                        <div class="mt-2 pt-2 border-t border-slate-800 flex justify-between items-center text-[10px] text-slate-400 font-mono">
+                            <span>Próx 7 días:</span>
+                            <strong id="kpi-ventas-semana" class="text-slate-200">0 uds</strong>
+                        </div>
                     </div>
-                    <div class="hidden sm:flex items-center gap-2 bg-amber-500/15 border border-amber-500/40 px-3 py-1.5 rounded-xl text-xs text-amber-200 font-medium">
-                        <i class="fa-solid fa-arrow-pointer text-amber-400"></i> Clic para ver desglose y lotes
+
+                    <!-- SUB-TARJETA REEMPLAZOS HOY -->
+                    <div onclick="openModal('Tiquets de Reemplazos (Hoy)', window.allTasks.filter(t => t.dateInfo && t.dateInfo.isTodayOrOverdue && !t.esSoloRecibir && !isTaskCompleted(t) && isReemplazoTask(t)))"
+                         class="bg-slate-900/90 hover:bg-slate-800 border border-amber-500/40 hover:border-amber-400 p-4 rounded-xl transition cursor-pointer group shadow-lg">
+                        <div class="flex items-center justify-between text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
+                            <span class="flex items-center gap-1.5"><i class="fa-solid fa-rotate-left"></i> Reemplazos (Hoy)</span>
+                            <i class="fa-solid fa-arrow-pointer opacity-0 group-hover:opacity-100 transition-opacity text-[10px]"></i>
+                        </div>
+                        <div class="flex items-baseline justify-between">
+                            <span id="kpi-reemplazos-hoy" class="text-4xl font-black text-amber-400 font-mono tracking-tight">0</span>
+                            <span class="text-[11px] text-amber-300/80 font-mono font-bold">uds hoy</span>
+                        </div>
+                        <div class="mt-2 pt-2 border-t border-slate-800 flex justify-between items-center text-[10px] text-slate-400 font-mono">
+                            <span>Próx 7 días:</span>
+                            <strong id="kpi-reemplazos-semana" class="text-slate-200">0 uds</strong>
+                        </div>
                     </div>
                 </div>
             </div>
 
+            <!-- DEMANDA PLANIFICADA TOTAL (7 DÍAS) -->
             <div onclick="openModal('A Fabricar (Próx. 7 Días Lab.)', window.allTasks.filter(t => t.dateInfo && t.dateInfo.isWithinWindow && !t.esSoloRecibir && !t.esAccesorio && !isTaskCompleted(t)))" 
-                 class="lg:col-span-5 bi-kpi-card rounded-2xl p-6 flex flex-col justify-between">
+                 class="lg:col-span-4 bi-kpi-card rounded-2xl p-6 flex flex-col justify-between">
                 <div class="flex justify-between items-start">
                     <div>
                         <span class="text-xs font-extrabold uppercase tracking-widest text-slate-400">DEMANDA PLANIFICADA</span>
@@ -184,7 +205,7 @@
                         <span id="kpi-semana" class="text-5xl font-black text-white font-mono tracking-tight">0</span>
                         <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">unidades totales</span>
                     </div>
-                    <span class="text-xs text-blue-400 font-mono font-medium">Ventana 7d hábiles</span>
+                    <span class="text-xs text-blue-400 font-mono font-medium">7d hábiles</span>
                 </div>
             </div>
         </div>
@@ -454,6 +475,18 @@
         let currentTableFilter = 'ALL';
 
         let lastFetchTimestamp = null;
+
+        function isVentaTask(t) {
+            if (!t) return false;
+            const nameUpper = (t.nombre || '').toUpperCase();
+            return (t.etiquetas || []).some(e => e.includes('VENTA')) || nameUpper.includes('VENTA');
+        }
+
+        function isReemplazoTask(t) {
+            if (!t) return false;
+            const nameUpper = (t.nombre || '').toUpperCase();
+            return (t.etiquetas || []).some(e => e.includes('REEMPLAZO')) || nameUpper.includes('REEMPLAZO') || t.esAccesorio;
+        }
 
         function updateFreshnessIndicator() {
             if (!lastFetchTimestamp) return;
@@ -1108,7 +1141,9 @@
         }
 
         function updateDashboard() {
-            let totalSemana = 0, totalHoy = 0;
+            let totalSemana = 0;
+            let ventasHoy = 0, ventasSemana = 0;
+            let reemplazosHoy = 0, reemplazosSemana = 0;
             let statsModelos = { 'Ixotrack': 0, 'Ixotrack pro': 0, 'IxotrackproM10': 0, 'IxotrackproM10LR': 0, 'Cowpro v2': 0, 'Gateway': 0, 'Otro': 0 };
             let statsEtiquetas = {}; 
 
@@ -1118,26 +1153,38 @@
             window.allTasks.forEach(t => {
                 const completed = isTaskCompleted(t);
 
-                if (!t.esSoloRecibir && !t.esAccesorio && !completed) {
-                    if (t.dateInfo && t.dateInfo.isWithinWindow) totalSemana += t.unidades;
-                    if (t.dateInfo && t.dateInfo.isTodayOrOverdue) totalHoy += t.unidades;
+                if (!t.esSoloRecibir && !completed) {
+                    const uds = t.unidadesBrutas > 0 ? t.unidadesBrutas : (t.unidades > 0 ? t.unidades : 1);
+                    const isV = isVentaTask(t);
+                    const isR = isReemplazoTask(t);
 
-                    const isThisW = (t.timestamp <= workWeeks.thisWeek.end);
-                    const isNextW = (t.timestamp > workWeeks.thisWeek.end && t.timestamp <= workWeeks.nextWeek.end);
+                    if (t.dateInfo && t.dateInfo.isTodayOrOverdue) {
+                        if (isV) ventasHoy += uds;
+                        if (isR) reemplazosHoy += uds;
+                    }
 
-                    t.modelosDesglose.forEach(m => {
-                        const name = m.modeloInfo ? m.modeloInfo.nombre : 'Otro';
-                        if (t.dateInfo && t.dateInfo.isWithinWindow && statsModelos[name] !== undefined) statsModelos[name] += m.unidades;
-                        if (isThisW) {
-                            if (name === 'Ixotrack') thisWeekFamilies.ixo += m.unidades;
-                            else if (name.includes('Ixotrack pro') || name.includes('M10')) thisWeekFamilies.pro += m.unidades;
-                            else if (name === 'Cowpro v2') thisWeekFamilies.cow += m.unidades;
-                        } else if (isNextW) {
-                            if (name === 'Ixotrack') nextWeekFamilies.ixo += m.unidades;
-                            else if (name.includes('Ixotrack pro') || name.includes('M10')) nextWeekFamilies.pro += m.unidades;
-                            else if (name === 'Cowpro v2') nextWeekFamilies.cow += m.unidades;
-                        }
-                    });
+                    if (t.dateInfo && t.dateInfo.isWithinWindow) {
+                        totalSemana += uds;
+                        if (isV) ventasSemana += uds;
+                        if (isR) reemplazosSemana += uds;
+
+                        const isThisW = (t.timestamp <= workWeeks.thisWeek.end);
+                        const isNextW = (t.timestamp > workWeeks.thisWeek.end && t.timestamp <= workWeeks.nextWeek.end);
+
+                        t.modelosDesglose.forEach(m => {
+                            const name = m.modeloInfo ? m.modeloInfo.nombre : 'Otro';
+                            if (statsModelos[name] !== undefined) statsModelos[name] += m.unidades;
+                            if (isThisW) {
+                                if (name === 'Ixotrack') thisWeekFamilies.ixo += m.unidades;
+                                else if (name.includes('Ixotrack pro') || name.includes('M10')) thisWeekFamilies.pro += m.unidades;
+                                else if (name === 'Cowpro v2') thisWeekFamilies.cow += m.unidades;
+                            } else if (isNextW) {
+                                if (name === 'Ixotrack') nextWeekFamilies.ixo += m.unidades;
+                                else if (name.includes('Ixotrack pro') || name.includes('M10')) nextWeekFamilies.pro += m.unidades;
+                                else if (name === 'Cowpro v2') nextWeekFamilies.cow += m.unidades;
+                            }
+                        });
+                    }
                 }
 
                 if (!completed) {
@@ -1150,9 +1197,16 @@
             updateSoporteBadge('header-soporte-nextweek', 'header-soporte-nextweek-status', nextWeekFamilies, true);
 
             const elSemana = document.getElementById('kpi-semana');
-            const elHoy = document.getElementById('kpi-hoy');
+            const elVH = document.getElementById('kpi-ventas-hoy');
+            const elVS = document.getElementById('kpi-ventas-semana');
+            const elRH = document.getElementById('kpi-reemplazos-hoy');
+            const elRS = document.getElementById('kpi-reemplazos-semana');
+
             if (elSemana) elSemana.innerText = totalSemana;
-            if (elHoy) elHoy.innerText = totalHoy;
+            if (elVH) elVH.innerText = ventasHoy;
+            if (elVS) elVS.innerText = `${ventasSemana} uds`;
+            if (elRH) elRH.innerText = reemplazosHoy;
+            if (elRS) elRS.innerText = `${reemplazosSemana} uds`;
 
             const elIxo = document.getElementById('mod-ixo');
             const elPro = document.getElementById('mod-pro');
@@ -1259,7 +1313,6 @@
             } else if (currentTab === 'ACCESORIOS') {
                 return window.allTasks.filter(t => t.esAccesorio);
             } else if (currentTab === 'BLOQUEADOS') {
-                // FILTRO CORREGIDO: Tiquets con la etiqueta 'SOLO RECIBIR' que están actualmente en la columna 'BLOQUEADO' y no cerrados
                 return window.allTasks.filter(t => t.esSoloRecibir && !isTaskCompleted(t) && t.estado.includes('BLOQUEAD'));
             }
             return [];
@@ -1589,7 +1642,7 @@
             }
 
             // -------------------------------------------------------------
-            // BLOQUE 3: PENDIENTES DE RECIBIR (FILTRADO EXACTO POR COLUMNA)
+            // BLOQUE 3: PENDIENTES DE RECIBIR
             // -------------------------------------------------------------
             else if (currentTab === 'BLOQUEADOS') {
                 const titleEl = document.getElementById('support-table-title');
