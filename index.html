@@ -135,28 +135,28 @@
     <!-- ========================================================================= -->
     <div id="env-produccion-section" class="space-y-6 max-w-[1700px] mx-auto">
         
-        <!-- OPCIÓN 2: TARJETA HERO "A FABRICAR (HOY)" DIVIDIDA EN VENTAS VS REEMPLAZOS -->
+        <!-- TARJETA HERO "A FABRICAR (HOY)" DIVIDIDA EN VENTAS VS REEMPLAZOS -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
             
-            <!-- BLOQUE HERO DIVIDIDO EN 2 COLUMNAS INTERNAS -->
             <div class="lg:col-span-8 hero-amber-card rounded-2xl p-5 flex flex-col justify-between">
-                <div class="flex justify-between items-center mb-3">
+                <div class="flex justify-between items-center mb-3 cursor-pointer" 
+                     onclick="openModal('A Fabricar Hoy y Lotes Recomendados (Global)', window.allTasks.filter(t => t.dateInfo && t.dateInfo.isWithinWindow && !t.esSoloRecibir && !t.esAccesorio && !isTaskCompleted(t)), true)">
                     <div class="flex items-center gap-2">
                         <span class="w-3 h-3 rounded-full bg-amber-400 animate-ping"></span>
                         <span class="text-xs font-black uppercase tracking-widest text-amber-400">FOCO PRINCIPAL: A FABRICAR (HOY)</span>
                     </div>
                     <span id="kpi-sugerencia-badge" class="hidden bg-amber-500/20 text-amber-300 text-xs px-2.5 py-0.5 rounded-full border border-amber-500/50 animate-pulse font-mono font-bold">
-                        <i class="fa-solid fa-bolt"></i> Oportunidad Lotes
+                        <i class="fa-solid fa-bolt"></i> Oportunidad Lotes LEAN
                     </span>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
                     <!-- SUB-TARJETA VENTAS HOY -->
-                    <div onclick="openModal('Tiquets de Ventas (Hoy)', window.allTasks.filter(t => t.dateInfo && t.dateInfo.isTodayOrOverdue && !t.esSoloRecibir && !isTaskCompleted(t) && isVentaTask(t)))"
+                    <div onclick="openModal('Tiquets de Ventas (Hoy + Próx 7d)', window.allTasks.filter(t => t.dateInfo && t.dateInfo.isWithinWindow && !t.esSoloRecibir && !isTaskCompleted(t) && isVentaTask(t)), true)"
                          class="bg-slate-900/90 hover:bg-slate-800 border border-blue-500/40 hover:border-blue-400 p-4 rounded-xl transition cursor-pointer group shadow-lg">
                         <div class="flex items-center justify-between text-blue-400 text-xs font-bold uppercase tracking-wider mb-2">
                             <span class="flex items-center gap-1.5"><i class="fa-solid fa-bag-shopping"></i> Ventas (Hoy)</span>
-                            <i class="fa-solid fa-arrow-pointer opacity-0 group-hover:opacity-100 transition-opacity text-[10px]"></i>
+                            <span class="text-[10px] text-blue-300 font-mono group-hover:underline">Ver Lotes &rarr;</span>
                         </div>
                         <div class="flex items-baseline justify-between">
                             <span id="kpi-ventas-hoy" class="text-4xl font-black text-blue-400 font-mono tracking-tight">0</span>
@@ -169,11 +169,11 @@
                     </div>
 
                     <!-- SUB-TARJETA REEMPLAZOS HOY -->
-                    <div onclick="openModal('Tiquets de Reemplazos (Hoy)', window.allTasks.filter(t => t.dateInfo && t.dateInfo.isTodayOrOverdue && !t.esSoloRecibir && !isTaskCompleted(t) && isReemplazoTask(t)))"
+                    <div onclick="openModal('Tiquets de Reemplazos (Hoy + Próx 7d)', window.allTasks.filter(t => t.dateInfo && t.dateInfo.isWithinWindow && !t.esSoloRecibir && !isTaskCompleted(t) && isReemplazoTask(t)), true)"
                          class="bg-slate-900/90 hover:bg-slate-800 border border-amber-500/40 hover:border-amber-400 p-4 rounded-xl transition cursor-pointer group shadow-lg">
                         <div class="flex items-center justify-between text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
                             <span class="flex items-center gap-1.5"><i class="fa-solid fa-rotate-left"></i> Reemplazos (Hoy)</span>
-                            <i class="fa-solid fa-arrow-pointer opacity-0 group-hover:opacity-100 transition-opacity text-[10px]"></i>
+                            <span class="text-[10px] text-amber-300 font-mono group-hover:underline">Ver Lotes &rarr;</span>
                         </div>
                         <div class="flex items-baseline justify-between">
                             <span id="kpi-reemplazos-hoy" class="text-4xl font-black text-amber-400 font-mono tracking-tight">0</span>
@@ -1026,9 +1026,12 @@
             }
         };
 
-        function checkBatchingRecommendations() {
+        // CALCULADOR LEAN EVALUANDO EL CONTEXTO
+        function checkBatchingRecommendations(targetTasks) {
             let modelsData = {};
-            window.allTasks.forEach(task => {
+            const baseTasks = (targetTasks && targetTasks.length > 0) ? targetTasks : window.allTasks;
+
+            baseTasks.forEach(task => {
                 if (task.esSoloRecibir || task.esAccesorio) return; 
                 if (isTaskCompleted(task)) return;
                 if (!task.dateInfo || !task.dateInfo.isWithinWindow) return; 
@@ -1058,7 +1061,7 @@
 
             let suggestions = [];
             for (const [model, data] of Object.entries(modelsData)) {
-                if (data.futureUnits > 0) {
+                if (data.futureUnits > 0 || data.todayUnits > 0) {
                     const batchTotal = data.todayUnits + data.futureUnits;
                     const safeId = model.replace(/[^a-zA-Z0-9]/g, '_');
 
@@ -1070,7 +1073,9 @@
                             </span>`).join('')
                         : '<span class="text-xs text-slate-400 italic">No hay tiquets con vencimiento hoy para este modelo.</span>';
 
-                    const ticketsHtml = data.futureTickets.map(t => `<span class="bg-slate-900 border border-slate-700 text-slate-300 px-2 py-1 rounded text-[11px] font-mono"><i class="fa-solid fa-ticket text-slate-500"></i> ${t}</span>`).join('');
+                    const ticketsHtml = data.futureTickets.length > 0
+                        ? data.futureTickets.map(t => `<span class="bg-slate-900 border border-slate-700 text-slate-300 px-2 py-1 rounded text-[11px] font-mono"><i class="fa-solid fa-ticket text-slate-500"></i> ${t}</span>`).join('')
+                        : '<span class="text-xs text-slate-500 italic">Sin unidades adicionales para adelantar.</span>';
 
                     suggestions.push(`
                         <div class="bg-slate-900/80 p-4 rounded-xl border border-amber-500/30 mb-3 shadow-inner">
@@ -1332,9 +1337,7 @@
             if (charts.support2) { charts.support2.destroy(); charts.support2 = null; }
             if (charts.support3) { charts.support3.destroy(); charts.support3 = null; }
 
-            // -------------------------------------------------------------
-            // BLOQUE 1: INCIDENCIAS GW & KITS SOLARES (4 KPIS + 3 CHARTS)
-            // -------------------------------------------------------------
+            // BLOQUE 1: GW & KITS
             if (currentTab === 'GW_INCIDENCIAS') {
                 const titleEl = document.getElementById('support-table-title');
                 if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-router text-orange-400"></i> Incidencias GW & Kits Solares`;
@@ -1546,9 +1549,7 @@
                 }
             }
 
-            // -------------------------------------------------------------
-            // BLOQUE 2: CORREAS & CONTRAPESOS
-            // -------------------------------------------------------------
+            // BLOQUE 2: ACCESORIOS
             else if (currentTab === 'ACCESORIOS') {
                 const titleEl = document.getElementById('support-table-title');
                 if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-weight-hanging text-cyan-400"></i> Reemplazos de Correas & Contrapesos`;
@@ -1641,9 +1642,7 @@
                 }
             }
 
-            // -------------------------------------------------------------
             // BLOQUE 3: PENDIENTES DE RECIBIR
-            // -------------------------------------------------------------
             else if (currentTab === 'BLOQUEADOS') {
                 const titleEl = document.getElementById('support-table-title');
                 if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-inbox text-purple-400"></i> Dispositivos Pendientes de Recibir`;
@@ -1736,9 +1735,7 @@
                 }
             }
 
-            // -------------------------------------------------------------
             // TABLA INFERIOR DE SOPORTE
-            // -------------------------------------------------------------
             const clientCountsAll = {};
             dataset.forEach(t => { const c = t.cliente || 'Cliente General'; clientCountsAll[c] = (clientCountsAll[c] || 0) + 1; });
 
@@ -1969,7 +1966,7 @@
         }
 
         // =========================================================================
-        // MODAL ESTÁNDAR UNIVERSAL (BLINDADO)
+        // MODAL ESTÁNDAR UNIVERSAL (100% RECUPERADO Y ADAPTADO)
         // =========================================================================
         function sortTable(col) {
             currentSort.dir = (currentSort.column === col && currentSort.dir === 'asc') ? 'desc' : 'asc';
@@ -2075,6 +2072,7 @@
                 else gwCausasBox.classList.add('hidden');
             }
 
+            // Resumen de modelos en Producción
             if (summaryContainer) {
                 let modelBreakdown = {};
                 (tasks || []).forEach(t => {
@@ -2104,9 +2102,10 @@
                 }
             }
 
+            // Oportunidades LEAN evaluadas sobre el conjunto filtrado
             if (recBox) {
                 if (showRecommendations) {
-                    const sugerencias = checkBatchingRecommendations();
+                    const sugerencias = checkBatchingRecommendations(tasks);
                     const recList = document.getElementById('modal-recommendation-list');
                     if (sugerencias.length > 0 && recList) {
                         recList.innerHTML = sugerencias.join('');
