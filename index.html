@@ -35,6 +35,7 @@
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #0b1329; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
         .tab-btn.active { background-color: #3b82f6; color: #ffffff; box-shadow: 0 0 12px rgba(59, 130, 246, 0.4); }
         .support-tab-btn.active { background-color: #8b5cf6; color: #ffffff; box-shadow: 0 0 14px rgba(139, 92, 246, 0.45); }
         .cause-chip.active { background-color: #8b5cf6 !important; border-color: #c084fc !important; color: #ffffff !important; }
@@ -379,58 +380,63 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- MODAL EMERGENTE UNIVERSAL (DESGLOSES Y KPIS) -->
+    <!-- MODAL EMERGENTE UNIVERSAL (ESTRUCTURA DE SCROLL CORREGIDA) -->
     <!-- ========================================================================= -->
     <div id="detail-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 opacity-0 transition-opacity duration-300">
         <div class="absolute inset-0 bg-slate-950/85 backdrop-blur-md cursor-pointer" onclick="closeModal()"></div>
         <div class="relative bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl transform transition-transform duration-300 scale-95 overflow-hidden" id="modal-content-box">
             
-            <div class="flex justify-between items-center p-5 border-b border-slate-800 bg-slate-900">
+            <!-- HEADER FIJO ARRIBA -->
+            <div class="flex justify-between items-center p-5 border-b border-slate-800 bg-slate-900 flex-none">
                 <h3 id="modal-title" class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-filter text-brand-blue"></i> Desglose</h3>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 w-8 h-8 rounded-lg flex items-center justify-center transition cursor-pointer"><i class="fa-solid fa-times"></i></button>
             </div>
 
-            <div id="modal-gw-causas-box" class="hidden bg-slate-950/70 border-b border-purple-500/20 p-4 px-5">
-                <h4 class="text-purple-400 font-bold mb-2.5 flex items-center gap-2 text-xs uppercase tracking-wide">
-                    <i class="fa-solid fa-tags"></i> Filtrar por Causa de Incidencia:
-                </h4>
-                <div id="modal-gw-causas-list" class="flex flex-wrap gap-2"></div>
-            </div>
-
-            <div id="modal-recurrentes-clients-view" class="hidden p-5 overflow-auto flex-1">
-                <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-800">
-                    <span class="text-xs font-bold text-red-400 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-users-rays text-base"></i> Resumen de Clientes Reincidentes (&ge;2 Incidencias GW & Kits)
-                    </span>
-                    <span id="modal-recurrentes-count-badge" class="px-2.5 py-0.5 bg-red-500/20 text-red-300 border border-red-500/40 rounded-full text-xs font-mono font-bold">0 CLIENTES</span>
+            <!-- CUERPO PRINCIPAL CON SCROLLABLE INTEGRADO -->
+            <div class="flex-1 overflow-y-auto divide-y divide-slate-800/50">
+                <div id="modal-gw-causas-box" class="hidden bg-slate-950/70 p-4 px-5">
+                    <h4 class="text-purple-400 font-bold mb-2.5 flex items-center gap-2 text-xs uppercase tracking-wide">
+                        <i class="fa-solid fa-tags"></i> Filtrar por Causa de Incidencia:
+                    </h4>
+                    <div id="modal-gw-causas-list" class="flex flex-wrap gap-2"></div>
                 </div>
-                <div id="modal-recurrentes-clients-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
-            </div>
 
-            <div id="modal-summary-models-box" class="hidden bg-slate-950/60 border-b border-slate-800/80 p-4 px-5">
-                <div id="modal-summary-models-list" class="flex flex-wrap gap-2.5"></div>
-            </div>
+                <div id="modal-recurrentes-clients-view" class="hidden p-5">
+                    <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-800">
+                        <span class="text-xs font-bold text-red-400 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-users-rays text-base"></i> Resumen de Clientes Reincidentes (&ge;2 Incidencias GW & Kits)
+                        </span>
+                        <span id="modal-recurrentes-count-badge" class="px-2.5 py-0.5 bg-red-500/20 text-red-300 border border-red-500/40 rounded-full text-xs font-mono font-bold">0 CLIENTES</span>
+                    </div>
+                    <div id="modal-recurrentes-clients-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
+                </div>
 
-            <div id="modal-recommendation-box" class="hidden bg-amber-500/10 border-b border-amber-500/30 p-5">
-                <h4 class="text-amber-400 font-bold mb-3 flex items-center gap-2 text-sm uppercase tracking-wide"><i class="fa-solid fa-bolt"></i> Oportunidades de Producción en Serie</h4>
-                <div id="modal-recommendation-list" class="space-y-3"></div>
-            </div>
+                <div id="modal-summary-models-box" class="hidden bg-slate-950/60 p-4 px-5">
+                    <div id="modal-summary-models-list" class="flex flex-wrap gap-2.5"></div>
+                </div>
 
-            <div id="modal-standard-table-container" class="overflow-auto flex-1 p-5">
-                <table class="w-full text-left border-collapse text-sm">
-                    <thead class="sticky top-0 bg-slate-900">
-                        <tr class="border-b border-slate-800 text-xs text-slate-400 uppercase tracking-wider font-semibold">
-                            <th class="pb-3 pr-4">Tiquet / Etiquetas</th>
-                            <th class="pb-3 px-4">Clasificación / Causa</th>
-                            <th class="pb-3 px-4 text-center">Uds</th>
-                            <th class="pb-3 pl-4 text-right">Deadline</th>
-                        </tr>
-                    </thead>
-                    <tbody id="modal-table-body" class="divide-y divide-slate-800/60"></tbody>
-                </table>
+                <div id="modal-recommendation-box" class="hidden bg-amber-500/10 p-5">
+                    <h4 class="text-amber-400 font-bold mb-3 flex items-center gap-2 text-sm uppercase tracking-wide"><i class="fa-solid fa-bolt"></i> Oportunidades de Producción en Serie</h4>
+                    <div id="modal-recommendation-list" class="space-y-3"></div>
+                </div>
+
+                <div id="modal-standard-table-container" class="p-5">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead class="sticky top-0 bg-slate-900/95 backdrop-blur-md z-10">
+                            <tr class="border-b border-slate-800 text-xs text-slate-400 uppercase tracking-wider font-semibold">
+                                <th class="pb-3 pr-4">Tiquet / Etiquetas</th>
+                                <th class="pb-3 px-4">Clasificación / Causa</th>
+                                <th class="pb-3 px-4 text-center">Uds</th>
+                                <th class="pb-3 pl-4 text-right">Deadline</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modal-table-body" class="divide-y divide-slate-800/60"></tbody>
+                    </table>
+                </div>
             </div>
             
-            <div id="modal-standard-footer" class="p-4 border-t border-slate-800 bg-slate-950/80 flex justify-between items-center">
+            <!-- FOOTER FIJO ABAJO -->
+            <div id="modal-standard-footer" class="p-4 border-t border-slate-800 bg-slate-950/80 flex justify-between items-center flex-none">
                 <span class="text-xs text-slate-500 font-mono" id="modal-total-tickets">0 ROWS</span>
                 <div class="text-right flex items-baseline gap-2">
                     <span class="text-xs text-slate-400 uppercase font-semibold">Suma Unidades:</span>
@@ -1026,7 +1032,6 @@
             }
         };
 
-        // CALCULADOR LEAN EVALUANDO EL CONTEXTO
         function checkBatchingRecommendations(targetTasks) {
             let modelsData = {};
             const baseTasks = (targetTasks && targetTasks.length > 0) ? targetTasks : window.allTasks;
@@ -2102,7 +2107,7 @@
                 }
             }
 
-            // Oportunidades LEAN evaluadas sobre el conjunto filtrado
+            // Recomendaciones LEAN evaluadas sobre el conjunto filtrado
             if (recBox) {
                 if (showRecommendations) {
                     const sugerencias = checkBatchingRecommendations(tasks);
