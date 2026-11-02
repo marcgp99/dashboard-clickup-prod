@@ -331,9 +331,10 @@
                         class="support-tab-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white">
                     <i class="fa-solid fa-weight-hanging"></i> 2. Correas & Contrapesos
                 </button>
+                <!-- SUB-PESTAÑA 3 ACTUALIZADA: SOLO RECIBIR -->
                 <button type="button" onclick="setSupportSubTab('BLOQUEADOS')" id="subtab-BLOQUEADOS" 
                         class="support-tab-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white">
-                    <i class="fa-solid fa-inbox"></i> 3. Pendientes de Recibir
+                    <i class="fa-solid fa-inbox"></i> 3. Solo Recibir
                 </button>
             </div>
 
@@ -673,7 +674,12 @@
             return ['LISTO', 'COMPLETADO', 'CERRADO', 'DONE', 'CLOSED'].includes(status);
         }
 
+        // FUNCIÓN ACTUALIZADA: RECONOCE TANTO LA NUEVA COLUMNA "SOLO RECIBIR" COMO ETIQUETAS
         function checkSoloRecibir(task) {
+            const statusName = (task.status && task.status.status ? task.status.status : '').toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            if (statusName.includes("SOLO RECIBIR") || statusName.includes("RECIBIR")) {
+                return true;
+            }
             if (task.tags && Array.isArray(task.tags)) {
                 return task.tags.some(t => t.name && t.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes("solo recibir"));
             }
@@ -1078,7 +1084,7 @@
                             </span>`).join('')
                         : '<span class="text-xs text-slate-400 italic">No hay tiquets con vencimiento hoy para este modelo.</span>';
 
-                    const ticketsHtml = data.futureTickets.length > 0
+                    const ticketsHtml = data.futureTickets.length > 0 
                         ? data.futureTickets.map(t => `<span class="bg-slate-900 border border-slate-700 text-slate-300 px-2 py-1 rounded text-[11px] font-mono"><i class="fa-solid fa-ticket text-slate-500"></i> ${t}</span>`).join('')
                         : '<span class="text-xs text-slate-500 italic">Sin unidades adicionales para adelantar.</span>';
 
@@ -1323,7 +1329,8 @@
             } else if (currentTab === 'ACCESORIOS') {
                 return window.allTasks.filter(t => t.esAccesorio);
             } else if (currentTab === 'BLOQUEADOS') {
-                return window.allTasks.filter(t => t.esSoloRecibir && !isTaskCompleted(t) && t.estado.includes('BLOQUEAD'));
+                // FILTRO DIRECTO A LA NUEVA COLUMNA O ETIQUETA "SOLO RECIBIR"
+                return window.allTasks.filter(t => !isTaskCompleted(t) && (t.esSoloRecibir || (t.estado && t.estado.includes('RECIBIR'))));
             }
             return [];
         }
@@ -1647,10 +1654,10 @@
                 }
             }
 
-            // BLOQUE 3: PENDIENTES DE RECIBIR
+            // BLOQUE 3: SOLO RECIBIR (ACTUALIZADO CON LA NUEVA COLUMNA)
             else if (currentTab === 'BLOQUEADOS') {
                 const titleEl = document.getElementById('support-table-title');
-                if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-inbox text-purple-400"></i> Dispositivos Pendientes de Recibir`;
+                if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-inbox text-purple-400"></i> Dispositivos en "Solo Recibir"`;
                 if (tableControls) tableControls.innerHTML = ``;
 
                 let totalRecibir = 0;
@@ -1664,10 +1671,10 @@
                 });
 
                 let modelCardsHtml = `
-                    <div onclick="openSupportModalSimple('Todos los Tiquets: Pendientes por Recibir', getSupportDataset())" 
-                         class="bi-kpi-card rounded-2xl p-5 border-l-4 border-l-purple-500 group" title="Haz clic para ver todos los tiquets bloqueados">
+                    <div onclick="openSupportModalSimple('Todos los Tiquets: Solo Recibir', getSupportDataset())" 
+                         class="bi-kpi-card rounded-2xl p-5 border-l-4 border-l-purple-500 group" title="Haz clic para ver todos los tiquets de Solo Recibir">
                         <div class="flex items-center justify-between text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
-                            <span>Total Dispositivos a Recibir</span>
+                            <span>Total Dispositivos Solo Recibir</span>
                             <i class="fa-solid fa-box-open text-purple-400 group-hover:scale-125 transition-transform"></i>
                         </div>
                         <div class="flex items-baseline justify-between">
@@ -1680,7 +1687,7 @@
                 Object.entries(modelsPending).forEach(([mName, count]) => {
                     const hex = getModelColorHex(mName);
                     modelCardsHtml += `
-                        <div onclick="openSupportModalSimple('Pendiente Recibir: ${mName}', getSupportDataset().filter(t => t.modeloInfo && t.modeloInfo.nombre === '${mName}'))" 
+                        <div onclick="openSupportModalSimple('Solo Recibir: ${mName}', getSupportDataset().filter(t => t.modeloInfo && t.modeloInfo.nombre === '${mName}'))" 
                              class="bi-kpi-card rounded-2xl p-5 group" style="border-left: 4px solid ${hex} !important" title="Haz clic para ver tiquets de ${mName}">
                             <div class="flex items-center justify-between text-slate-300 text-xs font-bold uppercase tracking-wider mb-2">
                                 <span>${mName}</span>
@@ -1705,7 +1712,7 @@
                         <div class="bi-panel p-5">
                             <div class="flex items-center justify-between mb-3">
                                 <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                                    <i class="fa-solid fa-chart-pie text-purple-400"></i> Desglose por Modelo de Dispositivo Pendiente de Recibir
+                                    <i class="fa-solid fa-chart-pie text-purple-400"></i> Desglose por Modelo en "Solo Recibir"
                                 </h3>
                                 <span class="text-[10px] text-slate-500 font-mono">Haz clic en un modelo para ver tiquets</span>
                             </div>
@@ -1731,7 +1738,7 @@
                                 onClick: (e, activeEls) => {
                                     if (activeEls.length > 0) {
                                         const selectedModel = modelNames[activeEls[0].index];
-                                        openSupportModalSimple(`Pendiente Recibir: ${selectedModel}`, dataset.filter(t => t.modeloInfo && t.modeloInfo.nombre === selectedModel));
+                                        openSupportModalSimple(`Solo Recibir: ${selectedModel}`, dataset.filter(t => t.modeloInfo && t.modeloInfo.nombre === selectedModel));
                                     }
                                 }
                             }
@@ -1971,7 +1978,7 @@
         }
 
         // =========================================================================
-        // MODAL ESTÁNDAR UNIVERSAL (100% RECUPERADO Y ADAPTADO)
+        // MODAL ESTÁNDAR UNIVERSAL (CON SCROLL CONTINUO INTEGRADO)
         // =========================================================================
         function sortTable(col) {
             currentSort.dir = (currentSort.column === col && currentSort.dir === 'asc') ? 'desc' : 'asc';
@@ -2107,7 +2114,7 @@
                 }
             }
 
-            // Recomendaciones LEAN evaluadas sobre el conjunto filtrado
+            // Recomendaciones LEAN evaluadas contextualmente
             if (recBox) {
                 if (showRecommendations) {
                     const sugerencias = checkBatchingRecommendations(tasks);
