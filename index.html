@@ -331,7 +331,6 @@
                         class="support-tab-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white">
                     <i class="fa-solid fa-weight-hanging"></i> 2. Correas & Contrapesos
                 </button>
-                <!-- SUB-PESTAÑA 3 ACTUALIZADA: SOLO RECIBIR -->
                 <button type="button" onclick="setSupportSubTab('BLOQUEADOS')" id="subtab-BLOQUEADOS" 
                         class="support-tab-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white">
                     <i class="fa-solid fa-inbox"></i> 3. Solo Recibir
@@ -366,7 +365,7 @@
                         <tr class="text-xs text-slate-400 uppercase tracking-wider font-semibold">
                             <th class="py-3.5 px-4 w-48">Cliente</th>
                             <th class="py-3.5 px-4">Tiquet / Asunto</th>
-                            <th class="py-3.5 px-4 w-52">Causa / Modelo GW</th>
+                            <th class="py-3.5 px-4 w-56">Causa / Diagnóstico</th>
                             <th class="py-3.5 px-4 text-center w-20">Uds</th>
                             <th class="py-3.5 px-4 w-28">Estado</th>
                             <th class="py-3.5 px-4 w-28 text-right">Deadline</th>
@@ -381,19 +380,17 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- MODAL EMERGENTE UNIVERSAL (ESTRUCTURA DE SCROLL CORREGIDA) -->
+    <!-- MODAL EMERGENTE UNIVERSAL (ESTRUCTURA DE SCROLL INTEGRADO) -->
     <!-- ========================================================================= -->
     <div id="detail-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 opacity-0 transition-opacity duration-300">
         <div class="absolute inset-0 bg-slate-950/85 backdrop-blur-md cursor-pointer" onclick="closeModal()"></div>
         <div class="relative bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl transform transition-transform duration-300 scale-95 overflow-hidden" id="modal-content-box">
             
-            <!-- HEADER FIJO ARRIBA -->
             <div class="flex justify-between items-center p-5 border-b border-slate-800 bg-slate-900 flex-none">
                 <h3 id="modal-title" class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-filter text-brand-blue"></i> Desglose</h3>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 w-8 h-8 rounded-lg flex items-center justify-center transition cursor-pointer"><i class="fa-solid fa-times"></i></button>
             </div>
 
-            <!-- CUERPO PRINCIPAL CON SCROLLABLE INTEGRADO -->
             <div class="flex-1 overflow-y-auto divide-y divide-slate-800/50">
                 <div id="modal-gw-causas-box" class="hidden bg-slate-950/70 p-4 px-5">
                     <h4 class="text-purple-400 font-bold mb-2.5 flex items-center gap-2 text-xs uppercase tracking-wide">
@@ -436,7 +433,6 @@
                 </div>
             </div>
             
-            <!-- FOOTER FIJO ABAJO -->
             <div id="modal-standard-footer" class="p-4 border-t border-slate-800 bg-slate-950/80 flex justify-between items-center flex-none">
                 <span class="text-xs text-slate-500 font-mono" id="modal-total-tickets">0 ROWS</span>
                 <div class="text-right flex items-baseline gap-2">
@@ -483,10 +479,16 @@
 
         let lastFetchTimestamp = null;
 
+        // IDENTIFICADOR DE TICKET DE VENTA (ROBUSTO)
         function isVentaTask(t) {
             if (!t) return false;
-            const nameUpper = (t.nombre || '').toUpperCase();
-            return (t.etiquetas || []).some(e => e.includes('VENTA')) || nameUpper.includes('VENTA');
+            const nameUpper = (t.nombre || '').toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const hasVentaTag = (t.etiquetas || []).some(e => {
+                const eu = e.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                return eu.includes('VENTA');
+            });
+            const hasVentaName = /\bVENTAS?\b/i.test(nameUpper);
+            return hasVentaTag || hasVentaName;
         }
 
         function isReemplazoTask(t) {
@@ -593,8 +595,14 @@
             renderSupportView();
         }
 
+        // =========================================================================
+        // FILTRADO ESTRICTO DE INCIDENCIAS GW & SOLAR (EXCLUYE CUALQUIER VENTA)
+        // =========================================================================
         function isStrictlyGWOrKit(t) {
             if (t.esAccesorio || t.esSoloRecibir) return false;
+            
+            // REGLA DE ORO: SI ES VENTA, QUEDA EXCLUIDO AUTOMÁTICAMENTE DE INCIDENCIAS
+            if (isVentaTask(t)) return false;
 
             const nameLower = (t.nombre || '').toLowerCase();
             const descLower = (t.description || '').toLowerCase();
@@ -625,25 +633,44 @@
             return 'Sin especificar';
         }
 
+        // =========================================================================
+        // CLASIFICADOR DE CAUSAS POR SÍNTOMA REAL DE AVERÍA
+        // =========================================================================
         function analyzeSupportIssue(task) {
             const raw = ((task.nombre || '') + ' ' + (task.description || '') + ' ' + ((task.tags || []).map(x=>x.name).join(' '))).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             
-            if (raw.includes('bateria') || raw.includes('pila') || raw.includes('carga') || raw.includes('descarga') || raw.includes('battery')) {
-                return { tipo: 'Cambio Batería', hex: '#f59e0b', icon: 'fa-battery-quarter' };
+            // 1. Averías de Batería y Alimentación
+            if (raw.includes('bateria') || raw.includes('pila') || raw.includes('battery') || raw.includes('descarga') || raw.includes('sulfata')) {
+                return { tipo: 'Batería / Alimentación', hex: '#f59e0b', icon: 'fa-battery-quarter' };
             }
-            if (raw.includes('cable') || raw.includes('conector') || raw.includes('alimentacion') || raw.includes('borne') || raw.includes('cables')) {
+
+            // 2. Cables / Conectores cortados o dañados
+            if (raw.includes('cable') || raw.includes('conector') || raw.includes('borne') || raw.includes('cortado') || raw.includes('pelado') || raw.includes('empalme')) {
                 return { tipo: 'Cables / Conectores', hex: '#3b82f6', icon: 'fa-plug' };
             }
-            if (raw.includes('panel') || raw.includes('solar') || raw.includes('placa') || raw.includes('kit solar') || raw.includes('1as') || raw.includes('2as')) {
-                return { tipo: 'Panel Solar / Kit', hex: '#10b981', icon: 'fa-solar-panel' };
+
+            // 3. Fallo explícito del Panel Solar
+            if (raw.includes('no carga') || raw.includes('panel roto') || raw.includes('placa rota') || raw.includes('regulador') || raw.includes('fallo solar') || raw.includes('cristal roto')) {
+                return { tipo: 'Fallo Panel / Carga Solar', hex: '#10b981', icon: 'fa-solar-panel' };
             }
-            if (raw.includes('antena') || raw.includes('cobertura') || raw.includes('lora') || raw.includes('alcance') || raw.includes('desconectad') || raw.includes('senal') || raw.includes('señal')) {
-                return { tipo: 'Antena / Cobertura', hex: '#06b6d4', icon: 'fa-tower-broadcast' };
+
+            // 4. Cobertura / Antena / Pérdida de Señal LoRa
+            if (raw.includes('cobertura') || raw.includes('alcance') || raw.includes('antena rota') || raw.includes('lora') || raw.includes('desconecta') || raw.includes('sin senal') || raw.includes('perdida senal')) {
+                return { tipo: 'Antena / Cobertura LoRa', hex: '#06b6d4', icon: 'fa-tower-broadcast' };
             }
-            if (raw.includes('no enciende') || raw.includes('roto') || raw.includes('reinicio') || raw.includes('hardware') || raw.includes('placa base') || raw.includes('gateway') || raw.includes('gw')) {
-                return { tipo: 'Hardware / Propio GW', hex: '#f97316', icon: 'fa-microchip' };
+
+            // 5. Hardware / Placa Base / Equipo Dañado
+            if (raw.includes('no enciende') || raw.includes('placa base') || raw.includes('quemado') || raw.includes('reinicio') || raw.includes('luz roja') || raw.includes('muerto') || raw.includes('hardware') || raw.includes('roto')) {
+                return { tipo: 'Hardware / Placa Base', hex: '#f97316', icon: 'fa-microchip' };
             }
-            return { tipo: 'Incidencia General GW', hex: '#8b5cf6', icon: 'fa-circle-question' };
+
+            // 6. Si es un Kit Solar pero no se especifica síntoma claro
+            if (raw.includes('solar') || raw.includes('panel') || raw.includes('1as') || raw.includes('2as')) {
+                return { tipo: 'Incidencia Kit Solar', hex: '#14b8a6', icon: 'fa-solar-panel' };
+            }
+
+            // 7. General / Diagnóstico Pendiente (cuando sólo se indica "Incidencia GW", "Revisar", etc.)
+            return { tipo: 'Revisión / Diagnóstico GW', hex: '#8b5cf6', icon: 'fa-circle-question' };
         }
 
         function checkPinAuth() {
@@ -674,7 +701,6 @@
             return ['LISTO', 'COMPLETADO', 'CERRADO', 'DONE', 'CLOSED'].includes(status);
         }
 
-        // FUNCIÓN ACTUALIZADA: RECONOCE TANTO LA NUEVA COLUMNA "SOLO RECIBIR" COMO ETIQUETAS
         function checkSoloRecibir(task) {
             const statusName = (task.status && task.status.status ? task.status.status : '').toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             if (statusName.includes("SOLO RECIBIR") || statusName.includes("RECIBIR")) {
@@ -1329,7 +1355,6 @@
             } else if (currentTab === 'ACCESORIOS') {
                 return window.allTasks.filter(t => t.esAccesorio);
             } else if (currentTab === 'BLOQUEADOS') {
-                // FILTRO DIRECTO A LA NUEVA COLUMNA O ETIQUETA "SOLO RECIBIR"
                 return window.allTasks.filter(t => !isTaskCompleted(t) && (t.esSoloRecibir || (t.estado && t.estado.includes('RECIBIR'))));
             }
             return [];
@@ -1492,7 +1517,7 @@
                             type: 'doughnut',
                             data: {
                                 labels: Object.keys(causasStats),
-                                datasets: [{ data: Object.values(causasStats), backgroundColor: ['#f59e0b', '#3b82f6', '#10b981', '#06b6d4', '#f97316', '#8b5cf6'], borderWidth: 0 }]
+                                datasets: [{ data: Object.values(causasStats), backgroundColor: ['#f59e0b', '#3b82f6', '#10b981', '#06b6d4', '#f97316', '#8b5cf6', '#14b8a6'], borderWidth: 0 }]
                             },
                             options: {
                                 responsive: true, maintainAspectRatio: false,
@@ -1654,7 +1679,7 @@
                 }
             }
 
-            // BLOQUE 3: SOLO RECIBIR (ACTUALIZADO CON LA NUEVA COLUMNA)
+            // BLOQUE 3: SOLO RECIBIR
             else if (currentTab === 'BLOQUEADOS') {
                 const titleEl = document.getElementById('support-table-title');
                 if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-inbox text-purple-400"></i> Dispositivos en "Solo Recibir"`;
