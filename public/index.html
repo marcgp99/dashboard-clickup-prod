@@ -137,7 +137,8 @@ body[data-env="sup"] .switch-env { color: #ffc35c; border-color: #6b4d12; }
 .olist { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
 .olist li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 6px; align-items: center; font-size: 11.5px; color: var(--text-2); }
 .lot .olist span.cl { font-size: 11.5px; color: var(--text-2); }
-.olist .cl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.olist .cl { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; line-height: 1.3; word-break: break-word; }
+.olist li { align-items: start; } .olist .tg, .olist .u { margin-top: 1px; }
 .lot .olist span.u, .olist .u { font: 700 11px var(--mono); color: var(--muted); white-space: nowrap; }
 .olist .u small, .lot .olist .u small { font: 500 10px var(--sans, inherit); color: var(--faint); margin-left: 3px; }
 .lot .olist span.more, .olist .more { display: block; font-size: 11px; color: var(--faint); }
@@ -941,7 +942,7 @@ function renderProdHoy() {
 const tagHtml = (t) => t.kind === 'venta' ? '<span class="tg v">Venta</span>' : t.kind === 'reemplazo' ? '<span class="tg r">Reempl.</span>' : '<span class="tg x">Sin tipo</span>';
 function orderRows(b, max) {
   const os = [...b.orders].sort((a, c) => a.due - c.due), shown = os.slice(0, max), rest = os.length - shown.length;
-  return `<ul class="olist">${shown.map(o => `<li>${tagHtml(o.t)}<span class="cl" title="${esc(o.t.client || 'Sin cliente')}">${esc(o.t.client || 'Sin cliente')}</span><span class="u">${fmt(o.u)}${o.day > b.day ? `<small>→ ${esc(fDay(o.due))}</small>` : ''}</span></li>`).join('')}${rest > 0 ? `<li><span class="more">+${rest} pedido${rest === 1 ? '' : 's'} más · clic para verlos</span></li>` : ''}</ul>`;
+  return `<ul class="olist">${shown.map(o => `<li>${tagHtml(o.t)}<span class="cl" title="${esc(o.t.name)}">${esc(o.t.name)}</span><span class="u">${fmt(o.u)}${o.day > b.day ? `<small>→ ${esc(fDay(o.due))}</small>` : ''}</span></li>`).join('')}${rest > 0 ? `<li><span class="more">+${rest} pedido${rest === 1 ? '' : 's'} más · clic para verlos</span></li>` : ''}</ul>`;
 }
 function renderCalendar() {
   const P = state.P, days = P.days.slice(state.calWin * 5, state.calWin * 5 + 5);
