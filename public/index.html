@@ -17,9 +17,9 @@
 body[data-env="prod"] { color-scheme: dark; --bg: #0b0f14; --bg-2: #0f141b; --panel: #121922; --panel-2: #161f2b; --line: #233042; --line-2: #1d2530;
   --text: #e9edf2; --text-2: #c3ccd8; --muted: #8a96a8; --faint: #5d6878; --accent: #f5a524; --accent-ink: #0b0f14; --accent-soft: #1a1408;
   --ok: #3ccf6e; --warn: #f5a524; --bad: #ef4f43; --ok-t: #7fe0a3; --warn-t: #ffc35c; --bad-t: #ff8a80; --info-t: #9fc6ff; }
-body[data-env="sup"] { color-scheme: light; --bg: #f6f6fb; --bg-2: #ffffff; --panel: #ffffff; --panel-2: #faf9ff; --line: #e6e5f0; --line-2: #efeef6;
-  --text: #1b1b2b; --text-2: #45445a; --muted: #6e6c85; --faint: #9a98ad; --accent: #5b3fe0; --accent-ink: #ffffff; --accent-soft: #efebff;
-  --ok: #1e9e55; --warn: #d98a00; --bad: #c62828; --ok-t: #1e7b45; --warn-t: #8a5a00; --bad-t: #b3261e; --info-t: #3f27b5; }
+body[data-env="sup"] { color-scheme: dark; --bg: #0b0f14; --bg-2: #0f141b; --panel: #121922; --panel-2: #161f2b; --line: #233042; --line-2: #1d2530;
+  --text: #e9edf2; --text-2: #c3ccd8; --muted: #8a96a8; --faint: #5d6878; --accent: #8b74ff; --accent-ink: #0b0f14; --accent-soft: #17132b;
+  --ok: #3ccf6e; --warn: #f5a524; --bad: #ef4f43; --ok-t: #7fe0a3; --warn-t: #ffc35c; --bad-t: #ff8a80; --info-t: #b9a8ff; }
 * { box-sizing: border-box; }
 html, body { margin: 0; }
 body { background: var(--bg); color: var(--text); font: 14px/1.45 var(--font); -webkit-font-smoothing: antialiased; min-height: 100vh; }
@@ -71,12 +71,14 @@ a { color: var(--accent); }
 .fresh.warn .dot { background: var(--warn); } .fresh.bad .dot { background: var(--bad); }
 .switch-env { font-weight: 600; text-decoration: none; border: 1px solid; padding: 7px 12px; border-radius: 8px; cursor: pointer; background: none; font-size: 12px; }
 body[data-env="prod"] .switch-env { color: #b9a8ff; border-color: #3a2f6b; }
-body[data-env="sup"] .switch-env { color: #9a6200; border-color: #f0d48f; }
+body[data-env="sup"] .switch-env { color: #ffc35c; border-color: #6b4d12; }
 
 .cupo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--line-2); border-bottom: 1px solid var(--line-2); }
 .cupo > div { background: var(--bg-2); padding: 16px 32px; display: flex; flex-direction: column; gap: 12px; }
+.cupo-pills { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+.fsub { display: block; font-size: 10.5px; font-weight: 500; color: var(--faint); margin-top: 1px; }
 .cupo-h { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
-.cupo-h span:first-child { font-size: 12px; font-weight: 700; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; }
+.cupo-h > span:first-child { font-size: 12px; font-weight: 700; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; }
 .cupo-f { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
 .fam { display: flex; flex-direction: column; gap: 6px; text-align: left; background: none; border: 0; padding: 0; cursor: pointer; }
 .fam .top { display: flex; justify-content: space-between; align-items: baseline; }
@@ -132,6 +134,20 @@ body[data-env="sup"] .switch-env { color: #9a6200; border-color: #f0d48f; }
 .lot:hover { background: color-mix(in srgb, var(--c) 22%, var(--panel)); }
 .lot b { font-size: 13px; display: block; } .lot span { font-size: 12px; color: var(--muted); }
 .lot em { font-style: normal; font-size: 11px; color: var(--info-t); font-weight: 600; }
+.olist { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+.olist li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 6px; align-items: center; font-size: 11.5px; color: var(--text-2); }
+.lot .olist span.cl { font-size: 11.5px; color: var(--text-2); }
+.olist .cl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lot .olist span.u, .olist .u { font: 700 11px var(--mono); color: var(--muted); white-space: nowrap; }
+.olist .u small, .lot .olist .u small { font: 500 10px var(--sans, inherit); color: var(--faint); margin-left: 3px; }
+.lot .olist span.more, .olist .more { display: block; font-size: 11px; color: var(--faint); }
+.olist .tg, .tg { font-size: 9px; min-width: 50px; text-align: center; line-height: 14px; font-weight: 800; letter-spacing: .04em; padding: 1px 5px; border-radius: 4px; border: 1px solid; text-transform: uppercase; }
+.tg.v { color: #c9c7d8; border-color: #5b596b; }
+.tg.r { color: #8cbcff; border-color: #2f5f9e; background: rgba(57,135,229,.12); }
+.tg.x { color: var(--faint); border-color: var(--line); }
+.order .olist { grid-template-columns: none; margin-top: 8px; gap: 4px; }
+.order .olist li { font-size: 13px; grid-template-columns: auto minmax(0, 1fr) auto; }
+.order .olist .u { font-size: 12px; }
 .gap-hint { border-radius: 9px; padding: 10px; border: 1px dashed var(--line); color: var(--muted); font-size: 12px; }
 
 .capgrid { display: grid; grid-template-columns: 130px repeat(4, minmax(0, 1fr)); gap: 8px; }
@@ -145,7 +161,7 @@ body[data-env="sup"] .switch-env { color: #9a6200; border-color: #f0d48f; }
    SOPORTE
    ========================================================================= */
 #app-sup { display: flex; flex-wrap: wrap; min-height: 100vh; }
-.s-side { flex: 0 0 236px; background: #fff; border-right: 1px solid var(--line); padding: 22px 14px; display: flex; flex-direction: column; gap: 4px; position: sticky; top: 0; height: 100vh; overflow: auto; }
+.s-side { flex: 0 0 236px; background: var(--bg-2); border-right: 1px solid var(--line); padding: 22px 14px; display: flex; flex-direction: column; gap: 4px; position: sticky; top: 0; height: 100vh; overflow: auto; }
 .s-brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 16px; }
 .s-logo { width: 32px; height: 32px; border-radius: 9px; background: var(--accent); display: grid; place-items: center; }
 .s-nav { border: 0; background: none; text-align: left; padding: 9px 12px; border-radius: 8px; color: var(--text-2); font-weight: 500; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
@@ -177,7 +193,7 @@ body[data-env="sup"] .switch-env { color: #9a6200; border-color: #f0d48f; }
 .rank button { display: grid; grid-template-columns: minmax(120px, 200px) 1fr 76px; gap: 12px; align-items: center; background: none; border: 0; padding: 2px 0; cursor: pointer; text-align: left; color: var(--text); }
 .rank button:hover span:first-child { text-decoration: underline; }
 .rank .t { height: 12px; background: var(--line-2); border-radius: 6px; overflow: hidden; } .rank .t i { display: block; height: 100%; background: var(--accent); border-radius: 6px; }
-.rank .t i.soft { background: #8f7bf0; } .rank .t i.none { background: #d6d3e6; }
+.rank .t i.soft { background: #5d4bb8; } .rank .t i.none { background: #39445a; }
 .rank .n { text-align: right; font-weight: 700; }
 .brandc { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .brandc button { text-align: left; border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: var(--panel); cursor: pointer; }
@@ -582,7 +598,8 @@ const MODELS = [
   { id: 'cow', name: 'Cowpro v2', short: 'Cowpro', family: 'cow', color: '#e66767' },
 ];
 const MODEL_BY_ID = Object.fromEntries(MODELS.map(m => [m.id, m]));
-const FAMILIES = [['ixo', 'Ixotrack', '#199e70'], ['pro', 'Familia Pro', '#3987e5'], ['cow', 'Cowpro', '#e66767']];
+const FAMILY_SUB = { pro: 'Pro · M10 · M10LR' };
+const FAMILIES = [['ixo', 'Ixotrack', '#199e70'], ['pro', 'IxotrackPro', '#3987e5'], ['cow', 'Cowpro', '#e66767']];
 const CATS = [
   { id: 'incidencia', label: 'Incidencia GW / kit', color: '#d95926' },
   { id: 'reemplazo', label: 'Reemplazo collar', color: '#3987e5' },
@@ -887,11 +904,12 @@ const shadow = () => ({ type: 'shadow', shadowStyle: { color: 'rgba(127,127,127,
 function renderCupo() {
   const P = state.P;
   const block = (w, title) => {
-    const worst = FAMILIES.map(([f, l]) => [l, pct(w.used[f], CONFIG.capacity[f])]).sort((a, b) => b[1] - a[1])[0];
-    const pill = worst[1] > 100 ? `<span class="pill bad">✕ ${esc(worst[0])} superado: no comprometer</span>` : worst[1] >= CONFIG.capacityWarnPct ? `<span class="pill warn">▲ ${esc(worst[0])} cerca del límite</span>` : '<span class="pill ok">✓ Hay cupo en todas las familias</span>';
-    return `<div><div class="cupo-h"><span>${esc(title)} · ${esc(fDay(w.start))}–${esc(fDay(w.end - 2 * DAY))}</span>${pill}</div><div class="cupo-f">${FAMILIES.map(([f, l]) => {
+    const ps = FAMILIES.map(([f, l]) => [l, pct(w.used[f], CONFIG.capacity[f])]);
+    const bad = ps.filter(x => x[1] > 100).map(x => x[0]), warn = ps.filter(x => x[1] <= 100 && x[1] >= CONFIG.capacityWarnPct).map(x => x[0]);
+    const pill = (bad.length ? `<span class="pill bad">✕ Sin cupo: ${esc(bad.join(', '))}</span>` : '') + (warn.length ? `<span class="pill warn">▲ Justo: ${esc(warn.join(', '))}</span>` : '') || '<span class="pill ok">✓ Hay cupo</span>';
+    return `<div><div class="cupo-h"><span>${esc(title)} · ${esc(fDay(w.start))}–${esc(fDay(w.end - 2 * DAY))}</span><span class="cupo-pills">${pill}</span></div><div class="cupo-f">${FAMILIES.map(([f, l]) => {
       const u = w.used[f], c = CONFIG.capacity[f], p = pct(u, c), lv = level(p);
-      return `<button class="fam" data-action="m-week" data-w="${w.i}" data-f="${f}"><span class="top"><span class="n">${esc(l)}</span><span class="v"${lv === 'bad' ? ' style="color:var(--bad-t)"' : ''}>${fmt(u)}<small>/${fmt(c)}</small></span></span><span class="bar"><i class="${lv === 'ok' ? '' : lv}" style="width:${Math.min(100, p)}%"></i></span><span class="s ${lv === 'ok' ? '' : lv}">${p} % · ${u > c ? `${fmt(u - c)} de exceso` : `quedan ${fmt(c - u)}`}</span></button>`; }).join('')}</div></div>`;
+      return `<button class="fam" data-action="m-week" data-w="${w.i}" data-f="${f}"><span class="top"><span class="n">${esc(l)}${FAMILY_SUB[f] ? `<small class="fsub">${esc(FAMILY_SUB[f])}</small>` : ''}</span><span class="v"${lv === 'bad' ? ' style="color:var(--bad-t)"' : ''}>${fmt(u)}<small>/${fmt(c)}</small></span></span><span class="bar"><i class="${lv === 'ok' ? '' : lv}" style="width:${Math.min(100, p)}%"></i></span><span class="s ${lv === 'ok' ? '' : lv}">${p} % · ${u > c ? `${fmt(u - c)} de exceso` : `quedan ${fmt(c - u)}`}</span></button>`; }).join('')}</div></div>`;
   };
   $('p-cupo').innerHTML = block(P.weeks[0], 'Cupo esta semana') + block(P.weeks[1], 'Cupo próxima semana');
   // mini-cupo en Soporte
@@ -907,9 +925,9 @@ function renderProdHoy() {
   $('p-r').textContent = fmt(P.hoy.reemplazo); $('p-rs').textContent = `${P.hoy.reemplazoT} pedidos · ver lotes →`;
   $('p-order').innerHTML = P.todayBatches.length ? P.todayBatches.map((b, i) => {
     const cap = CONFIG.dailyCapacity[b.model.family], excess = b.overDay ? Math.min(b.units, b.dayLoad - cap) : 0;
-    const desc = b.fwdUnits > 0 ? `${b.dueUnits} vencen hoy + adelanta ${b.fwdUnits} de ${b.fwdOrders} pedido${b.fwdOrders === 1 ? '' : 's'} hasta el ${fDay(b.lastDue)}` : `${b.orders.length} pedido${b.orders.length > 1 ? 's' : ''} · ${b.orders.slice(0, 4).map(o => o.t.client || 'sin cliente').join(', ')}`;
+    const desc = b.fwdUnits > 0 ? `${b.dueUnits} vencen hoy + adelanta ${b.fwdUnits} de ${b.fwdOrders} pedido${b.fwdOrders === 1 ? '' : 's'} hasta el ${fDay(b.lastDue)}` : `${b.orders.length} pedido${b.orders.length > 1 ? 's' : ''}${b.hasOverdue ? ' · incluye atrasado' : ''}`;
     const pill = excess > 0 ? `<span class="pill bad">${fmt(excess)} uds no caben hoy</span>` : b.fwdUnits > 0 ? `<span class="pill info">En serie · ${b.saved} cambio${b.saved === 1 ? '' : 's'} de modelo menos</span>` : b.hasOverdue ? '<span class="pill warn">Incluye atrasado</span>' : '<span></span>';
-    return `<li><button style="--c:${b.model.color}" data-action="m-lot" data-i="${P.batches.indexOf(b)}"><span class="k">${i + 1}</span><span><div class="t">${esc(b.model.name)} · lote ${fmt(b.units)} uds</div><div class="d">${esc(desc)}</div></span>${pill}</button></li>`;
+    return `<li><button style="--c:${b.model.color}" data-action="m-lot" data-i="${P.batches.indexOf(b)}"><span class="k">${i + 1}</span><span><div class="t">${esc(b.model.name)} · lote ${fmt(b.units)} uds</div><div class="d">${esc(desc)}</div>${orderRows(b, 6)}</span>${pill}</button></li>`;
   }).join('') : '<li class="empty">No hay nada con fecha de hoy.</li>';
   $('p-models').innerHTML = MODELS.map(m => `<button style="--c:${m.color}" data-action="m-model" data-m="${m.id}"><div class="n">${esc(m.short)}</div><div class="v">${fmt(P.byModel[m.id].upto)}</div><div class="s">hoy ${fmt(P.byModel[m.id].today)}</div></button>`).join('');
   $('p-attn').innerHTML = [
@@ -920,6 +938,11 @@ function renderProdHoy() {
   ].map(([l, v, a, c]) => `<button class="qrow ${c}" data-action="${a}"><span>${esc(l)}</span><b>${esc(v)}</b></button>`).join('');
   renderCalendar();
 }
+const tagHtml = (t) => t.kind === 'venta' ? '<span class="tg v">Venta</span>' : t.kind === 'reemplazo' ? '<span class="tg r">Reempl.</span>' : '<span class="tg x">Sin tipo</span>';
+function orderRows(b, max) {
+  const os = [...b.orders].sort((a, c) => a.due - c.due), shown = os.slice(0, max), rest = os.length - shown.length;
+  return `<ul class="olist">${shown.map(o => `<li>${tagHtml(o.t)}<span class="cl" title="${esc(o.t.client || 'Sin cliente')}">${esc(o.t.client || 'Sin cliente')}</span><span class="u">${fmt(o.u)}${o.day > b.day ? `<small>→ ${esc(fDay(o.due))}</small>` : ''}</span></li>`).join('')}${rest > 0 ? `<li><span class="more">+${rest} pedido${rest === 1 ? '' : 's'} más · clic para verlos</span></li>` : ''}</ul>`;
+}
 function renderCalendar() {
   const P = state.P, days = P.days.slice(state.calWin * 5, state.calWin * 5 + 5);
   $$('[data-action="calwin"]').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.w === state.calWin)));
@@ -928,7 +951,7 @@ function renderCalendar() {
     const total = lots.reduce((a, b) => a + b.units, 0);
     const worst = Math.max(0, ...FAMILIES.map(([f]) => pct(P.dayUse[d + ':' + f] || 0, CONFIG.dailyCapacity[f])));
     const lv = level(worst), isToday = d === P.today0;
-    const cards = lots.map(b => `<button class="lot" style="--c:${b.model.color}" data-action="m-lot" data-i="${P.batches.indexOf(b)}"><b>${esc(b.model.short)} · ${fmt(b.units)} ${b.fwdUnits > 0 ? '<em>en serie</em>' : ''}</b><span>${b.fwdUnits > 0 ? `adelanta ${fmt(b.fwdUnits)} hasta el ${esc(fDay(b.lastDue))}` : `${b.orders.length} pedido${b.orders.length > 1 ? 's' : ''}${b.hasOverdue ? ' · atrasado' : ''}`}</span></button>`).join('');
+    const cards = lots.map(b => `<button class="lot" style="--c:${b.model.color}" data-action="m-lot" data-i="${P.batches.indexOf(b)}"><b>${esc(b.model.short)} · ${fmt(b.units)} ${b.fwdUnits > 0 ? '<em>en serie</em>' : ''}</b><span>${b.fwdUnits > 0 ? `adelanta ${fmt(b.fwdUnits)} hasta el ${esc(fDay(b.lastDue))}` : `${b.orders.length} pedido${b.orders.length > 1 ? 's' : ''}${b.hasOverdue ? ' · atrasado' : ''}`}</span>${orderRows(b, 4)}</button>`).join('');
     const hint = worst < 30 ? `<div class="gap-hint">Día con hueco${lots.length ? '' : ': nada programado'}</div>` : '';
     return `<div class="day ${isToday ? 'today' : ''}"><div class="day-h"><b>${isToday ? 'Hoy · ' : ''}${esc(cap1(fDow(d)))} ${new Date(d).getDate()}</b><span class="${lv === 'bad' ? 'bad' : ''}">${fmt(total)}</span></div>
       <div class="dbar" title="Carga máxima por familia: ${worst} % de la capacidad diaria"><i class="${lv === 'ok' ? '' : lv}" style="width:${Math.min(100, worst)}%"></i></div>${lv === 'bad' ? '<div class="dnote">Supera la capacidad diaria</div>' : ''}${cards}${hint}</div>`;
@@ -937,7 +960,7 @@ function renderCalendar() {
 function renderProdCap() {
   const P = state.P;
   let h = '<div></div>' + P.weeks.map(w => `<div class="hd">${w.i === 0 ? 'Esta semana' : w.i === 1 ? 'Próxima' : `Semana ${isoWeek(w.start)}`}<b>${esc(fDay(w.start))} – ${esc(fDay(w.end - 2 * DAY))}</b></div>`).join('');
-  for (const [f, l] of FAMILIES) { h += `<div class="fn">${esc(l)}&nbsp;<span class="muted mono" style="font-size:11px">${fmt(CONFIG.capacity[f])}</span></div>`;
+  for (const [f, l] of FAMILIES) { h += `<div class="fn"><span>${esc(l)}&nbsp;<span class="muted mono" style="font-size:11px">${fmt(CONFIG.capacity[f])}</span>${FAMILY_SUB[f] ? `<small class="fsub">${esc(FAMILY_SUB[f])}</small>` : ''}</span></div>`;
     for (const w of P.weeks) { const u = w.used[f], c = CONFIG.capacity[f], p = pct(u, c), lv = level(p);
       h += `<button class="capcell" data-action="m-week" data-w="${w.i}" data-f="${f}"><span style="display:flex;justify-content:space-between;align-items:baseline"><span class="free" style="${u > c ? 'color:var(--bad-t)' : ''}">${fmt(c - u)}<small>${u > c ? 'exceso' : 'libres'}</small></span><span class="u">${fmt(u)}/${fmt(c)}</span></span><span class="bar" style="height:7px"><i class="${lv === 'ok' ? '' : lv}" style="width:${Math.min(100, p)}%"></i></span></button>`; } }
   $('p-capgrid').innerHTML = h;
@@ -1001,7 +1024,7 @@ function renderSupGeneral() {
 }
 function heatCells(c) {
   const S = state.S, months = S.months.slice(-6), counts = months.map(m => c.tasks.filter(t => monthKey(supDate(t)) === m).length);
-  const col = (v) => v === 0 ? '#f0eefb' : v === 1 ? '#c9bdff' : v <= 3 ? '#8f7bf0' : v <= 5 ? '#5b3fe0' : '#3f27b5';
+  const col = (v) => v === 0 ? '#1a2230' : v === 1 ? '#2e2763' : v <= 3 ? '#4a3c9e' : v <= 5 ? '#6f5ad8' : '#a493ff';
   return `<div class="heatrow">${counts.map((v, i) => `<span style="background:${col(v)}" title="${esc(monthLabel(months[i]))}: ${v} casos"></span>`).join('')}</div>`;
 }
 function clientTable(list, compact) {
@@ -1541,4 +1564,3 @@ if (window.__DEMO__ || pinStore.get()) load(); else showPin('');
 </script>
 </body>
 </html>
-
