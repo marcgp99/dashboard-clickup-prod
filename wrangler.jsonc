@@ -1,0 +1,39 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "dashboard-clickup-prod",
+  "main": "src/worker.js",
+  // Fecha reciente: activa las últimas correcciones del runtime. Revisar al actualizar wrangler.
+  "compatibility_date": "2026-11-01",
+
+  "assets": {
+    // SOLO esta carpeta es pública. Antes era "." y se publicaban worker.js, wrangler.json y los .md
+    "directory": "./public",
+    "binding": "ASSETS",
+    // Las rutas /api/* siempre pasan por el Worker, aunque algún día exista un archivo con ese nombre
+    "run_worker_first": ["/api/*"]
+  },
+
+  // Logs y métricas en el panel de Cloudflare (Workers → Observability)
+  "observability": { "enabled": true },
+
+  // Valores NO secretos. Los secretos van con:  npx wrangler secret put CLICKUP_TOKEN
+  //                                              npx wrangler secret put DASHBOARD_PIN
+  "vars": {
+    "CLICKUP_TEAM_ID": "90151302562",
+    "CLICKUP_FOLDER_ID": "901515642734",
+    "CACHE_TTL_SECONDS": "120",
+    "MIN_FORCE_SECONDS": "30",
+    "CLOSED_LOOKBACK_DAYS": "400",
+    "MAX_PAGES": "25",
+    "AUTH_MODE": "pin"
+    // Si se activa Cloudflare Access:
+    // "AUTH_MODE": "access",
+    // "ACCESS_TEAM_DOMAIN": "<equipo>.cloudflareaccess.com",
+    // "ACCESS_AUD": "<Application Audience (AUD) Tag>"
+  }
+
+  // Caché global recomendada (obligatoria si se usa Cloudflare Access, donde la Cache API no funciona):
+  //   npx wrangler kv namespace create HUB_CACHE
+  // y descomentar con el id que devuelva el comando:
+  // ,"kv_namespaces": [{ "binding": "HUB_CACHE", "id": "<ID_DEL_NAMESPACE>" }]
+}
