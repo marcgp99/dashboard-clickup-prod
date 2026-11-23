@@ -154,6 +154,7 @@ body[data-env="sup"] .switch-env { color: #ffc35c; border-color: #6b4d12; }
 .lot.prop { border: 1px dashed color-mix(in srgb, var(--warn) 60%, transparent); border-left: 4px solid var(--c); }
 .order button.prop { border-style: dashed; border-left-style: solid; }
 .olist .part, .lot .olist span.part { font-size: 10.5px; color: var(--faint); }
+.olist .u small.late, .lot .olist .u small.late { color: var(--bad-t); }
 .gap-hint { border-radius: 9px; padding: 10px; border: 1px dashed var(--line); color: var(--muted); font-size: 12px; }
 
 .capgrid { display: grid; grid-template-columns: 130px repeat(4, minmax(0, 1fr)); gap: 8px; }
@@ -416,15 +417,15 @@ body[data-env="prod"] .report { margin: 0 -32px; border-radius: 0; }
           <div class="box"><span class="cap">Necesitan atención</span><div id="p-attn"></div></div>
         </div>
       </div>
-      <section aria-label="Calendario de fabricación" style="display:flex;flex-direction:column;gap:14px">
+      <section aria-label="Calendario de entregas" style="display:flex;flex-direction:column;gap:14px">
         <div class="cal-head">
-          <h2 class="cap">Calendario de fabricación</h2>
+          <h2 class="cap">Calendario de entregas</h2>
           <div class="seg" role="group" aria-label="Ventana del calendario">
             <button data-action="calwin" data-w="0" aria-pressed="true">Próximos 5 días</button>
             <button data-action="calwin" data-w="1" aria-pressed="false">Días 6–10</button>
             <button data-action="calwin" data-w="2" aria-pressed="false">Días 11–15</button>
           </div>
-          <span class="muted" style="margin-left:auto;font-size:12px">Cada tarjeta es un lote · clic para ver sus pedidos · la barra es la carga del día frente a la capacidad diaria</span>
+          <span class="muted" style="margin-left:auto;font-size:12px">Pedidos en su fecha límite (no se mueven) · clic en una tarjeta para ver sus tiquets · la barra es la carga del día frente a la capacidad diaria</span>
         </div>
         <div class="cal" id="p-cal"></div>
       </section>
@@ -822,6 +823,8 @@ function buildBatches(prod, P) {
     let day = t.due < today0 ? today0 : prevOrSameBiz(Math.max(t.due, today0)); if (day < today0) day = today0; if (!isBiz(day)) day = nextBiz(day, 1)[0];
     all.push({ t, u: p.units, due: t.due, day, model: p.model }); } }
   for (const o of all) { const f = fam(o.model); dayUse[k(o.day, f)] = (dayUse[k(o.day, f)] || 0) + o.u; weekUse[wk(o.day, f)] = (weekUse[wk(o.day, f)] || 0) + o.u; }
+  // Calendario de entregas: foto de los pedidos en su fecha límite, antes de cualquier adelanto o lote
+  P.delivery = all.map(o => ({ t: o.t, u: o.u, due: o.due, day: o.day, model: o.model })); P.dlUse = { ...dayUse };
   // Adelanto propuesto: si hoy queda capacidad diaria libre, se rellena con pedidos de los próximos días
   // (primero los días que superan su capacidad diaria, luego por fecha). Es una recomendación: nunca retrasa nada.
   if (CONFIG.advanceBusinessDays > 0 && isBiz(today0)) {
@@ -978,14 +981,19 @@ function renderCalendar() {
   const P = state.P, days = P.days.slice(state.calWin * 5, state.calWin * 5 + 5);
   $$('[data-action="calwin"]').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.w === state.calWin)));
   $('p-cal').innerHTML = days.map(d => {
-    const lots = P.batches.filter(b => b.day === d);
-    const total = lots.reduce((a, b) => a + b.units, 0);
-    const worst = Math.max(0, ...FAMILIES.map(([f]) => pct(P.dayUse[d + ':' + f] || 0, CONFIG.dailyCapacity[f])));
+    const items = P.delivery.filter(o => o.day === d);
+    const total = items.reduce((a, o) => a + o.u, 0);
+    const worst = Math.max(0, ...FAMILIES.map(([f]) => pct(P.dlUse[d + ':' + f] || 0, CONFIG.dailyCapacity[f])));
     const lv = level(worst), isToday = d === P.today0;
-    const cards = lots.map(b => `<button class="lot ${b.advUnits > 0 ? 'prop' : ''}" style="--c:${b.model.color}" data-action="m-lot" data-i="${P.batches.indexOf(b)}"><b>${esc(b.model.short)} · ${fmt(b.units)} ${b.advUnits > 0 ? '<em class="adv-t">adelanto propuesto</em>' : b.fwdUnits > 0 ? '<em>en serie</em>' : ''}</b><span>${b.advUnits > 0 ? `${b.dueUnits - b.advUnits > 0 ? `${fmt(b.dueUnits - b.advUnits)} de hoy + ` : ''}${fmt(b.advUnits + b.fwdUnits)} adelantadas hasta el ${esc(fDay(b.lastDue))}` : b.fwdUnits > 0 ? `adelanta ${fmt(b.fwdUnits)} hasta el ${esc(fDay(b.lastDue))}` : `${b.orders.length} pedido${b.orders.length > 1 ? 's' : ''}${b.hasOverdue ? ' · atrasado' : ''}`}</span>${orderRows(b, 4)}</button>`).join('');
-    const hint = worst < 30 ? `<div class="gap-hint">Día con hueco${lots.length ? '' : ': nada programado'}</div>` : '';
+    const cards = MODELS.map(m => {
+      const os = items.filter(o => o.model === m.id).sort((a, b) => a.due - b.due || a.t.prio - b.t.prio); if (!os.length) return '';
+      const u = os.reduce((a, o) => a + o.u, 0), late = os.filter(o => o.due < P.today0).length, shown = os.slice(0, 5), rest = os.length - shown.length;
+      const rows = shown.map(o => `<li>${tagHtml(o.t)}<span class="cl" title="${esc(o.t.name)}">${esc(o.t.name)}</span><span class="u">${fmt(o.u)}${o.due < P.today0 ? `<small class="late">atrasado ${esc(fDay(o.due))}</small>` : ''}</span></li>`).join('');
+      return `<button class="lot" style="--c:${m.color}" data-action="m-deliv" data-d="${d}" data-m="${m.id}"><b>${esc(m.short)} · ${fmt(u)}</b><span>${os.length} pedido${os.length > 1 ? 's' : ''}${late ? ` · ${late} atrasado${late > 1 ? 's' : ''}` : ''}</span><ul class="olist">${rows}${rest > 0 ? `<li><span class="more">+${rest} pedido${rest === 1 ? '' : 's'} más · clic para verlos</span></li>` : ''}</ul></button>`;
+    }).join('');
+    const hint = worst < 30 ? `<div class="gap-hint">Día con hueco${items.length ? '' : ': ninguna entrega'}</div>` : '';
     return `<div class="day ${isToday ? 'today' : ''}"><div class="day-h"><b>${isToday ? 'Hoy · ' : ''}${esc(cap1(fDow(d)))} ${new Date(d).getDate()}</b><span class="${lv === 'bad' ? 'bad' : ''}">${fmt(total)}</span></div>
-      <div class="dbar" title="Carga máxima por familia: ${worst} % de la capacidad diaria"><i class="${lv === 'ok' ? '' : lv}" style="width:${Math.min(100, worst)}%"></i></div>${lv === 'bad' ? '<div class="dnote">Supera la capacidad diaria</div>' : ''}${cards}${hint}</div>`;
+      <div class="dbar" title="Carga máxima por familia: ${worst} % de la capacidad diaria"><i class="${lv === 'ok' ? '' : lv}" style="width:${Math.min(100, worst)}%"></i></div>${lv === 'bad' ? '<div class="dnote">Supera la capacidad diaria: conviene adelantar parte</div>' : ''}${cards}${hint}</div>`;
   }).join('');
 }
 function renderProdCap() {
@@ -1510,6 +1518,8 @@ document.addEventListener('click', (e) => {
     case 'm-overdue': { const P = state.P, ts = state.tasks.filter(t => !t.closed && t.production && t.units > 0 && t.due !== null && t.due < P.today0); return openList('Pedidos atrasados', `${fmt(P.atrasado.units)} uds`, ts, 'prod', 'model', batchesFor(ts, P.today0)); }
     case 'm-week': return openWeek(+D.w, D.f);
     case 'm-model': { const m = MODEL_BY_ID[D.m]; return openList(m.name, `Pedidos activos · cupo de la familia ${fmt(CONFIG.capacity[m.family])} uds/semana`, state.tasks.filter(t => !t.closed && t.production && t.units > 0 && t.parts.some(p => p.model === D.m)), 'prod', 'model', state.P.batches.filter(b => b.model.id === D.m)); }
+    case 'm-deliv': { const P = state.P, d = +D.d, m = MODEL_BY_ID[D.m], os = P.delivery.filter(o => o.day === d && o.model === D.m), tasks = [...new Set(os.map(o => o.t))];
+      return openList(`Entregas ${m.name} · ${d === P.today0 ? 'hoy' : fDowDay(d)}`, `${fmt(os.reduce((a, o) => a + o.u, 0))} uds con fecha límite este día`, tasks, 'prod', 'model', batchesFor(tasks)); }
     case 'm-lot': { const b = state.P.batches[+D.i]; return openList(`Lote ${b.model.name} · ${b.day === state.P.today0 ? 'hoy' : fDowDay(b.day)}`, `${fmt(b.units)} uds en ${b.orders.length} pedidos`, lotTasks([b]), 'prod', 'model', [b]); }
     case 'm-quality': { const L = { sinFecha: 'Pedidos sin fecha límite', sinTipo: 'Sin etiqueta VENTA ni REEMPLAZO', ventaYReemplazo: 'Venta y reemplazo a la vez' }; return openList(L[D.k], 'Corregir en ClickUp para que entren en el plan', state.P.quality[D.k], 'prod'); }
     case 'm-client': if (D.c) openClient(D.c); return;
