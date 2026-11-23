@@ -59,7 +59,7 @@ a { color: var(--accent); }
 .p-head { display: flex; align-items: center; gap: 20px; padding: 14px 32px; border-bottom: 1px solid var(--line-2); flex-wrap: wrap; position: sticky; top: 0; z-index: 20; background: rgba(11,15,20,.96); backdrop-filter: blur(8px); }
 .p-brand { display: flex; align-items: center; gap: 12px; }
 .p-logo { width: 36px; height: 36px; border-radius: 8px; background: var(--accent); display: grid; place-items: center; }
-.p-brand b { display: block; font-size: 15px; font-weight: 800; letter-spacing: .03em; }
+.p-brand b { display: block; font-size: 16px; font-weight: 800; letter-spacing: -.01em; }
 .p-brand small { font-size: 12px; color: var(--muted); }
 .p-nav { display: flex; gap: 4px; flex-wrap: wrap; }
 .p-nav button { border: 0; background: none; color: var(--muted); padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; }
@@ -149,6 +149,11 @@ body[data-env="sup"] .switch-env { color: #ffc35c; border-color: #6b4d12; }
 .order .olist { grid-template-columns: none; margin-top: 8px; gap: 4px; }
 .order .olist li { font-size: 13px; grid-template-columns: auto minmax(0, 1fr) auto; }
 .order .olist .u { font-size: 12px; }
+.pill.adv { color: var(--warn-t); border-color: color-mix(in srgb, var(--warn) 55%, transparent); border-style: dashed; }
+.adv-t { color: var(--warn-t) !important; font-weight: 700; }
+.lot.prop { border: 1px dashed color-mix(in srgb, var(--warn) 60%, transparent); border-left: 4px solid var(--c); }
+.order button.prop { border-style: dashed; border-left-style: solid; }
+.olist .part, .lot .olist span.part { font-size: 10.5px; color: var(--faint); }
 .gap-hint { border-radius: 9px; padding: 10px; border: 1px dashed var(--line); color: var(--muted); font-size: 12px; }
 
 .capgrid { display: grid; grid-template-columns: 130px repeat(4, minmax(0, 1fr)); gap: 8px; }
@@ -365,8 +370,7 @@ body[data-env="prod"] .report { margin: 0 -32px; border-radius: 0; }
 <div id="app-prod">
   <header class="p-head">
     <div class="p-brand">
-      <div class="p-logo" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0b0f14" stroke-width="2.4"><path d="M3 21V9l6 4V9l6 4V5l6 4v12z"/></svg></div>
-      <div><b>TALLER IXORIGUE</b><small id="p-date">Producción</small></div>
+      <div><b>Producción</b><small id="p-date">Producción</small></div>
     </div>
     <nav class="p-nav" aria-label="Producción">
       <button data-action="go" data-page="prod-hoy">Hoy y semana</button>
@@ -394,7 +398,7 @@ body[data-env="prod"] .report { margin: 0 -32px; border-radius: 0; }
             <button class="tile" data-action="m-today" data-kind="venta"><span class="l">Ventas</span><span class="v" id="p-v">0</span><span class="a" id="p-vs"></span></button>
             <button class="tile" data-action="m-today" data-kind="reemplazo"><span class="l">Reemplazos</span><span class="v" id="p-r">0</span><span class="a" id="p-rs"></span></button>
           </div>
-          <h2 class="cap" style="margin-top:8px">Orden de fabricación de hoy (en serie)</h2>
+          <h2 class="cap" style="margin-top:8px" id="p-order-h">Orden de fabricación de hoy (en serie)</h2>
           <ol class="order" id="p-order"></ol>
         </div>
         <div class="col">
@@ -580,6 +584,8 @@ const CONFIG = {
   capacityWeeks: 4,
   minLeadBusinessDays: 2,
   batchWindowBusinessDays: 7,
+  advanceBusinessDays: 5,                              // si hoy hay hueco, proponer adelantar pedidos de los próximos N días hábiles (0 = desactivado)
+  advanceMinUnits: 5,                                  // no proponer trozos de pedido más pequeños que esto
   maxLot: { ixo: null, pro: null, m10: null, m10lr: null, cow: null },
   historyDays: 400,                                    // debe coincidir con CLOSED_LOOKBACK_DAYS del Worker
   freshness: { warnMin: 20, badMin: 45 },
@@ -800,7 +806,8 @@ function deriveProd() {
   }
   P.batches = buildBatches(prod, P);
   for (const b of P.batches) for (const o of b.orders) o.t.lot = b;
-  P.todayBatches = P.batches.filter(b => b.day === today0).sort((a, b) => (b.hasOverdue - a.hasOverdue) || (Math.min(...a.orders.map(o => o.t.prio)) - Math.min(...b.orders.map(o => o.t.prio))) || b.units - a.units);
+  P.todayBatches = P.batches.filter(b => b.day === today0).sort((a, b) => (a.proposed - b.proposed) || (b.hasOverdue - a.hasOverdue) || (Math.min(...a.orders.map(o => o.t.prio)) - Math.min(...b.orders.map(o => o.t.prio))) || b.units - a.units);
+  P.advUnits = P.todayBatches.reduce((a, b) => a + b.advUnits, 0);
   P.setupsSaved = P.batches.reduce((a, b) => a + b.saved, 0);
   P.quality = { sinFecha: [], sinTipo: [], ventaYReemplazo: [] };
   for (const t of state.tasks.filter(t => !t.closed)) for (const f of t.flags) if (P.quality[f]) P.quality[f].push(t);
@@ -815,6 +822,26 @@ function buildBatches(prod, P) {
     let day = t.due < today0 ? today0 : prevOrSameBiz(Math.max(t.due, today0)); if (day < today0) day = today0; if (!isBiz(day)) day = nextBiz(day, 1)[0];
     all.push({ t, u: p.units, due: t.due, day, model: p.model }); } }
   for (const o of all) { const f = fam(o.model); dayUse[k(o.day, f)] = (dayUse[k(o.day, f)] || 0) + o.u; weekUse[wk(o.day, f)] = (weekUse[wk(o.day, f)] || 0) + o.u; }
+  // Adelanto propuesto: si hoy queda capacidad diaria libre, se rellena con pedidos de los próximos días
+  // (primero los días que superan su capacidad diaria, luego por fecha). Es una recomendación: nunca retrasa nada.
+  if (CONFIG.advanceBusinessDays > 0 && isBiz(today0)) {
+    const horizon = nextBiz(today0, CONFIG.advanceBusinessDays).pop(), dcapOf = (f) => CONFIG.dailyCapacity[f] || Infinity;
+    const cand = all.filter(o => o.day > today0 && o.day <= horizon);
+    for (const o of cand) o.srcOver = dayUse[k(o.day, fam(o.model))] > dcapOf(fam(o.model));
+    cand.sort((a, b) => (b.srcOver - a.srcOver) || a.day - b.day || a.model.localeCompare(b.model) || a.due - b.due || a.t.prio - b.t.prio);
+    for (const o of cand) {
+      const f = fam(o.model), sameWeek = weekStart(o.day) === weekStart(today0);
+      let free = dcapOf(f) - (dayUse[k(today0, f)] || 0);
+      if (!sameWeek) free = Math.min(free, CONFIG.capacity[f] - (weekUse[wk(today0, f)] || 0));
+      const u = Math.min(free, o.u);
+      if (u <= 0 || (u < o.u && u < CONFIG.advanceMinUnits)) continue;
+      let mv = o;
+      if (u < o.u) { mv = { ...o, u, partOf: o.u }; o.u -= u; o.rest = true; all.push(mv); }
+      mv.fromDay = o.day; mv.day = today0; mv.adv = true;
+      dayUse[k(today0, f)] = (dayUse[k(today0, f)] || 0) + u; dayUse[k(mv.fromDay, f)] -= u;
+      if (!sameWeek) { weekUse[wk(today0, f)] = (weekUse[wk(today0, f)] || 0) + u; weekUse[wk(mv.fromDay, f)] -= u; }
+    }
+  }
   const batches = [];
   for (const m of MODELS) {
     const f = m.family, dcap = CONFIG.dailyCapacity[f] || Infinity, wcap = CONFIG.capacity[f], maxLot = CONFIG.maxLot[m.id] || Infinity;
@@ -835,7 +862,7 @@ function buildBatches(prod, P) {
     }
   }
   for (const b of batches) {
-    const f = b.model.family; b.fwdUnits = b.units - b.dueUnits; b.fwdOrders = b.orders.filter(o => o.day > b.day).length; b.saved = new Set(b.orders.filter(o => o.day > b.day).map(o => o.day)).size; b.lastDue = Math.max(...b.orders.map(o => o.due)); b.hasOverdue = b.orders.some(o => o.due < today0);
+    const f = b.model.family; b.fwdUnits = b.units - b.dueUnits; b.fwdOrders = b.orders.filter(o => o.day > b.day).length; b.saved = new Set(b.orders.filter(o => o.day > b.day).map(o => o.day)).size; b.lastDue = Math.max(...b.orders.map(o => o.due)); b.hasOverdue = b.orders.some(o => o.due < today0); b.advUnits = b.orders.reduce((a, o) => a + (o.adv ? o.u : 0), 0); b.advOrders = b.orders.filter(o => o.adv); b.proposed = b.advUnits > 0 && b.advUnits === b.units; b.advOver = b.advOrders.some(o => o.srcOver);
     b.dayLoad = dayUse[k(b.day, f)]; b.overDay = b.dayLoad > (CONFIG.dailyCapacity[f] || Infinity); b.overCap = weekUse[wk(b.day, f)] > CONFIG.capacity[f];
   }
   P.dayUse = dayUse;
@@ -921,15 +948,17 @@ function renderCupo() {
 function renderProdHoy() {
   const P = state.P;
   $('p-today-big').textContent = fmt(P.hoy.units);
-  $('p-today-sub').textContent = `uds · ${P.hoy.tickets} pedidos${P.atrasado.units ? ` · ${fmt(P.atrasado.units)} atrasadas` : ''}`;
+  $('p-today-sub').innerHTML = `uds · ${P.hoy.tickets} pedidos${P.atrasado.units ? ` · ${fmt(P.atrasado.units)} atrasadas` : ''}${P.advUnits ? ` · <b class="adv-t">+${fmt(P.advUnits)} recomendadas para adelantar</b>` : ''}`;
   $('p-v').textContent = fmt(P.hoy.venta); $('p-vs').textContent = `${P.hoy.ventaT} pedidos · ver lotes →`;
   $('p-r').textContent = fmt(P.hoy.reemplazo); $('p-rs').textContent = `${P.hoy.reemplazoT} pedidos · ver lotes →`;
   $('p-order').innerHTML = P.todayBatches.length ? P.todayBatches.map((b, i) => {
     const cap = CONFIG.dailyCapacity[b.model.family], excess = b.overDay ? Math.min(b.units, b.dayLoad - cap) : 0;
-    const desc = b.fwdUnits > 0 ? `${b.dueUnits} vencen hoy + adelanta ${b.fwdUnits} de ${b.fwdOrders} pedido${b.fwdOrders === 1 ? '' : 's'} hasta el ${fDay(b.lastDue)}` : `${b.orders.length} pedido${b.orders.length > 1 ? 's' : ''}${b.hasOverdue ? ' · incluye atrasado' : ''}`;
-    const pill = excess > 0 ? `<span class="pill bad">${fmt(excess)} uds no caben hoy</span>` : b.fwdUnits > 0 ? `<span class="pill info">En serie · ${b.saved} cambio${b.saved === 1 ? '' : 's'} de modelo menos</span>` : b.hasOverdue ? '<span class="pill warn">Incluye atrasado</span>' : '<span></span>';
-    return `<li><button style="--c:${b.model.color}" data-action="m-lot" data-i="${P.batches.indexOf(b)}"><span class="k">${i + 1}</span><span><div class="t">${esc(b.model.name)} · lote ${fmt(b.units)} uds</div><div class="d">${esc(desc)}</div>${orderRows(b, 6)}</span>${pill}</button></li>`;
-  }).join('') : '<li class="empty">No hay nada con fecha de hoy.</li>';
+    const todayU = b.dueUnits - b.advUnits;
+    const desc = b.advUnits > 0 ? `${todayU > 0 ? `${fmt(todayU)} vencen hoy + ` : ''}adelanto propuesto de ${fmt(b.advUnits)} uds del ${advFrom(b)}${b.fwdUnits > 0 ? ` + ${fmt(b.fwdUnits)} en serie hasta el ${fDay(b.lastDue)}` : ''}${b.advOver ? ' (hay días que superan la capacidad diaria)' : ''}` : b.fwdUnits > 0 ? `${b.dueUnits} vencen hoy + adelanta ${b.fwdUnits} de ${b.fwdOrders} pedido${b.fwdOrders === 1 ? '' : 's'} hasta el ${fDay(b.lastDue)}` : `${b.orders.length} pedido${b.orders.length > 1 ? 's' : ''}${b.hasOverdue ? ' · incluye atrasado' : ''}`;
+    const pill = b.advUnits > 0 ? '<span class="pill adv">Adelanto recomendado</span>' : excess > 0 ? `<span class="pill bad">${fmt(excess)} uds no caben hoy</span>` : b.fwdUnits > 0 ? `<span class="pill info">En serie · ${b.saved} cambio${b.saved === 1 ? '' : 's'} de modelo menos</span>` : b.hasOverdue ? '<span class="pill warn">Incluye atrasado</span>' : '<span></span>';
+    return `<li><button class="${b.proposed ? 'prop' : ''}" style="--c:${b.model.color}" data-action="m-lot" data-i="${P.batches.indexOf(b)}"><span class="k">${i + 1}</span><span><div class="t">${esc(b.model.name)} · lote ${fmt(b.units)} uds</div><div class="d">${esc(desc)}</div>${orderRows(b, 6)}</span>${pill}</button></li>`;
+  }).join('') : '<li class="empty">No hay nada con fecha de hoy ni pedidos que adelantar en los próximos días.</li>';
+  $('p-order-h').textContent = P.todayBatches.length && !P.hoy.units ? 'Hoy no vence nada · recomendado adelantar' : 'Orden de fabricación de hoy (en serie)';
   $('p-models').innerHTML = MODELS.map(m => `<button style="--c:${m.color}" data-action="m-model" data-m="${m.id}"><div class="n">${esc(m.short)}</div><div class="v">${fmt(P.byModel[m.id].upto)}</div><div class="s">hoy ${fmt(P.byModel[m.id].today)}</div></button>`).join('');
   $('p-attn').innerHTML = [
     [`Pedidos atrasados`, `${P.atrasado.tickets} · ${fmt(P.atrasado.units)} uds`, 'm-overdue', P.atrasado.tickets ? 'bad' : ''],
@@ -939,10 +968,11 @@ function renderProdHoy() {
   ].map(([l, v, a, c]) => `<button class="qrow ${c}" data-action="${a}"><span>${esc(l)}</span><b>${esc(v)}</b></button>`).join('');
   renderCalendar();
 }
+const advFrom = (b) => [...new Set(b.advOrders.map(o => o.fromDay))].sort((a, c) => a - c).map(fDay).join(', ');
 const tagHtml = (t) => t.kind === 'venta' ? '<span class="tg v">Venta</span>' : t.kind === 'reemplazo' ? '<span class="tg r">Reempl.</span>' : '<span class="tg x">Sin tipo</span>';
 function orderRows(b, max) {
   const os = [...b.orders].sort((a, c) => a.due - c.due), shown = os.slice(0, max), rest = os.length - shown.length;
-  return `<ul class="olist">${shown.map(o => `<li>${tagHtml(o.t)}<span class="cl" title="${esc(o.t.name)}">${esc(o.t.name)}</span><span class="u">${fmt(o.u)}${o.day > b.day ? `<small>→ ${esc(fDay(o.due))}</small>` : ''}</span></li>`).join('')}${rest > 0 ? `<li><span class="more">+${rest} pedido${rest === 1 ? '' : 's'} más · clic para verlos</span></li>` : ''}</ul>`;
+  return `<ul class="olist">${shown.map(o => `<li>${tagHtml(o.t)}<span class="cl" title="${esc(o.t.name)}">${esc(o.t.name)}${o.partOf ? ` <span class="part">(${fmt(o.u)} de ${fmt(o.partOf)})</span>` : o.rest ? ' <span class="part">(resto)</span>' : ''}</span><span class="u">${fmt(o.u)}${o.adv || o.day > b.day ? `<small>→ ${esc(fDay(o.due))}</small>` : ''}</span></li>`).join('')}${rest > 0 ? `<li><span class="more">+${rest} pedido${rest === 1 ? '' : 's'} más · clic para verlos</span></li>` : ''}</ul>`;
 }
 function renderCalendar() {
   const P = state.P, days = P.days.slice(state.calWin * 5, state.calWin * 5 + 5);
@@ -952,7 +982,7 @@ function renderCalendar() {
     const total = lots.reduce((a, b) => a + b.units, 0);
     const worst = Math.max(0, ...FAMILIES.map(([f]) => pct(P.dayUse[d + ':' + f] || 0, CONFIG.dailyCapacity[f])));
     const lv = level(worst), isToday = d === P.today0;
-    const cards = lots.map(b => `<button class="lot" style="--c:${b.model.color}" data-action="m-lot" data-i="${P.batches.indexOf(b)}"><b>${esc(b.model.short)} · ${fmt(b.units)} ${b.fwdUnits > 0 ? '<em>en serie</em>' : ''}</b><span>${b.fwdUnits > 0 ? `adelanta ${fmt(b.fwdUnits)} hasta el ${esc(fDay(b.lastDue))}` : `${b.orders.length} pedido${b.orders.length > 1 ? 's' : ''}${b.hasOverdue ? ' · atrasado' : ''}`}</span>${orderRows(b, 4)}</button>`).join('');
+    const cards = lots.map(b => `<button class="lot ${b.advUnits > 0 ? 'prop' : ''}" style="--c:${b.model.color}" data-action="m-lot" data-i="${P.batches.indexOf(b)}"><b>${esc(b.model.short)} · ${fmt(b.units)} ${b.advUnits > 0 ? '<em class="adv-t">adelanto propuesto</em>' : b.fwdUnits > 0 ? '<em>en serie</em>' : ''}</b><span>${b.advUnits > 0 ? `${b.dueUnits - b.advUnits > 0 ? `${fmt(b.dueUnits - b.advUnits)} de hoy + ` : ''}${fmt(b.advUnits + b.fwdUnits)} adelantadas hasta el ${esc(fDay(b.lastDue))}` : b.fwdUnits > 0 ? `adelanta ${fmt(b.fwdUnits)} hasta el ${esc(fDay(b.lastDue))}` : `${b.orders.length} pedido${b.orders.length > 1 ? 's' : ''}${b.hasOverdue ? ' · atrasado' : ''}`}</span>${orderRows(b, 4)}</button>`).join('');
     const hint = worst < 30 ? `<div class="gap-hint">Día con hueco${lots.length ? '' : ': nada programado'}</div>` : '';
     return `<div class="day ${isToday ? 'today' : ''}"><div class="day-h"><b>${isToday ? 'Hoy · ' : ''}${esc(cap1(fDow(d)))} ${new Date(d).getDate()}</b><span class="${lv === 'bad' ? 'bad' : ''}">${fmt(total)}</span></div>
       <div class="dbar" title="Carga máxima por familia: ${worst} % de la capacidad diaria"><i class="${lv === 'ok' ? '' : lv}" style="width:${Math.min(100, worst)}%"></i></div>${lv === 'bad' ? '<div class="dnote">Supera la capacidad diaria</div>' : ''}${cards}${hint}</div>`;
@@ -1313,9 +1343,10 @@ function summaryChips(tasks, mode) {
 }
 function recHtml(b) {
   const P = state.P, when = b.day === P.today0 ? 'Hoy' : cap1(fDowDay(b.day)), fwdOrders = b.fwdOrders;
-  const why = b.fwdUnits > 0 ? `Fabricar en un solo lote ${fmt(b.dueUnits)} uds que vencen y adelantar ${fmt(b.fwdUnits)} uds de ${fwdOrders} pedido${fwdOrders === 1 ? '' : 's'} hasta el ${fDay(b.lastDue)}: ${b.saved} cambio${b.saved === 1 ? '' : 's'} de modelo menos en la mesa.`
+  const why = b.advUnits > 0 ? `Hoy queda capacidad libre: se recomienda adelantar ${fmt(b.advUnits)} uds de ${b.advOrders.length} pedido${b.advOrders.length === 1 ? '' : 's'} con fecha ${advFrom(b)}${b.advOver ? ' (hay días que superan la capacidad diaria)' : ''}. Es una recomendación: confirmar que hay material antes de empezar.`
+    : b.fwdUnits > 0 ? `Fabricar en un solo lote ${fmt(b.dueUnits)} uds que vencen y adelantar ${fmt(b.fwdUnits)} uds de ${fwdOrders} pedido${fwdOrders === 1 ? '' : 's'} hasta el ${fDay(b.lastDue)}: ${b.saved} cambio${b.saved === 1 ? '' : 's'} de modelo menos en la mesa.`
     : b.overDay ? `El día ya está por encima de la capacidad diaria de la familia (${fmt(CONFIG.dailyCapacity[b.model.family])} uds): no se adelanta nada; conviene repartir o renegociar fechas.` : `Pedidos con fecha este día; no hay más pedidos de ${b.model.name} que quepan en los próximos ${CONFIG.batchWindowBusinessDays} días hábiles.`;
-  return `<div class="rec"><div class="t"><span class="sw" style="background:${b.model.color}"></span><b>${esc(when)} · Lote ${esc(b.model.name)}</b>${b.fwdUnits > 0 ? '<span class="pill info">En serie</span>' : ''}${b.overDay ? `<span class="pill bad">Día al ${pct(b.dayLoad, CONFIG.dailyCapacity[b.model.family])} % de la capacidad diaria</span>` : ''}${b.overCap ? '<span class="pill warn">Supera el cupo semanal</span>' : ''}<span class="u">${fmt(b.units)} uds</span></div>
+  return `<div class="rec"><div class="t"><span class="sw" style="background:${b.model.color}"></span><b>${esc(when)} · Lote ${esc(b.model.name)}</b>${b.advUnits > 0 ? '<span class="pill adv">Adelanto recomendado</span>' : b.fwdUnits > 0 ? '<span class="pill info">En serie</span>' : ''}${b.overDay ? `<span class="pill bad">Día al ${pct(b.dayLoad, CONFIG.dailyCapacity[b.model.family])} % de la capacidad diaria</span>` : ''}${b.overCap ? '<span class="pill warn">Supera el cupo semanal</span>' : ''}<span class="u">${fmt(b.units)} uds</span></div>
     <div class="why">${esc(why)}</div><div class="os">${b.orders.map(o => `<span class="o ${o.due <= addDays(b.day, 1) - 1 ? 'now' : ''}">${esc(o.t.client || o.t.name.slice(0, 40))} · ${esc(o.due < P.today0 ? 'atrasado' : fDay(o.due))} <strong>${o.u}</strong></span>`).join('')}</div></div>`;
 }
 function showModal(title, sub, html, count, units, cls = '') {
@@ -1411,7 +1442,7 @@ function go(page, push = true) {
 }
 function renderAll() { deriveProd(); deriveSup(); renderCupo(); renderBadges(); go(state.page, false); }
 function renderBadges() { $('s-nb-dev').textContent = state.S.recibir.length || ''; $('s-nb-open').textContent = state.S.incOpen.length || '';
-  $('p-date').textContent = `Producción · ${new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' })} · semana ${isoWeek(Date.now())}`; }
+  $('p-date').textContent = `Ixorigue · ${new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' })} · semana ${isoWeek(Date.now())}`; }
 function renderBanners() {
   const out = [], m = state.meta || {}, P = state.P, env = (PAGES[state.page] || {}).env;
   if (window.__DEMO__) out.push(['info', 'i', '<b>Datos de demostración.</b> Prototipo sin conexión a ClickUp; clientes y tiquets inventados.']);
