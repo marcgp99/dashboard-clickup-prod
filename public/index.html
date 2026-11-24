@@ -79,6 +79,14 @@ body[data-env="sup"] .switch-env { color: #ffc35c; border-color: #6b4d12; }
 .cupo-btn.ok { color: var(--ok-t); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
 .cupo-btn.warn { color: var(--warn-t); border-color: color-mix(in srgb, var(--warn) 55%, transparent); background: color-mix(in srgb, var(--warn) 8%, transparent); }
 .cupo-btn.bad { color: var(--bad-t); border-color: color-mix(in srgb, var(--bad) 60%, transparent); background: color-mix(in srgb, var(--bad) 10%, transparent); }
+.cupo-btn.cmini > * { flex-shrink: 0; } .cupo-btn.cmini .cm { flex-shrink: 1; min-width: 0; }
+.cupo-btn.cmini { flex-wrap: nowrap; border-color: var(--line); color: var(--muted); gap: 10px; padding: 5px 12px; border-radius: 10px; max-width: 420px; }
+.cupo-btn .cw { display: inline-flex; align-items: center; gap: 6px; font: 700 11.5px var(--mono); color: var(--muted); }
+.cupo-btn .mb { display: inline-flex; gap: 3px; align-items: flex-end; height: 18px; }
+.cupo-btn .mb i { width: 7px; height: 18px; background: #1f2a38; border-radius: 2px; position: relative; overflow: hidden; }
+.cupo-btn .mb i b { position: absolute; left: 0; right: 0; bottom: 0; background: var(--ok); } .cupo-btn .mb i b.warn { background: var(--warn); } .cupo-btn .mb i b.bad { background: var(--bad); }
+.cupo-btn .cs { width: 1px; height: 18px; background: var(--line); }
+.cupo-btn .cm { font-weight: 700; overflow: hidden; text-overflow: ellipsis; } .cupo-btn .cm.ok { color: var(--ok-t); } .cupo-btn .cm.warn { color: var(--warn-t); } .cupo-btn .cm.bad { color: var(--bad-t); }
 .cupo-pop { position: absolute; right: 0; top: calc(100% + 8px); z-index: 40; width: 470px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; box-shadow: 0 16px 40px rgba(0,0,0,.55); }
 .cupo-pop table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .cupo-pop th { text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 0 0 8px; }
@@ -466,7 +474,7 @@ body[data-env="prod"] .report { margin: 0 -32px; border-radius: 0; }
             <button data-action="calwin" data-w="2" aria-pressed="false">A 2 semanas vista</button>
           </div>
           <span class="cal-week" id="p-calweek"></span>
-          <span class="cal-legend"><span class="tg v">Venta</span><span class="tg r">Reempl.</span><span class="lg-fix">🔒 Fecha acordada con cliente</span><span class="muted">Pedidos en su fecha límite (no se mueven) · clic en una tarjeta para ver sus tiquets · la barra es la carga del día frente a la capacidad diaria</span></span>
+          <span class="cal-legend"><span class="tg v">Venta</span><span class="tg r">Reempl.</span><span class="lg-fix">🔒 Fecha acordada con cliente</span><span class="muted">Pedidos en su fecha límite (no se mueven) · clic en una tarjeta para ver sus tiquets</span></span>
         </div>
         <div class="cal" id="p-cal"></div>
       </section>
@@ -622,12 +630,12 @@ const LS = safeStore('localStorage'), SS = safeStore('sessionStorage');
 const CONFIG = {
   apiUrl: '/api/tasks',
   capacity: { ixo: 150, pro: 300, cow: 1000 },          // unidades / semana
-  dailyCapacity: { ixo: 30, pro: 60, cow: 200 },       // unidades / día (por defecto semanal ÷ 5)
+  dailyCapacity: {},                                   // sin límite diario: con trabajo en serie un día puede asumir mucho más (solo cuenta el cupo semanal)
   capacityWarnPct: 80,
   capacityWeeks: 4,
   minLeadBusinessDays: 2,
-  batchWindowBusinessDays: 7,
-  advanceBusinessDays: 5,                              // si hoy hay hueco, proponer adelantar pedidos de los próximos N días hábiles (0 = desactivado)
+  batchWindowBusinessDays: 3,
+  advanceBusinessDays: 3,                              // si hoy hay hueco, proponer adelantar pedidos de los próximos N días hábiles (0 = desactivado)
   fixedDateTag: 'FECHA ACORDADA',                          // etiqueta de ClickUp para pedidos comprometidos con fecha fija
   advanceMinUnits: 5,                                  // no proponer trozos de pedido más pequeños que esto
   maxLot: { ixo: null, pro: null, m10: null, m10lr: null, cow: null },
@@ -876,7 +884,7 @@ function deriveProd() {
   for (const b of P.batches) for (const o of b.orders) o.t.lot = b;
   P.todayBatches = P.batches.filter(b => b.day === today0).sort((a, b) => (a.proposed - b.proposed) || (b.hasOverdue - a.hasOverdue) || (Math.min(...a.orders.map(o => o.t.prio)) - Math.min(...b.orders.map(o => o.t.prio))) || b.units - a.units);
   P.fixedAll = [...new Set(P.delivery.filter(o => o.t.fixed).map(o => o.t))];
-  P.fixedRisk = [...new Set(P.delivery.filter(o => o.t.fixed && (P.dlUse[o.day + ':' + MODEL_BY_ID[o.model].family] || 0) > (CONFIG.dailyCapacity[MODEL_BY_ID[o.model].family] || Infinity)).map(o => o.t))];
+  P.fixedRisk = [...new Set(P.delivery.filter(o => { const f = MODEL_BY_ID[o.model].family, w = P.weeks.find(x => o.day >= x.start && o.day <= x.end); return o.t.fixed && w && w.used[f] > CONFIG.capacity[f]; }).map(o => o.t))];
   P.advUnits = P.todayBatches.reduce((a, b) => a + b.advUnits, 0);
   P.setupsSaved = P.batches.reduce((a, b) => a + b.saved, 0);
   P.quality = { sinFecha: [], sinTipo: [], ventaYReemplazo: [] };
@@ -884,7 +892,7 @@ function deriveProd() {
   state.P = P;
 }
 /** Lotes en serie: un lote se fabrica el día del pedido más urgente y adelanta pedidos del mismo modelo
- *  de los siguientes N días hábiles mientras quepan en la capacidad diaria y semanal de la familia. Nunca retrasa. */
+ *  de los siguientes N días hábiles mientras quepan en el cupo semanal de la familia (sin límite diario). Nunca retrasa. */
 function buildBatches(prod, P) {
   const today0 = P.today0, fam = (id) => MODEL_BY_ID[id].family, dayUse = {}, weekUse = {};
   const k = (d, f) => d + ':' + f, wk = (d, f) => weekStart(d) + ':' + f, all = [];
@@ -894,8 +902,8 @@ function buildBatches(prod, P) {
   for (const o of all) { const f = fam(o.model); dayUse[k(o.day, f)] = (dayUse[k(o.day, f)] || 0) + o.u; weekUse[wk(o.day, f)] = (weekUse[wk(o.day, f)] || 0) + o.u; }
   // Calendario de entregas: foto de los pedidos en su fecha límite, antes de cualquier adelanto o lote
   P.delivery = all.map(o => ({ t: o.t, u: o.u, due: o.due, day: o.day, model: o.model })); P.dlUse = { ...dayUse };
-  // Adelanto propuesto: si hoy queda capacidad diaria libre, se rellena con pedidos de los próximos días
-  // (primero los días que superan su capacidad diaria, luego por fecha). Es una recomendación: nunca retrasa nada.
+  // Adelanto propuesto: se recomienda adelantar a hoy los pedidos de los próximos N días hábiles (primero fecha acordada,
+  // luego por fecha), limitado solo por el cupo semanal. Es una recomendación: nunca retrasa nada.
   if (CONFIG.advanceBusinessDays > 0 && isBiz(today0)) {
     const horizon = nextBiz(today0, CONFIG.advanceBusinessDays).pop(), dcapOf = (f) => CONFIG.dailyCapacity[f] || Infinity;
     const cand = all.filter(o => o.day > today0 && o.day <= horizon);
@@ -1008,9 +1016,11 @@ function renderCupo() {
   const bad = [], warn = [];
   st.forEach((fs, i) => fs.forEach(([, l, p]) => { if (p > 100) bad.push(`${l} (${wl[i]})`); else if (p >= CONFIG.capacityWarnPct) warn.push(`${l} (${wl[i]})`); }));
   const btn = $('p-cupo-btn');
-  btn.className = 'cupo-btn ' + (bad.length ? 'bad' : warn.length ? 'warn' : 'ok');
-  btn.innerHTML = (bad.length ? `✕ Sin cupo: ${esc(bad.join(', '))}` : warn.length ? `▲ Justo: ${esc(warn.join(', '))}` : `✓ Cupo OK <em>· ${wl.join(' y ')}</em>`) + ' <span class="car">▾</span>';
-  btn.title = 'Cupo semanal por familia: esta semana y la próxima';
+  btn.className = 'cupo-btn cmini';
+  const minis = st.map((fs, i) => `<span class="cw">${esc(wl[i])}<span class="mb">${fs.map(([, l, p]) => { const lv = level(p); return `<i title="${esc(l)} ${esc(wl[i])}: ${p} %"><b class="${lv === 'ok' ? '' : lv}" style="height:${Math.max(6, Math.min(100, p))}%"></b></i>`; }).join('')}</span></span>`).join('<span class="cs"></span>');
+  const msg = bad.length ? `<span class="cm bad">✕ ${esc(bad.join(', '))}</span>` : warn.length ? `<span class="cm warn">▲ ${esc(warn.join(', '))}</span>` : '<span class="cm ok">✓ Hay cupo</span>';
+  btn.innerHTML = `${minis}${msg}<span class="car">▾</span>`;
+  btn.title = 'Cupo semanal · barras: Ixotrack, IxotrackPro, Cowpro · clic para ver el detalle';
   const cell = (w, i, f) => { const u = w.used[f], c = CONFIG.capacity[f], p = pct(u, c), lv = level(p);
     return `<td><button class="cupo-cell" data-action="m-week" data-w="${w.i}" data-f="${f}" title="${p} % · quedan ${fmt(Math.max(0, c - u))} uds"><span class="bar"><i class="${lv === 'ok' ? '' : lv}" style="width:${Math.min(100, p)}%"></i></span><span class="v${lv === 'bad' ? ' bad' : ''}">${fmt(u)}<small>/${fmt(c)}</small></span></button></td>`; };
   $('p-cupo').innerHTML = `<table><thead><tr><th></th>${W.map((w, i) => `<th>${i ? 'Próxima' : 'Esta semana'} <small>${esc(wl[i])} · ${esc(fDay(w.start))}–${esc(fDay(w.end - 2 * DAY))}</small></th>`).join('')}</tr></thead>
@@ -1028,10 +1038,9 @@ function renderProdHoy() {
   $('p-v').textContent = fmt(P.hoy.venta); $('p-vs').textContent = `${P.hoy.ventaT} pedidos · ver lotes →`;
   $('p-r').textContent = fmt(P.hoy.reemplazo); $('p-rs').textContent = `${P.hoy.reemplazoT} pedidos · ver lotes →`;
   $('p-order').innerHTML = P.todayBatches.length ? P.todayBatches.map((b, i) => {
-    const cap = CONFIG.dailyCapacity[b.model.family], excess = b.overDay ? Math.min(b.units, b.dayLoad - cap) : 0;
     const todayU = b.dueUnits - b.advUnits;
-    const desc = b.advUnits > 0 ? `${todayU > 0 ? `${fmt(todayU)} vencen hoy + ` : ''}adelanto propuesto de ${fmt(b.advUnits)} uds del ${advFrom(b)}${b.fwdUnits > 0 ? ` + ${fmt(b.fwdUnits)} en serie hasta el ${fDay(b.lastDue)}` : ''}${b.advOver ? ' (hay días que superan la capacidad diaria)' : ''}` : b.fwdUnits > 0 ? `${b.dueUnits} vencen hoy + adelanta ${b.fwdUnits} de ${b.fwdOrders} pedido${b.fwdOrders === 1 ? '' : 's'} hasta el ${fDay(b.lastDue)}` : `${b.orders.length} pedido${b.orders.length > 1 ? 's' : ''}${b.hasOverdue ? ' · incluye atrasado' : ''}`;
-    const pill = b.advUnits > 0 ? '<span class="pill adv">Adelanto recomendado</span>' : excess > 0 ? `<span class="pill bad">${fmt(excess)} uds no caben hoy</span>` : b.fwdUnits > 0 ? `<span class="pill info">En serie · ${b.saved} cambio${b.saved === 1 ? '' : 's'} de modelo menos</span>` : b.hasOverdue ? '<span class="pill warn">Incluye atrasado</span>' : '<span></span>';
+    const desc = b.advUnits > 0 ? `${todayU > 0 ? `${fmt(todayU)} vencen hoy + ` : ''}adelanto propuesto de ${fmt(b.advUnits)} uds del ${advFrom(b)}${b.fwdUnits > 0 ? ` + ${fmt(b.fwdUnits)} en serie hasta el ${fDay(b.lastDue)}` : ''}` : b.fwdUnits > 0 ? `${b.dueUnits} vencen hoy + adelanta ${b.fwdUnits} de ${b.fwdOrders} pedido${b.fwdOrders === 1 ? '' : 's'} hasta el ${fDay(b.lastDue)}` : `${b.orders.length} pedido${b.orders.length > 1 ? 's' : ''}${b.hasOverdue ? ' · incluye atrasado' : ''}`;
+    const pill = b.advUnits > 0 ? '<span class="pill adv">Adelanto recomendado</span>' : b.fwdUnits > 0 ? `<span class="pill info">En serie · ${b.saved} cambio${b.saved === 1 ? '' : 's'} de modelo menos</span>` : b.hasOverdue ? '<span class="pill warn">Incluye atrasado</span>' : '<span></span>';
     return `<li><button class="${b.proposed ? 'prop' : ''}" style="--c:${b.model.color}" data-action="m-lot" data-i="${P.batches.indexOf(b)}"><span class="k">${i + 1}</span><span><div class="t">${esc(b.model.name)} · lote ${fmt(b.units)} uds</div><div class="d">${esc(desc)}</div>${orderRows(b, 6)}</span>${pill}</button></li>`;
   }).join('') : '<li class="empty">No hay nada con fecha de hoy ni pedidos que adelantar en los próximos días.</li>';
   $('p-order-h').textContent = P.todayBatches.length && !P.hoy.units ? 'Hoy no vence nada · recomendado adelantar' : 'Orden de fabricación de hoy (en serie)';
@@ -1057,8 +1066,7 @@ function renderCalendar() {
   $('p-cal').innerHTML = days.map(d => {
     const items = P.delivery.filter(o => o.day === d);
     const total = items.reduce((a, o) => a + o.u, 0);
-    const worst = Math.max(0, ...FAMILIES.map(([f]) => pct(P.dlUse[d + ':' + f] || 0, CONFIG.dailyCapacity[f])));
-    const lv = level(worst), isToday = d === P.today0, past = d < P.today0, hol = !isBiz(d);
+    const isToday = d === P.today0, past = d < P.today0, hol = !isBiz(d);
     if (past || hol) return `<div class="day off"><div class="day-h"><b>${esc(cap1(fDow(d)))} ${new Date(d).getDate()}</b><span></span></div><div class="gap-hint">${hol ? 'Festivo' : 'Día pasado · lo pendiente sale hoy como atrasado'}</div></div>`;
     const cards = MODELS.map(m => {
       const os = items.filter(o => o.model === m.id).sort((a, b) => (b.t.fixed - a.t.fixed) || a.due - b.due || a.t.prio - b.t.prio), nFix = os.filter(o => o.t.fixed).length; if (!os.length) return '';
@@ -1066,9 +1074,8 @@ function renderCalendar() {
       const rows = shown.map(o => `<li class="${o.t.fixed ? 'fixed' : ''}">${tagHtml(o.t)}<span class="cl" title="${esc(o.t.name)}">${o.t.fixed ? '<span class="lock" title="Fecha acordada con cliente">🔒</span>' : ''}${esc(o.t.name)}${o.due < P.today0 ? `<small class="late-l">atrasado · ${esc(fDay(o.due))}</small>` : ''}</span><span class="u">${fmt(o.u)}</span></li>`).join('');
       return `<button class="lot ${nFix ? 'has-fixed' : ''}" style="--c:${m.color}" data-action="m-deliv" data-d="${d}" data-m="${m.id}"><b>${esc(m.short)} · ${fmt(u)}</b><span>${os.length} pedido${os.length > 1 ? 's' : ''}${late ? ` · ${late} atrasado${late > 1 ? 's' : ''}` : ''}${nFix ? ` · <em class="fix-t">🔒 ${nFix} fecha${nFix > 1 ? 's' : ''} acordada${nFix > 1 ? 's' : ''}</em>` : ''}</span><ul class="olist">${rows}${rest > 0 ? `<li><span class="more">+${rest} pedido${rest === 1 ? '' : 's'} más · clic para verlos</span></li>` : ''}</ul></button>`;
     }).join('');
-    const hint = worst < 30 ? `<div class="gap-hint">Día con hueco${items.length ? '' : ': ninguna entrega'}</div>` : '';
-    return `<div class="day ${isToday ? 'today' : ''}"><div class="day-h"><b>${isToday ? 'Hoy · ' : ''}${esc(cap1(fDow(d)))} ${new Date(d).getDate()}</b><span class="${lv === 'bad' ? 'bad' : ''}">${fmt(total)}</span></div>
-      <div class="dbar" title="Carga máxima por familia: ${worst} % de la capacidad diaria"><i class="${lv === 'ok' ? '' : lv}" style="width:${Math.min(100, worst)}%"></i></div>${lv === 'bad' ? '<div class="dnote">Supera la capacidad diaria: conviene adelantar parte</div>' : ''}${cards}${hint}</div>`;
+    const hint = items.length ? '' : '<div class="gap-hint">Sin entregas</div>';
+    return `<div class="day ${isToday ? 'today' : ''}"><div class="day-h"><b>${isToday ? 'Hoy · ' : ''}${esc(cap1(fDow(d)))} ${new Date(d).getDate()}</b><span title="Unidades con entrega este día">${fmt(total)} uds</span></div>${cards}${hint}</div>`;
   }).join('');
 }
 function renderProdCap() {
@@ -1438,10 +1445,10 @@ function summaryChips(tasks, mode) {
 }
 function recHtml(b) {
   const P = state.P, when = b.day === P.today0 ? 'Hoy' : cap1(fDowDay(b.day)), fwdOrders = b.fwdOrders;
-  const why = b.advUnits > 0 ? `Hoy queda capacidad libre: se recomienda adelantar ${fmt(b.advUnits)} uds de ${b.advOrders.length} pedido${b.advOrders.length === 1 ? '' : 's'} con fecha ${advFrom(b)}${b.advOver ? ' (hay días que superan la capacidad diaria)' : ''}. Es una recomendación: confirmar que hay material antes de empezar.`
+  const why = b.advUnits > 0 ? `Para ir por delante se recomienda adelantar ${fmt(b.advUnits)} uds de ${b.advOrders.length} pedido${b.advOrders.length === 1 ? '' : 's'} con fecha ${advFrom(b)}. Cabe en el cupo semanal. Es una recomendación: confirmar que hay material antes de empezar.`
     : b.fwdUnits > 0 ? `Fabricar en un solo lote ${fmt(b.dueUnits)} uds que vencen y adelantar ${fmt(b.fwdUnits)} uds de ${fwdOrders} pedido${fwdOrders === 1 ? '' : 's'} hasta el ${fDay(b.lastDue)}: ${b.saved} cambio${b.saved === 1 ? '' : 's'} de modelo menos en la mesa.`
-    : b.overDay ? `El día ya está por encima de la capacidad diaria de la familia (${fmt(CONFIG.dailyCapacity[b.model.family])} uds): no se adelanta nada; conviene repartir o renegociar fechas.` : `Pedidos con fecha este día; no hay más pedidos de ${b.model.name} que quepan en los próximos ${CONFIG.batchWindowBusinessDays} días hábiles.`;
-  return `<div class="rec"><div class="t"><span class="sw" style="background:${b.model.color}"></span><b>${esc(when)} · Lote ${esc(b.model.name)}</b>${b.advUnits > 0 ? '<span class="pill adv">Adelanto recomendado</span>' : b.fwdUnits > 0 ? '<span class="pill info">En serie</span>' : ''}${b.overDay ? `<span class="pill bad">Día al ${pct(b.dayLoad, CONFIG.dailyCapacity[b.model.family])} % de la capacidad diaria</span>` : ''}${b.overCap ? '<span class="pill warn">Supera el cupo semanal</span>' : ''}<span class="u">${fmt(b.units)} uds</span></div>
+    : `Pedidos con fecha este día; no hay más pedidos de ${b.model.name} que quepan en los próximos ${CONFIG.batchWindowBusinessDays} días hábiles.`;
+  return `<div class="rec"><div class="t"><span class="sw" style="background:${b.model.color}"></span><b>${esc(when)} · Lote ${esc(b.model.name)}</b>${b.advUnits > 0 ? '<span class="pill adv">Adelanto recomendado</span>' : b.fwdUnits > 0 ? '<span class="pill info">En serie</span>' : ''}${b.overCap ? '<span class="pill warn">Supera el cupo semanal</span>' : ''}<span class="u">${fmt(b.units)} uds</span></div>
     <div class="why">${esc(why)}</div><div class="os">${b.orders.map(o => `<span class="o ${o.due <= addDays(b.day, 1) - 1 ? 'now' : ''}">${esc(o.t.client || o.t.name.slice(0, 40))} · ${esc(o.due < P.today0 ? 'atrasado' : fDay(o.due))} <strong>${o.u}</strong></span>`).join('')}</div></div>`;
 }
 function showModal(title, sub, html, count, units, cls = '') {
@@ -1606,7 +1613,7 @@ document.addEventListener('click', (e) => {
     case 'm-overdue': { const P = state.P, ts = state.tasks.filter(t => !t.closed && t.production && t.units > 0 && t.due !== null && t.due < P.today0); return openList('Pedidos atrasados', `${fmt(P.atrasado.units)} uds`, ts, 'prod', 'model', batchesFor(ts, P.today0)); }
     case 'm-week': return openWeek(+D.w, D.f);
     case 'm-model': { const m = MODEL_BY_ID[D.m]; return openList(m.name, `Pedidos activos · cupo de la familia ${fmt(CONFIG.capacity[m.family])} uds/semana`, state.tasks.filter(t => !t.closed && t.production && t.units > 0 && t.parts.some(p => p.model === D.m)), 'prod', 'model', state.P.batches.filter(b => b.model.id === D.m)); }
-    case 'm-fixedrisk': return openList('Fecha acordada con cliente', state.P.fixedRisk.length ? `${state.P.fixedRisk.length} con entrega en un día que supera la capacidad diaria: conviene adelantar su fabricación` : 'Pedidos con fecha comprometida con el cliente (etiqueta ' + CONFIG.fixedDateTag + ')', state.P.fixedAll, 'prod', 'model', batchesFor(state.P.fixedAll));
+    case 'm-fixedrisk': return openList('Fecha acordada con cliente', state.P.fixedRisk.length ? `${state.P.fixedRisk.length} con entrega en una semana que supera el cupo: conviene adelantar su fabricación` : 'Pedidos con fecha comprometida con el cliente (etiqueta ' + CONFIG.fixedDateTag + ')', state.P.fixedAll, 'prod', 'model', batchesFor(state.P.fixedAll));
     case 'rs-cell': { const h = state.rs.heatT[+D.ci], bi = +D.bi; return openList(`${h.c}${bi >= 0 ? ' · ' + h.labels[bi] : ''}`, 'Casos de soporte del informe', bi >= 0 ? h.cells[bi] : h.all, 'sup', 'kind'); }
     case 'm-deliv': { const P = state.P, d = +D.d, m = MODEL_BY_ID[D.m], os = P.delivery.filter(o => o.day === d && o.model === D.m), tasks = [...new Set(os.map(o => o.t))];
       return openList(`Entregas ${m.name} · ${d === P.today0 ? 'hoy' : fDowDay(d)}`, `${fmt(os.reduce((a, o) => a + o.u, 0))} uds con fecha límite este día`, tasks, 'prod', 'model', batchesFor(tasks)); }
