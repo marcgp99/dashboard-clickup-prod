@@ -56,16 +56,16 @@ a { color: var(--accent); }
    PRODUCCIÓN
    ========================================================================= */
 #app-prod { display: flex; flex-direction: column; min-height: 100vh; }
-.p-head { display: flex; align-items: center; gap: 20px; padding: 14px 32px; border-bottom: 1px solid var(--line-2); flex-wrap: wrap; position: sticky; top: 0; z-index: 20; background: rgba(11,15,20,.96); backdrop-filter: blur(8px); }
+.p-head { display: flex; align-items: center; gap: 16px; padding: 14px 32px; border-bottom: 1px solid var(--line-2); flex-wrap: wrap; position: sticky; top: 0; z-index: 20; background: rgba(11,15,20,.96); backdrop-filter: blur(8px); }
 .p-brand { display: flex; align-items: center; gap: 12px; }
 .p-logo { width: 36px; height: 36px; border-radius: 8px; background: var(--accent); display: grid; place-items: center; }
 .p-brand b { display: block; font-size: 16px; font-weight: 800; letter-spacing: -.01em; }
 .p-brand small { font-size: 12px; color: var(--muted); }
 .p-nav { display: flex; gap: 4px; flex-wrap: wrap; }
-.p-nav button { border: 0; background: none; color: var(--muted); padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; }
+.p-nav button { border: 0; background: none; color: var(--muted); padding: 8px 11px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; }
 .p-nav button[aria-current="page"] { background: #1a222d; color: #fff; }
 .p-nav button:hover { color: #fff; }
-.head-right { margin-left: auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.head-right { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
 .fresh { display: inline-flex; align-items: center; gap: 6px; }
 .fresh .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
 .fresh.warn .dot { background: var(--warn); } .fresh.bad .dot { background: var(--bad); }
@@ -73,6 +73,22 @@ a { color: var(--accent); }
 body[data-env="prod"] .switch-env { color: #b9a8ff; border-color: #3a2f6b; }
 body[data-env="sup"] .switch-env { color: #ffc35c; border-color: #6b4d12; }
 
+.cupo-dd { position: relative; }
+.cupo-btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid; border-radius: 999px; padding: 6px 13px; font: 700 12.5px var(--font); background: transparent; cursor: pointer; max-width: 360px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cupo-btn em { font-style: normal; font-weight: 500; color: var(--muted); } .cupo-btn .car { font-size: 10px; opacity: .7; }
+.cupo-btn.ok { color: var(--ok-t); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
+.cupo-btn.warn { color: var(--warn-t); border-color: color-mix(in srgb, var(--warn) 55%, transparent); background: color-mix(in srgb, var(--warn) 8%, transparent); }
+.cupo-btn.bad { color: var(--bad-t); border-color: color-mix(in srgb, var(--bad) 60%, transparent); background: color-mix(in srgb, var(--bad) 10%, transparent); }
+.cupo-pop { position: absolute; right: 0; top: calc(100% + 8px); z-index: 40; width: 470px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; box-shadow: 0 16px 40px rgba(0,0,0,.55); }
+.cupo-pop table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.cupo-pop th { text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 0 0 8px; }
+.cupo-pop th small { display: block; text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--faint); }
+.cupo-pop td { border-top: 1px solid var(--line-2); padding: 7px 0; } .cupo-pop td.fn { font-weight: 600; padding-right: 10px; }
+.cupo-cell { display: flex; align-items: center; gap: 8px; background: none; border: 0; color: var(--text); cursor: pointer; padding: 2px 4px; border-radius: 6px; font: inherit; }
+.cupo-cell:hover { background: var(--panel-2); }
+.cupo-cell .bar { width: 80px; height: 5px; } .cupo-cell .v { font: 700 13px var(--mono); } .cupo-cell .v small { color: var(--faint); font-weight: 500; } .cupo-cell .v.bad { color: var(--bad-t); }
+.cupo-foot .linkb { white-space: nowrap; }
+.cupo-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; font-size: 11.5px; color: var(--faint); }
 .cupo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--line-2); border-bottom: 1px solid var(--line-2); }
 .cupo > div { background: var(--bg-2); padding: 16px 32px; display: flex; flex-direction: column; gap: 12px; }
 .cupo-pills { display: inline-flex; gap: 6px; flex-wrap: wrap; }
@@ -136,6 +152,8 @@ body[data-env="sup"] .switch-env { color: #ffc35c; border-color: #6b4d12; }
 #page-prod-cal .day { min-height: 60vh; }
 .cal { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
 .day { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.day.off { opacity: .5; }
+.cal-week { font: 600 12.5px var(--mono); color: var(--muted); }
 .day.today { border: 2px solid var(--accent); }
 .day-h { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
 .day-h b { font-size: 14px; } .day-h span { font: 700 13px var(--mono); color: var(--muted); }
@@ -399,14 +417,14 @@ body[data-env="prod"] .report { margin: 0 -32px; border-radius: 0; }
       <button data-action="go" data-page="prod-informe">Informes</button>
     </nav>
     <div class="head-right">
-      <button class="switch-env" data-action="go" data-page="sup-general">Ir a Soporte →</button>
+      <button class="switch-env" data-action="go" data-page="sup-general" title="Ir a Soporte">Soporte →</button>
+      <div class="cupo-dd"><button class="cupo-btn ok" id="p-cupo-btn" data-action="cupo-toggle" aria-expanded="false" aria-controls="p-cupo">Cupo</button><div class="cupo-pop" id="p-cupo" role="dialog" aria-label="Cupo semanal" hidden></div></div>
       <span class="fresh" data-fresh><span class="dot"></span><span data-fresh-text>Cargando…</span></span>
       <label style="display:inline-flex;gap:6px;align-items:center" title="Refresco automático para la pantalla del taller"><input type="checkbox" data-auto> Auto 10 min</label>
       <button class="btn primary" data-action="refresh" data-refresh><svg data-ico width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg>Actualizar</button>
       <button class="btn sm" data-action="logout" title="Cerrar sesión" aria-label="Cerrar sesión">⏻</button>
     </div>
   </header>
-  <section class="cupo" id="p-cupo" aria-label="Cupo semanal"></section>
   <main class="p-main">
     <div class="banners" id="p-banners"></div>
 
@@ -443,10 +461,11 @@ body[data-env="prod"] .report { margin: 0 -32px; border-radius: 0; }
         <div class="cal-head">
           <h2 class="cap">Calendario de entregas</h2>
           <div class="seg" role="group" aria-label="Ventana del calendario">
-            <button data-action="calwin" data-w="0" aria-pressed="true">Próximos 5 días</button>
-            <button data-action="calwin" data-w="1" aria-pressed="false">Días 6–10</button>
-            <button data-action="calwin" data-w="2" aria-pressed="false">Días 11–15</button>
+            <button data-action="calwin" data-w="0" aria-pressed="true">Semana actual</button>
+            <button data-action="calwin" data-w="1" aria-pressed="false">Próxima semana</button>
+            <button data-action="calwin" data-w="2" aria-pressed="false">A 2 semanas vista</button>
           </div>
+          <span class="cal-week" id="p-calweek"></span>
           <span class="cal-legend"><span class="tg v">Venta</span><span class="tg r">Reempl.</span><span class="lg-fix">🔒 Fecha acordada con cliente</span><span class="muted">Pedidos en su fecha límite (no se mueven) · clic en una tarjeta para ver sus tiquets · la barra es la carga del día frente a la capacidad diaria</span></span>
         </div>
         <div class="cal" id="p-cal"></div>
@@ -984,15 +1003,19 @@ const shadow = () => ({ type: 'shadow', shadowStyle: { color: 'rgba(127,127,127,
    ========================================================================= */
 function renderCupo() {
   const P = state.P;
-  const block = (w, title) => {
-    const ps = FAMILIES.map(([f, l]) => [l, pct(w.used[f], CONFIG.capacity[f])]);
-    const bad = ps.filter(x => x[1] > 100).map(x => x[0]), warn = ps.filter(x => x[1] <= 100 && x[1] >= CONFIG.capacityWarnPct).map(x => x[0]);
-    const pill = (bad.length ? `<span class="pill bad">✕ Sin cupo: ${esc(bad.join(', '))}</span>` : '') + (warn.length ? `<span class="pill warn">▲ Justo: ${esc(warn.join(', '))}</span>` : '') || '<span class="pill ok">✓ Hay cupo</span>';
-    return `<div><div class="cupo-h"><span>${esc(title)} · ${esc(fDay(w.start))}–${esc(fDay(w.end - 2 * DAY))}</span><span class="cupo-pills">${pill}</span></div><div class="cupo-f">${FAMILIES.map(([f, l]) => {
-      const u = w.used[f], c = CONFIG.capacity[f], p = pct(u, c), lv = level(p);
-      return `<button class="fam" data-action="m-week" data-w="${w.i}" data-f="${f}"><span class="top"><span class="n">${esc(l)}${FAMILY_SUB[f] ? `<small class="fsub">${esc(FAMILY_SUB[f])}</small>` : ''}</span><span class="v"${lv === 'bad' ? ' style="color:var(--bad-t)"' : ''}>${fmt(u)}<small>/${fmt(c)}</small></span></span><span class="bar"><i class="${lv === 'ok' ? '' : lv}" style="width:${Math.min(100, p)}%"></i></span><span class="s ${lv === 'ok' ? '' : lv}">${p} % · ${u > c ? `${fmt(u - c)} de exceso` : `quedan ${fmt(c - u)}`}</span></button>`; }).join('')}</div></div>`;
-  };
-  $('p-cupo').innerHTML = block(P.weeks[0], 'Cupo esta semana') + block(P.weeks[1], 'Cupo próxima semana');
+  const W = [P.weeks[0], P.weeks[1]], wl = W.map(w => 'S' + isoWeek(w.start));
+  const st = W.map(w => FAMILIES.map(([f, l]) => [f, l, pct(w.used[f], CONFIG.capacity[f])]));
+  const bad = [], warn = [];
+  st.forEach((fs, i) => fs.forEach(([, l, p]) => { if (p > 100) bad.push(`${l} (${wl[i]})`); else if (p >= CONFIG.capacityWarnPct) warn.push(`${l} (${wl[i]})`); }));
+  const btn = $('p-cupo-btn');
+  btn.className = 'cupo-btn ' + (bad.length ? 'bad' : warn.length ? 'warn' : 'ok');
+  btn.innerHTML = (bad.length ? `✕ Sin cupo: ${esc(bad.join(', '))}` : warn.length ? `▲ Justo: ${esc(warn.join(', '))}` : `✓ Cupo OK <em>· ${wl.join(' y ')}</em>`) + ' <span class="car">▾</span>';
+  btn.title = 'Cupo semanal por familia: esta semana y la próxima';
+  const cell = (w, i, f) => { const u = w.used[f], c = CONFIG.capacity[f], p = pct(u, c), lv = level(p);
+    return `<td><button class="cupo-cell" data-action="m-week" data-w="${w.i}" data-f="${f}" title="${p} % · quedan ${fmt(Math.max(0, c - u))} uds"><span class="bar"><i class="${lv === 'ok' ? '' : lv}" style="width:${Math.min(100, p)}%"></i></span><span class="v${lv === 'bad' ? ' bad' : ''}">${fmt(u)}<small>/${fmt(c)}</small></span></button></td>`; };
+  $('p-cupo').innerHTML = `<table><thead><tr><th></th>${W.map((w, i) => `<th>${i ? 'Próxima' : 'Esta semana'} <small>${esc(wl[i])} · ${esc(fDay(w.start))}–${esc(fDay(w.end - 2 * DAY))}</small></th>`).join('')}</tr></thead>
+    <tbody>${FAMILIES.map(([f, l]) => `<tr><td class="fn">${esc(l)}${FAMILY_SUB[f] ? `<small class="fsub">${esc(FAMILY_SUB[f])}</small>` : ''}</td>${W.map((w, i) => cell(w, i, f)).join('')}</tr>`).join('')}</tbody></table>
+    <div class="cupo-foot"><span>Verde &lt; ${CONFIG.capacityWarnPct} % · ámbar ≥ ${CONFIG.capacityWarnPct} % · rojo superado · clic en una cifra para ver sus pedidos</span><button class="linkb" data-action="go" data-page="prod-cap">Ver capacidad →</button></div>`;
   // mini-cupo en Soporte
   const line = (w, l) => { const worst = FAMILIES.map(([f, n]) => [n, pct(w.used[f], CONFIG.capacity[f])]).sort((a, b) => b[1] - a[1])[0]; const lv = level(worst[1]);
     return `<span style="${lv === 'bad' ? 'color:var(--bad-t)' : lv === 'warn' ? 'color:var(--warn-t)' : ''}">${l}: ${esc(worst[0])} ${worst[1]} % ${lv === 'bad' ? '✕' : lv === 'warn' ? '▲' : '✓'}</span>`; };
@@ -1028,13 +1051,15 @@ function orderRows(b, max) {
   return `<ul class="olist">${shown.map(o => `<li class="${o.t.fixed ? 'fixed' : ''}">${tagHtml(o.t)}<span class="cl" title="${esc(o.t.name)}">${o.t.fixed ? '<span class="lock" title="Fecha acordada con cliente">🔒</span>' : ''}${esc(o.t.name)}${o.partOf ? ` <span class="part">(${fmt(o.u)} de ${fmt(o.partOf)})</span>` : o.rest ? ' <span class="part">(resto)</span>' : ''}</span><span class="u">${fmt(o.u)}${o.adv || o.day > b.day ? `<small>→ ${esc(fDay(o.due))}</small>` : ''}</span></li>`).join('')}${rest > 0 ? `<li><span class="more">+${rest} pedido${rest === 1 ? '' : 's'} más · clic para verlos</span></li>` : ''}</ul>`;
 }
 function renderCalendar() {
-  const P = state.P, days = P.days.slice(state.calWin * 5, state.calWin * 5 + 5);
+  const P = state.P, ws = addDays(weekStart(P.today0), 7 * state.calWin), days = [0, 1, 2, 3, 4].map(i => addDays(ws, i));
+  $('p-calweek').textContent = `Semana ${isoWeek(ws)} · ${fDay(ws)} – ${fDay(days[4])}`;
   $$('[data-action="calwin"]').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.w === state.calWin)));
   $('p-cal').innerHTML = days.map(d => {
     const items = P.delivery.filter(o => o.day === d);
     const total = items.reduce((a, o) => a + o.u, 0);
     const worst = Math.max(0, ...FAMILIES.map(([f]) => pct(P.dlUse[d + ':' + f] || 0, CONFIG.dailyCapacity[f])));
-    const lv = level(worst), isToday = d === P.today0;
+    const lv = level(worst), isToday = d === P.today0, past = d < P.today0, hol = !isBiz(d);
+    if (past || hol) return `<div class="day off"><div class="day-h"><b>${esc(cap1(fDow(d)))} ${new Date(d).getDate()}</b><span></span></div><div class="gap-hint">${hol ? 'Festivo' : 'Día pasado · lo pendiente sale hoy como atrasado'}</div></div>`;
     const cards = MODELS.map(m => {
       const os = items.filter(o => o.model === m.id).sort((a, b) => (b.t.fixed - a.t.fixed) || a.due - b.due || a.t.prio - b.t.prio), nFix = os.filter(o => o.t.fixed).length; if (!os.length) return '';
       const u = os.reduce((a, o) => a + o.u, 0), late = os.filter(o => o.due < P.today0).length, shown = os.slice(0, 8), rest = os.length - shown.length;
@@ -1575,6 +1600,7 @@ document.addEventListener('click', (e) => {
     case 'logout': pinStore.clear(); state.tasks = []; return showPin('');
     case 'close': return closeModal();
     case 'period': state.periodDays = +D.d; deriveSup(); renderBadges(); return go(state.page);
+    case 'cupo-toggle': { const pop = $('p-cupo'), open = pop.hidden; pop.hidden = !open; $('p-cupo-btn').setAttribute('aria-expanded', String(open)); return; }
     case 'calwin': state.calWin = +D.w; return renderCalendar();
     case 'm-today': return openToday(D.kind);
     case 'm-overdue': { const P = state.P, ts = state.tasks.filter(t => !t.closed && t.production && t.units > 0 && t.due !== null && t.due < P.today0); return openList('Pedidos atrasados', `${fmt(P.atrasado.units)} uds`, ts, 'prod', 'model', batchesFor(ts, P.today0)); }
@@ -1620,7 +1646,8 @@ $('p-search').addEventListener('input', debounce(e => { state.prod.search = e.ta
 $('s-search').addEventListener('input', debounce(e => { state.sup.search = e.target.value; renderSupCasos(); }, 150));
 $('c-search').addEventListener('input', debounce(e => { state.cli.search = e.target.value; renderSupClientes(); }, 150));
 $('pin-form').addEventListener('submit', e => { e.preventDefault(); pinStore.set($('pin-input').value, $('pin-remember').checked); $('pin-err').textContent = ''; load(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && state.modal) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('p-cupo').hidden) { $('p-cupo').hidden = true; $('p-cupo-btn').setAttribute('aria-expanded', 'false'); return; } if (e.key === 'Escape' && state.modal) closeModal(); });
+document.addEventListener('click', e => { const pop = $('p-cupo'); if (!pop.hidden && !e.target.closest('.cupo-dd')) { pop.hidden = true; $('p-cupo-btn').setAttribute('aria-expanded', 'false'); } else if (!pop.hidden && e.target.closest('.cupo-cell, .cupo-foot .linkb')) { pop.hidden = true; $('p-cupo-btn').setAttribute('aria-expanded', 'false'); } }, true);
 window.addEventListener('hashchange', () => { const p = location.hash.slice(1); if (PAGES[p] && p !== state.page) go(p, false); });
 $$('[data-sim-model]').forEach(s => s.innerHTML = MODELS.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join(''));
 $$('[data-sim-from]').forEach(i => i.value = isoDay(Date.now()));
