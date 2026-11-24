@@ -161,6 +161,11 @@ body[data-env="sup"] .switch-env { color: #ffc35c; border-color: #6b4d12; }
 .cal { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
 .day { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .day.off { opacity: .5; }
+.day.past { background: color-mix(in srgb, var(--panel) 70%, var(--bg)); }
+.olist li.done { opacity: .55; } .olist li.done s { text-decoration-thickness: 1.5px; }
+.done-l { display: block; font: 600 10.5px var(--mono); color: var(--ok-t); margin-top: 1px; text-decoration: none; }
+.done-t { font-style: normal; font-weight: 700; color: var(--ok-t) !important; font-size: 11px; }
+.lot.all-done { opacity: .75; }
 .cal-week { font: 600 12.5px var(--mono); color: var(--muted); }
 .day.today { border: 2px solid var(--accent); }
 .day-h { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
@@ -902,6 +907,10 @@ function buildBatches(prod, P) {
   for (const o of all) { const f = fam(o.model); dayUse[k(o.day, f)] = (dayUse[k(o.day, f)] || 0) + o.u; weekUse[wk(o.day, f)] = (weekUse[wk(o.day, f)] || 0) + o.u; }
   // Calendario de entregas: foto de los pedidos en su fecha límite, antes de cualquier adelanto o lote
   P.delivery = all.map(o => ({ t: o.t, u: o.u, due: o.due, day: o.day, model: o.model })); P.dlUse = { ...dayUse };
+  // Pedidos ya cerrados (enviados / listos): se quedan en su fecha límite, tachados, para ver lo que ha salido
+  const calFrom = weekStart(today0), calTo = addDays(calFrom, 21);
+  P.deliveryDone = []; for (const t of state.tasks) { if (!t.closed || !t.production || t.due === null || t.due < calFrom || t.due >= calTo) continue;
+    const day = prevOrSameBiz(t.due); for (const p of t.parts) if (MODEL_BY_ID[p.model]) P.deliveryDone.push({ t, u: p.units, due: t.due, day, model: p.model, done: true }); }
   // Adelanto propuesto: se recomienda adelantar a hoy los pedidos de los próximos N días hábiles (primero fecha acordada,
   // luego por fecha), limitado solo por el cupo semanal. Es una recomendación: nunca retrasa nada.
   if (CONFIG.advanceBusinessDays > 0 && isBiz(today0)) {
@@ -1059,23 +1068,25 @@ function orderRows(b, max) {
   const os = [...b.orders].sort((a, c) => a.due - c.due), shown = os.slice(0, max), rest = os.length - shown.length;
   return `<ul class="olist">${shown.map(o => `<li class="${o.t.fixed ? 'fixed' : ''}">${tagHtml(o.t)}<span class="cl" title="${esc(o.t.name)}">${o.t.fixed ? '<span class="lock" title="Fecha acordada con cliente">🔒</span>' : ''}${esc(o.t.name)}${o.partOf ? ` <span class="part">(${fmt(o.u)} de ${fmt(o.partOf)})</span>` : o.rest ? ' <span class="part">(resto)</span>' : ''}</span><span class="u">${fmt(o.u)}${o.adv || o.day > b.day ? `<small>→ ${esc(fDay(o.due))}</small>` : ''}</span></li>`).join('')}${rest > 0 ? `<li><span class="more">+${rest} pedido${rest === 1 ? '' : 's'} más · clic para verlos</span></li>` : ''}</ul>`;
 }
+const calItems = (d) => [...state.P.delivery.filter(o => o.day === d), ...state.P.deliveryDone.filter(o => o.day === d)];
 function renderCalendar() {
   const P = state.P, ws = addDays(weekStart(P.today0), 7 * state.calWin), days = [0, 1, 2, 3, 4].map(i => addDays(ws, i));
   $('p-calweek').textContent = `Semana ${isoWeek(ws)} · ${fDay(ws)} – ${fDay(days[4])}`;
   $$('[data-action="calwin"]').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.w === state.calWin)));
   $('p-cal').innerHTML = days.map(d => {
-    const items = P.delivery.filter(o => o.day === d);
-    const total = items.reduce((a, o) => a + o.u, 0);
+    const items = calItems(d);
+    const total = items.reduce((a, o) => a + o.u, 0), doneU = items.filter(o => o.done).reduce((a, o) => a + o.u, 0);
     const isToday = d === P.today0, past = d < P.today0, hol = !isBiz(d);
-    if (past || hol) return `<div class="day off"><div class="day-h"><b>${esc(cap1(fDow(d)))} ${new Date(d).getDate()}</b><span></span></div><div class="gap-hint">${hol ? 'Festivo' : 'Día pasado · lo pendiente sale hoy como atrasado'}</div></div>`;
+    if (hol && !items.length) return `<div class="day off"><div class="day-h"><b>${esc(cap1(fDow(d)))} ${new Date(d).getDate()}</b><span></span></div><div class="gap-hint">Festivo</div></div>`;
     const cards = MODELS.map(m => {
-      const os = items.filter(o => o.model === m.id).sort((a, b) => (b.t.fixed - a.t.fixed) || a.due - b.due || a.t.prio - b.t.prio), nFix = os.filter(o => o.t.fixed).length; if (!os.length) return '';
-      const u = os.reduce((a, o) => a + o.u, 0), late = os.filter(o => o.due < P.today0).length, shown = os.slice(0, 8), rest = os.length - shown.length;
-      const rows = shown.map(o => `<li class="${o.t.fixed ? 'fixed' : ''}">${tagHtml(o.t)}<span class="cl" title="${esc(o.t.name)}">${o.t.fixed ? '<span class="lock" title="Fecha acordada con cliente">🔒</span>' : ''}${esc(o.t.name)}${o.due < P.today0 ? `<small class="late-l">atrasado · ${esc(fDay(o.due))}</small>` : ''}</span><span class="u">${fmt(o.u)}</span></li>`).join('');
-      return `<button class="lot ${nFix ? 'has-fixed' : ''}" style="--c:${m.color}" data-action="m-deliv" data-d="${d}" data-m="${m.id}"><b>${esc(m.short)} · ${fmt(u)}</b><span>${os.length} pedido${os.length > 1 ? 's' : ''}${late ? ` · ${late} atrasado${late > 1 ? 's' : ''}` : ''}${nFix ? ` · <em class="fix-t">🔒 ${nFix} fecha${nFix > 1 ? 's' : ''} acordada${nFix > 1 ? 's' : ''}</em>` : ''}</span><ul class="olist">${rows}${rest > 0 ? `<li><span class="more">+${rest} pedido${rest === 1 ? '' : 's'} más · clic para verlos</span></li>` : ''}</ul></button>`;
+      const os = items.filter(o => o.model === m.id).sort((a, b) => (!!a.done - !!b.done) || (b.t.fixed - a.t.fixed) || a.due - b.due || a.t.prio - b.t.prio), nFix = os.filter(o => o.t.fixed && !o.done).length; if (!os.length) return '';
+      const u = os.reduce((a, o) => a + o.u, 0), nDone = os.filter(o => o.done).length, late = os.filter(o => !o.done && o.due < P.today0).length, shown = os.slice(0, 8), rest = os.length - shown.length;
+      const rows = shown.map(o => o.done ? `<li class="done">${tagHtml(o.t)}<span class="cl" title="${esc(o.t.name)} · ${esc(o.t.statusLabel)}"><s>${esc(o.t.name)}</s><small class="done-l">✓ ${esc(o.t.statusLabel)}${o.t.closedAt ? ` · ${esc(fDay(o.t.closedAt))}` : ''}</small></span><span class="u"><s>${fmt(o.u)}</s></span></li>`
+        : `<li class="${o.t.fixed ? 'fixed' : ''}">${tagHtml(o.t)}<span class="cl" title="${esc(o.t.name)}">${o.t.fixed ? '<span class="lock" title="Fecha acordada con cliente">🔒</span>' : ''}${esc(o.t.name)}${o.due < P.today0 ? `<small class="late-l">atrasado · ${esc(fDay(o.due))}</small>` : ''}</span><span class="u">${fmt(o.u)}</span></li>`).join('');
+      return `<button class="lot ${nFix ? 'has-fixed' : ''} ${nDone === os.length ? 'all-done' : ''}" style="--c:${m.color}" data-action="m-deliv" data-d="${d}" data-m="${m.id}"><b>${esc(m.short)} · ${fmt(u)}${nDone === os.length ? ' <em class="done-t">✓ todo enviado</em>' : ''}</b><span>${os.length} pedido${os.length > 1 ? 's' : ''}${nDone && nDone < os.length ? ` · ${nDone} enviado${nDone > 1 ? 's' : ''}` : ''}${late ? ` · ${late} atrasado${late > 1 ? 's' : ''}` : ''}${nFix ? ` · <em class="fix-t">🔒 ${nFix} fecha${nFix > 1 ? 's' : ''} acordada${nFix > 1 ? 's' : ''}</em>` : ''}</span><ul class="olist">${rows}${rest > 0 ? `<li><span class="more">+${rest} pedido${rest === 1 ? '' : 's'} más · clic para verlos</span></li>` : ''}</ul></button>`;
     }).join('');
     const hint = items.length ? '' : '<div class="gap-hint">Sin entregas</div>';
-    return `<div class="day ${isToday ? 'today' : ''}"><div class="day-h"><b>${isToday ? 'Hoy · ' : ''}${esc(cap1(fDow(d)))} ${new Date(d).getDate()}</b><span title="Unidades con entrega este día">${fmt(total)} uds</span></div>${cards}${hint}</div>`;
+    return `<div class="day ${isToday ? 'today' : ''} ${past ? 'past' : ''}"><div class="day-h"><b>${isToday ? 'Hoy · ' : ''}${esc(cap1(fDow(d)))} ${new Date(d).getDate()}</b><span title="Unidades con entrega este día${doneU ? ` · ${fmt(doneU)} ya enviadas` : ''}">${fmt(total)} uds${doneU ? ` <em class="done-t">· ✓ ${fmt(doneU)}</em>` : ''}</span></div>${cards}${hint}</div>`;
   }).join('');
 }
 function renderProdCap() {
@@ -1615,8 +1626,8 @@ document.addEventListener('click', (e) => {
     case 'm-model': { const m = MODEL_BY_ID[D.m]; return openList(m.name, `Pedidos activos · cupo de la familia ${fmt(CONFIG.capacity[m.family])} uds/semana`, state.tasks.filter(t => !t.closed && t.production && t.units > 0 && t.parts.some(p => p.model === D.m)), 'prod', 'model', state.P.batches.filter(b => b.model.id === D.m)); }
     case 'm-fixedrisk': return openList('Fecha acordada con cliente', state.P.fixedRisk.length ? `${state.P.fixedRisk.length} con entrega en una semana que supera el cupo: conviene adelantar su fabricación` : 'Pedidos con fecha comprometida con el cliente (etiqueta ' + CONFIG.fixedDateTag + ')', state.P.fixedAll, 'prod', 'model', batchesFor(state.P.fixedAll));
     case 'rs-cell': { const h = state.rs.heatT[+D.ci], bi = +D.bi; return openList(`${h.c}${bi >= 0 ? ' · ' + h.labels[bi] : ''}`, 'Casos de soporte del informe', bi >= 0 ? h.cells[bi] : h.all, 'sup', 'kind'); }
-    case 'm-deliv': { const P = state.P, d = +D.d, m = MODEL_BY_ID[D.m], os = P.delivery.filter(o => o.day === d && o.model === D.m), tasks = [...new Set(os.map(o => o.t))];
-      return openList(`Entregas ${m.name} · ${d === P.today0 ? 'hoy' : fDowDay(d)}`, `${fmt(os.reduce((a, o) => a + o.u, 0))} uds con fecha límite este día`, tasks, 'prod', 'model', batchesFor(tasks)); }
+    case 'm-deliv': { const P = state.P, d = +D.d, m = MODEL_BY_ID[D.m], os = calItems(d).filter(o => o.model === D.m), tasks = [...new Set(os.map(o => o.t))];
+      return openList(`Entregas ${m.name} · ${d === P.today0 ? 'hoy' : fDowDay(d)}`, `${fmt(os.reduce((a, o) => a + o.u, 0))} uds con fecha límite este día${os.some(o => o.done) ? ` · ${fmt(os.filter(o => o.done).reduce((a, o) => a + o.u, 0))} ya enviadas` : ''}`, tasks, 'prod', 'model', batchesFor(tasks.filter(t => !t.closed))); }
     case 'm-lot': { const b = state.P.batches[+D.i]; return openList(`Lote ${b.model.name} · ${b.day === state.P.today0 ? 'hoy' : fDowDay(b.day)}`, `${fmt(b.units)} uds en ${b.orders.length} pedidos`, lotTasks([b]), 'prod', 'model', [b]); }
     case 'm-quality': { const L = { sinFecha: 'Pedidos sin fecha límite', sinTipo: 'Sin etiqueta VENTA ni REEMPLAZO', ventaYReemplazo: 'Venta y reemplazo a la vez' }; return openList(L[D.k], 'Corregir en ClickUp para que entren en el plan', state.P.quality[D.k], 'prod'); }
     case 'm-client': if (D.c) openClient(D.c); return;
