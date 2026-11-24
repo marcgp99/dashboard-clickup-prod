@@ -121,6 +121,19 @@ body[data-env="sup"] .switch-env { color: #ffc35c; border-color: #6b4d12; }
 .qrow.bad { color: var(--bad-t); } .qrow:hover { text-decoration: underline; }
 
 .cal-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+#app-sup .page:not(.hidden) { display: flex; flex-direction: column; gap: 20px; }
+.rsum { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+.rsum-b { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; background: var(--panel-2); }
+.rsum-b .v { font: 700 22px var(--mono); color: var(--vc, var(--text)); } .rsum-b .l { font-size: 12px; color: var(--muted); }
+.rsum.light { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.rsum.light .rsum-b { background: #fff; border-color: #e4e4e7; } .rsum.light .rsum-b .v { color: var(--vc, #1f1f23); font-size: 20px; } .rsum.light .rsum-b .l { color: #6b6b75; }
+@media (max-width: 900px) { .rsum { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.r-heat button.c { border: 0; cursor: pointer; font: inherit; } .r-heat button.c:hover { outline: 2px solid #1f1f23; outline-offset: -2px; }
+.late-l { display: block; font: 700 10.5px var(--mono); color: var(--bad-t); margin-top: 1px; }
+#page-prod-cal .olist .cl { -webkit-line-clamp: 4; }
+.cal-legend { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; }
+.lg-fix { font-size: 11.5px; font-weight: 700; color: #f5d76e; border: 1.5px solid #f5d76e; border-radius: 5px; padding: 1px 6px; background: rgba(245,215,110,.08); }
+#page-prod-cal .day { min-height: 60vh; }
 .cal { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
 .day { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .day.today { border: 2px solid var(--accent); }
@@ -155,6 +168,11 @@ body[data-env="sup"] .switch-env { color: #ffc35c; border-color: #6b4d12; }
 .order button.prop { border-style: dashed; border-left-style: solid; }
 .olist .part, .lot .olist span.part { font-size: 10.5px; color: var(--faint); }
 .olist .u small.late, .lot .olist .u small.late { color: var(--bad-t); }
+.olist li.fixed { outline: 1.5px solid #f5d76e; outline-offset: 1px; border-radius: 5px; background: rgba(245,215,110,.08); padding: 2px 3px; }
+.lock { margin-right: 4px; font-size: 11px; }
+.fix-t { color: #f5d76e !important; font-style: normal; font-weight: 700; }
+.lot.has-fixed { box-shadow: inset 0 0 0 1.5px rgba(245,215,110,.55); }
+.fix-hint { font-size: 12.5px; color: var(--text-2); border: 1px dashed #8a7a3a; border-radius: 8px; padding: 6px 9px; margin-top: 4px; }
 .gap-hint { border-radius: 9px; padding: 10px; border: 1px dashed var(--line); color: var(--muted); font-size: 12px; }
 
 .capgrid { display: grid; grid-template-columns: 130px repeat(4, minmax(0, 1fr)); gap: 8px; }
@@ -374,7 +392,8 @@ body[data-env="prod"] .report { margin: 0 -32px; border-radius: 0; }
       <div><b>Producción</b><small id="p-date">Producción</small></div>
     </div>
     <nav class="p-nav" aria-label="Producción">
-      <button data-action="go" data-page="prod-hoy">Hoy y semana</button>
+      <button data-action="go" data-page="prod-hoy">Producción</button>
+      <button data-action="go" data-page="prod-cal">Calendario</button>
       <button data-action="go" data-page="prod-cap">Comprometer pedido</button>
       <button data-action="go" data-page="prod-pedidos">Pedidos</button>
       <button data-action="go" data-page="prod-informe">Informes</button>
@@ -417,6 +436,9 @@ body[data-env="prod"] .report { margin: 0 -32px; border-radius: 0; }
           <div class="box"><span class="cap">Necesitan atención</span><div id="p-attn"></div></div>
         </div>
       </div>
+    </section>
+
+    <section class="page hidden" id="page-prod-cal">
       <section aria-label="Calendario de entregas" style="display:flex;flex-direction:column;gap:14px">
         <div class="cal-head">
           <h2 class="cap">Calendario de entregas</h2>
@@ -425,7 +447,7 @@ body[data-env="prod"] .report { margin: 0 -32px; border-radius: 0; }
             <button data-action="calwin" data-w="1" aria-pressed="false">Días 6–10</button>
             <button data-action="calwin" data-w="2" aria-pressed="false">Días 11–15</button>
           </div>
-          <span class="muted" style="margin-left:auto;font-size:12px">Pedidos en su fecha límite (no se mueven) · clic en una tarjeta para ver sus tiquets · la barra es la carga del día frente a la capacidad diaria</span>
+          <span class="cal-legend"><span class="tg v">Venta</span><span class="tg r">Reempl.</span><span class="lg-fix">🔒 Fecha acordada con cliente</span><span class="muted">Pedidos en su fecha límite (no se mueven) · clic en una tarjeta para ver sus tiquets · la barra es la carga del día frente a la capacidad diaria</span></span>
         </div>
         <div class="cal" id="p-cal"></div>
       </section>
@@ -503,6 +525,7 @@ body[data-env="prod"] .report { margin: 0 -32px; border-radius: 0; }
         <section class="card" style="display:flex;flex-direction:column;gap:14px"><div class="card-h" style="margin:0"><h2>RAK vs Milesight</h2><span>incidencias · reemplazos</span></div><div class="brandc" id="s-brands"></div><div class="segbar" id="s-brandbar"></div><p id="s-brandnote" style="margin:0;font-size:12px;color:var(--muted)"></p></section>
       </div>
       <section class="card"><div class="card-h"><h2>Evolución mensual de casos</h2><span>clic en una barra para ver los tiquets</span></div><div class="chart" id="ch-evol" role="img" aria-label="Casos por mes y categoría"></div></section>
+      <section class="card"><div class="card-h"><h2>Reemplazos de collares por modelo</h2><span>unidades en garantía · clic para ver tiquets</span></div><div class="chart" id="ch-colrep" role="img" aria-label="Reemplazos de collares por modelo"></div></section>
       <div class="g2e">
         <section class="card"><div class="card-h"><h2>Clientes con más problemas</h2><button class="linkb" data-action="go" data-page="sup-clientes">Ver todos →</button></div><div id="s-topclients"></div></section>
         <section class="card"><div class="card-h"><h2>Incidencias abiertas más antiguas</h2><span>sin cerrar</span></div><div id="s-oldest"></div></section>
@@ -522,8 +545,7 @@ body[data-env="prod"] .report { margin: 0 -32px; border-radius: 0; }
       <div class="g2e">
         <section class="card"><div class="card-h"><h2>Incidencias y reemplazos por marca</h2><span>clic para ver tiquets</span></div><div class="chart" id="ch-brand" role="img" aria-label="Incidencias y reemplazos por marca"></div></section>
         <section class="card"><div class="card-h"><h2>GW / kits reemplazados por mes</h2><span>unidades</span></div><div class="chart" id="ch-gwrep" role="img" aria-label="Gateways reemplazados por mes"></div></section>
-        <section class="card"><div class="card-h"><h2>Causas por fabricante</h2></div><div class="chart" id="ch-brandcause" role="img" aria-label="Causas por fabricante"></div></section>
-        <section class="card"><div class="card-h"><h2>Reemplazos de collares por modelo</h2><span>unidades en garantía</span></div><div class="chart" id="ch-colrep" role="img" aria-label="Reemplazos de collares por modelo"></div></section>
+        <section class="card" style="grid-column:1 / -1"><div class="card-h"><h2>Causas por fabricante</h2></div><div class="chart" id="ch-brandcause" role="img" aria-label="Causas por fabricante"></div></section>
       </div>
     </section>
 
@@ -537,6 +559,7 @@ body[data-env="prod"] .report { margin: 0 -32px; border-radius: 0; }
     </section>
 
     <section class="page hidden" id="page-sup-dev">
+      <section class="card"><div class="card-h"><h2>Pendiente de recibir · total</h2><span>todas las devoluciones abiertas</span></div><div id="d-sum"></div></section>
       <section class="card"><div class="card-h"><h2>Devoluciones pendientes («Solo recibir»)</h2><span>&gt; 30 días: reclamar al cliente</span></div><div class="chart lg" id="ch-dev" role="img" aria-label="Días esperando devolución"></div></section>
       <section class="card"><div class="scroll"><table class="t"><thead><tr><th>Cliente</th><th>Tiquet</th><th>Detalle</th><th class="n">Uds</th><th>Estado</th><th class="n">Días esperando</th></tr></thead><tbody id="d-tbody"></tbody></table></div></section>
     </section>
@@ -586,6 +609,7 @@ const CONFIG = {
   minLeadBusinessDays: 2,
   batchWindowBusinessDays: 7,
   advanceBusinessDays: 5,                              // si hoy hay hueco, proponer adelantar pedidos de los próximos N días hábiles (0 = desactivado)
+  fixedDateTag: 'FECHA ACORDADA',                          // etiqueta de ClickUp para pedidos comprometidos con fecha fija
   advanceMinUnits: 5,                                  // no proponer trozos de pedido más pequeños que esto
   maxLot: { ixo: null, pro: null, m10: null, m10lr: null, cow: null },
   historyDays: 400,                                    // debe coincidir con CLOSED_LOOKBACK_DAYS del Worker
@@ -758,10 +782,34 @@ function classify(raw) {
     if (cause && cause.id === 'pendiente') flags.push('sinCausa');
   }
   return { id: raw.id, name, url: raw.url || null, parent: raw.parent || null, desc: raw.description || '', tags, statusLabel, statusColor: (raw.status && raw.status.color) || '#64748b',
+    fixed: tags.some(t => t.includes(CONFIG.fixedDateTag)),
     closed, closedAt, created, due, prio, client, parts, collarUnits, comps, compUnits, gwUnits, kind, isVenta, isReemplazo, production, support, flags, cause,
     brand: (kind === 'incidencia' || kind === 'reemplazo_gw') ? detectBrand(text) : null,
     search: norm(`${name} ${client} ${raw.description || ''} ${tags.join(' ')} ${cause ? cause.label : ''}`) };
 }
+// Devoluciones pendientes de recibir: resumen global (tiquets, unidades por tipo, antigüedad)
+function returnsSummary(list) {
+  const now = Date.now(), byModel = {}, comps = {}; let gw = 0, other = 0, units = 0, over30 = 0, oldest = null;
+  for (const t of list) {
+    let u = 0;
+    for (const p of t.parts) { byModel[p.model] = (byModel[p.model] || 0) + p.units; u += p.units; }
+    if (t.gwUnits) { gw += t.gwUnits; u += t.gwUnits; }
+    for (const [k, v] of Object.entries(t.comps || {})) { comps[k] = (comps[k] || 0) + v; u += v; }
+    if (!u) { other += 1; u = 1; }
+    units += u;
+    const d = t.created ? Math.floor((now - t.created) / DAY) : 0; if (d > 30) over30++; if (!oldest || d > oldest.days) oldest = { t, days: d };
+  }
+  const collars = Object.values(byModel).reduce((a, v) => a + v, 0), compU = Object.values(comps).reduce((a, v) => a + v, 0);
+  return { tickets: list.length, units, collars, byModel, gw, comps, compU, other, over30, oldest };
+}
+const returnsHtml = (R, light) => {
+  const box = (v, l, act = '', extra = '') => `<${act ? `button data-action="${act}"` : 'div'} class="rsum-b"${extra}><span class="v">${v}</span><span class="l">${l}</span></${act ? 'button' : 'div'}>`;
+  const models = MODELS.filter(m => R.byModel[m.id]).map(m => `<span class="chip-s"><i class="sw" style="background:${m.color}"></i>${esc(m.short)} <strong>${fmt(R.byModel[m.id])}</strong></span>`).join('');
+  const comps = Object.entries(R.comps).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<span class="chip-s"><i class="sw" style="background:#199e70"></i>${esc((COMPONENTS.find(c => c.id === k) || {}).label || k)} <strong>${fmt(v)}</strong></span>`).join('');
+  return `<div class="rsum ${light ? 'light' : ''}">${box(fmt(R.tickets), 'tiquets pendientes')}${box(fmt(R.units), 'unidades por recibir')}${box(fmt(R.collars), 'collares')}${box(fmt(R.gw), 'gateways / kits')}${box(fmt(R.compU), 'componentes')}${box(fmt(R.over30), 'más de 30 días', '', R.over30 ? ' style="--vc:#e5484d"' : '')}</div>
+    ${models || comps || R.other ? `<div class="chips" style="margin-top:10px">${models}${comps}${R.other ? `<span class="chip-s"><i class="sw" style="background:#7a869c"></i>Sin detalle <strong>${fmt(R.other)}</strong></span>` : ''}</div>` : ''}
+    ${R.oldest ? `<p class="${light ? 'r-note' : 'muted'}" style="margin:8px 0 0;font-size:12.5px">La más antigua: ${esc(R.oldest.t.client || R.oldest.t.name)} · ${R.oldest.days} días esperando.</p>` : ''}`;
+};
 const supUnits = (t) => t.kind === 'componentes' ? t.compUnits || 1 : t.kind === 'reemplazo' ? t.collarUnits : t.kind === 'reemplazo_gw' ? t.gwUnits || 1 : t.kind === 'recibir' ? Math.max(1, t.parts.reduce((a, p) => a + p.units, 0)) : 1;
 const supDate = (t) => t.created || t.closedAt || t.due || Date.now();
 
@@ -808,6 +856,8 @@ function deriveProd() {
   P.batches = buildBatches(prod, P);
   for (const b of P.batches) for (const o of b.orders) o.t.lot = b;
   P.todayBatches = P.batches.filter(b => b.day === today0).sort((a, b) => (a.proposed - b.proposed) || (b.hasOverdue - a.hasOverdue) || (Math.min(...a.orders.map(o => o.t.prio)) - Math.min(...b.orders.map(o => o.t.prio))) || b.units - a.units);
+  P.fixedAll = [...new Set(P.delivery.filter(o => o.t.fixed).map(o => o.t))];
+  P.fixedRisk = [...new Set(P.delivery.filter(o => o.t.fixed && (P.dlUse[o.day + ':' + MODEL_BY_ID[o.model].family] || 0) > (CONFIG.dailyCapacity[MODEL_BY_ID[o.model].family] || Infinity)).map(o => o.t))];
   P.advUnits = P.todayBatches.reduce((a, b) => a + b.advUnits, 0);
   P.setupsSaved = P.batches.reduce((a, b) => a + b.saved, 0);
   P.quality = { sinFecha: [], sinTipo: [], ventaYReemplazo: [] };
@@ -831,7 +881,7 @@ function buildBatches(prod, P) {
     const horizon = nextBiz(today0, CONFIG.advanceBusinessDays).pop(), dcapOf = (f) => CONFIG.dailyCapacity[f] || Infinity;
     const cand = all.filter(o => o.day > today0 && o.day <= horizon);
     for (const o of cand) o.srcOver = dayUse[k(o.day, fam(o.model))] > dcapOf(fam(o.model));
-    cand.sort((a, b) => (b.srcOver - a.srcOver) || a.day - b.day || a.model.localeCompare(b.model) || a.due - b.due || a.t.prio - b.t.prio);
+    cand.sort((a, b) => (b.srcOver - a.srcOver) || (b.t.fixed - a.t.fixed) || a.day - b.day || a.model.localeCompare(b.model) || a.due - b.due || a.t.prio - b.t.prio);
     for (const o of cand) {
       const f = fam(o.model), sameWeek = weekStart(o.day) === weekStart(today0);
       let free = dcapOf(f) - (dayUse[k(today0, f)] || 0);
@@ -965,17 +1015,17 @@ function renderProdHoy() {
   $('p-models').innerHTML = MODELS.map(m => `<button style="--c:${m.color}" data-action="m-model" data-m="${m.id}"><div class="n">${esc(m.short)}</div><div class="v">${fmt(P.byModel[m.id].upto)}</div><div class="s">hoy ${fmt(P.byModel[m.id].today)}</div></button>`).join('');
   $('p-attn').innerHTML = [
     [`Pedidos atrasados`, `${P.atrasado.tickets} · ${fmt(P.atrasado.units)} uds`, 'm-overdue', P.atrasado.tickets ? 'bad' : ''],
+    ['🔒 Fecha acordada con cliente', P.fixedAll.length, 'm-fixedrisk', P.fixedRisk.length ? 'bad' : ''],
     ['Sin fecha límite', P.quality.sinFecha.length, 'm-quality" data-k="sinFecha', ''],
     ['Sin VENTA ni REEMPLAZO', P.quality.sinTipo.length, 'm-quality" data-k="sinTipo', ''],
     ['Venta y reemplazo a la vez', P.quality.ventaYReemplazo.length, 'm-quality" data-k="ventaYReemplazo', ''],
   ].map(([l, v, a, c]) => `<button class="qrow ${c}" data-action="${a}"><span>${esc(l)}</span><b>${esc(v)}</b></button>`).join('');
-  renderCalendar();
 }
 const advFrom = (b) => [...new Set(b.advOrders.map(o => o.fromDay))].sort((a, c) => a - c).map(fDay).join(', ');
 const tagHtml = (t) => t.kind === 'venta' ? '<span class="tg v">Venta</span>' : t.kind === 'reemplazo' ? '<span class="tg r">Reempl.</span>' : '<span class="tg x">Sin tipo</span>';
 function orderRows(b, max) {
   const os = [...b.orders].sort((a, c) => a.due - c.due), shown = os.slice(0, max), rest = os.length - shown.length;
-  return `<ul class="olist">${shown.map(o => `<li>${tagHtml(o.t)}<span class="cl" title="${esc(o.t.name)}">${esc(o.t.name)}${o.partOf ? ` <span class="part">(${fmt(o.u)} de ${fmt(o.partOf)})</span>` : o.rest ? ' <span class="part">(resto)</span>' : ''}</span><span class="u">${fmt(o.u)}${o.adv || o.day > b.day ? `<small>→ ${esc(fDay(o.due))}</small>` : ''}</span></li>`).join('')}${rest > 0 ? `<li><span class="more">+${rest} pedido${rest === 1 ? '' : 's'} más · clic para verlos</span></li>` : ''}</ul>`;
+  return `<ul class="olist">${shown.map(o => `<li class="${o.t.fixed ? 'fixed' : ''}">${tagHtml(o.t)}<span class="cl" title="${esc(o.t.name)}">${o.t.fixed ? '<span class="lock" title="Fecha acordada con cliente">🔒</span>' : ''}${esc(o.t.name)}${o.partOf ? ` <span class="part">(${fmt(o.u)} de ${fmt(o.partOf)})</span>` : o.rest ? ' <span class="part">(resto)</span>' : ''}</span><span class="u">${fmt(o.u)}${o.adv || o.day > b.day ? `<small>→ ${esc(fDay(o.due))}</small>` : ''}</span></li>`).join('')}${rest > 0 ? `<li><span class="more">+${rest} pedido${rest === 1 ? '' : 's'} más · clic para verlos</span></li>` : ''}</ul>`;
 }
 function renderCalendar() {
   const P = state.P, days = P.days.slice(state.calWin * 5, state.calWin * 5 + 5);
@@ -986,10 +1036,10 @@ function renderCalendar() {
     const worst = Math.max(0, ...FAMILIES.map(([f]) => pct(P.dlUse[d + ':' + f] || 0, CONFIG.dailyCapacity[f])));
     const lv = level(worst), isToday = d === P.today0;
     const cards = MODELS.map(m => {
-      const os = items.filter(o => o.model === m.id).sort((a, b) => a.due - b.due || a.t.prio - b.t.prio); if (!os.length) return '';
-      const u = os.reduce((a, o) => a + o.u, 0), late = os.filter(o => o.due < P.today0).length, shown = os.slice(0, 5), rest = os.length - shown.length;
-      const rows = shown.map(o => `<li>${tagHtml(o.t)}<span class="cl" title="${esc(o.t.name)}">${esc(o.t.name)}</span><span class="u">${fmt(o.u)}${o.due < P.today0 ? `<small class="late">atrasado ${esc(fDay(o.due))}</small>` : ''}</span></li>`).join('');
-      return `<button class="lot" style="--c:${m.color}" data-action="m-deliv" data-d="${d}" data-m="${m.id}"><b>${esc(m.short)} · ${fmt(u)}</b><span>${os.length} pedido${os.length > 1 ? 's' : ''}${late ? ` · ${late} atrasado${late > 1 ? 's' : ''}` : ''}</span><ul class="olist">${rows}${rest > 0 ? `<li><span class="more">+${rest} pedido${rest === 1 ? '' : 's'} más · clic para verlos</span></li>` : ''}</ul></button>`;
+      const os = items.filter(o => o.model === m.id).sort((a, b) => (b.t.fixed - a.t.fixed) || a.due - b.due || a.t.prio - b.t.prio), nFix = os.filter(o => o.t.fixed).length; if (!os.length) return '';
+      const u = os.reduce((a, o) => a + o.u, 0), late = os.filter(o => o.due < P.today0).length, shown = os.slice(0, 8), rest = os.length - shown.length;
+      const rows = shown.map(o => `<li class="${o.t.fixed ? 'fixed' : ''}">${tagHtml(o.t)}<span class="cl" title="${esc(o.t.name)}">${o.t.fixed ? '<span class="lock" title="Fecha acordada con cliente">🔒</span>' : ''}${esc(o.t.name)}${o.due < P.today0 ? `<small class="late-l">atrasado · ${esc(fDay(o.due))}</small>` : ''}</span><span class="u">${fmt(o.u)}</span></li>`).join('');
+      return `<button class="lot ${nFix ? 'has-fixed' : ''}" style="--c:${m.color}" data-action="m-deliv" data-d="${d}" data-m="${m.id}"><b>${esc(m.short)} · ${fmt(u)}</b><span>${os.length} pedido${os.length > 1 ? 's' : ''}${late ? ` · ${late} atrasado${late > 1 ? 's' : ''}` : ''}${nFix ? ` · <em class="fix-t">🔒 ${nFix} fecha${nFix > 1 ? 's' : ''} acordada${nFix > 1 ? 's' : ''}</em>` : ''}</span><ul class="olist">${rows}${rest > 0 ? `<li><span class="more">+${rest} pedido${rest === 1 ? '' : 's'} más · clic para verlos</span></li>` : ''}</ul></button>`;
     }).join('');
     const hint = worst < 30 ? `<div class="gap-hint">Día con hueco${items.length ? '' : ': ninguna entrega'}</div>` : '';
     return `<div class="day ${isToday ? 'today' : ''}"><div class="day-h"><b>${isToday ? 'Hoy · ' : ''}${esc(cap1(fDow(d)))} ${new Date(d).getDate()}</b><span class="${lv === 'bad' ? 'bad' : ''}">${fmt(total)}</span></div>
@@ -1021,7 +1071,7 @@ function simulate(modelId, units, fromTs) {
   const usable = weeks.filter(w => lastBiz(w) >= earliest), first = usable.find(w => w.free >= units);
   if (units > cap) return `<span class="pill bad" style="align-self:flex-start">✕ ${fmt(units)} uds superan el cupo semanal de ${esc(famName)} (${fmt(cap)})</span>`;
   const blocked = usable.filter(w => first && w.s < first.s).map(w => `semana del ${fDay(w.s)} ${w.free <= 0 ? 'llena' : `solo quedan ${fmt(w.free)}`}`);
-  if (first) return `<span>Semana del <b>${esc(fDay(first.s))}</b> · compromiso sugerido <b>${esc(fDowDay(lastBiz(first)))}</b>.</span><span class="muted" style="font-size:12.5px">${blocked.length ? esc(cap1(blocked.join(', '))) + '. ' : ''}Quedan ${fmt(first.free)} uds libres de ${esc(famName)} esa semana · margen mínimo ${CONFIG.minLeadBusinessDays} días hábiles.</span>`;
+  if (first) return `<span>Semana del <b>${esc(fDay(first.s))}</b> · compromiso sugerido <b>${esc(fDowDay(lastBiz(first)))}</b>.</span><span class="muted" style="font-size:12.5px">${blocked.length ? esc(cap1(blocked.join(', '))) + '. ' : ''}Quedan ${fmt(first.free)} uds libres de ${esc(famName)} esa semana · margen mínimo ${CONFIG.minLeadBusinessDays} días hábiles.</span><span class="fix-hint">🔒 Si se compromete: crear el tiquet en ClickUp con fecha límite <b>${esc(fDowDay(lastBiz(first)))}</b> y la etiqueta <b>${esc(CONFIG.fixedDateTag)}</b>. Saldrá destacado en el calendario como fecha acordada con el cliente.</span>`;
   let rem = units; const split = []; for (const w of usable) { if (rem <= 0) break; if (w.free > 0) { const tk = Math.min(w.free, rem); split.push(`${fmt(tk)} uds semana ${fDay(w.s)}`); rem -= tk; } }
   return `<span class="pill warn" style="align-self:flex-start">▲ No cabe en una sola semana en las próximas 12</span><span class="muted">Repartido: ${esc(split.join(' · '))}</span>`;
 }
@@ -1033,8 +1083,17 @@ const periodLabel = () => ({ 90: 'últimos 3 meses', 180: 'últimos 6 meses', 36
 const sparkSvg = (vals, bars) => { const max = Math.max(1, ...vals), w = 200, h = 36, n = vals.length; if (!n) return '';
   if (bars) return `<svg class="spark" viewBox="0 0 ${w} ${h}" aria-hidden="true"><g fill="#c9bdff">${vals.map((v, i) => { const bw = w / n - 6, bh = Math.max(2, v / max * (h - 2)); return `<rect x="${i * w / n + 3}" y="${h - bh}" width="${bw}" height="${bh}" rx="2"/>`; }).join('')}</g></svg>`;
   return `<svg class="spark" viewBox="0 0 ${w} ${h}" aria-hidden="true"><polyline fill="none" stroke="#5b3fe0" stroke-width="2" stroke-linejoin="round" points="${vals.map((v, i) => `${n === 1 ? w / 2 : i * w / (n - 1)},${h - 3 - v / max * (h - 8)}`).join(' ')}"/></svg>`; };
+function renderSupColRep() {
+  const S = state.S, ax = axis();
+  const cr = MODELS.map(m => [m.name, S.colRepByModel[m.id], m]).reverse();
+  chart('ch-colrep', { grid: { left: 8, right: 40, top: 6, bottom: 6, containLabel: true }, tooltip: { ...tip(), formatter: (p) => tipRows(p.name, [[cr[p.dataIndex][2].color, 'Unidades', fmt(p.value)]]) },
+    xAxis: { type: 'value', show: false }, yAxis: { type: 'category', data: cr.map(x => x[0]), ...ax, axisLine: { show: false }, axisLabel: { ...ax.axisLabel, color: theme().text } },
+    series: [{ type: 'bar', barMaxWidth: 16, data: cr.map(x => ({ value: x[1], itemStyle: { color: x[2].color, borderRadius: [0, 4, 4, 0] } })), label: { show: true, position: 'right', color: theme().text, fontWeight: 700, fontSize: 11 } }] },
+    (p) => { const m = cr[p.dataIndex][2]; openList(`Reemplazos de ${m.name}`, periodLabel(), S.colRep.filter(t => t.parts.some(x => x.model === m.id)), 'sup', 'model'); });
+}
 function renderSupGeneral() {
   const S = state.S;
+  renderSupColRep();
   const delta = S.prevAvailable && S.prevCount ? pct(S.periodCount - S.prevCount, S.prevCount) : null;
   const rd = S.resolAvg !== null && S.resolPrev !== null ? S.resolAvg - S.resolPrev : null;
   $('s-kpis').innerHTML = `
@@ -1107,11 +1166,6 @@ function renderSupGw() {
     xAxis: { type: 'value', minInterval: 1, ...ax, axisLine: { show: false } }, yAxis: { type: 'category', data: causes, ...ax, axisLabel: { ...ax.axisLabel, color: theme().text, width: 160, overflow: 'truncate' } },
     series: bset.map(([b, c], i) => ({ name: b, type: 'bar', stack: 'b', barMaxWidth: 16, itemStyle: { color: c, borderColor: theme().panel, borderWidth: 1, borderRadius: i === bset.length - 1 ? [0, 4, 4, 0] : 0 }, data: causes.map(k => S.inc.filter(t => t.brand === b && t.cause.label === k).length) })),
   }, (p) => openList(`${bset[p.seriesIndex][0]} · ${p.name}`, periodLabel(), S.inc.filter(t => t.brand === bset[p.seriesIndex][0] && t.cause.label === p.name), 'sup', 'kind'));
-  const cr = MODELS.map(m => [m.name, S.colRepByModel[m.id], m]).reverse();
-  chart('ch-colrep', { grid: { left: 8, right: 40, top: 6, bottom: 6, containLabel: true }, tooltip: { ...tip(), formatter: (p) => tipRows(p.name, [[cr[p.dataIndex][2].color, 'Unidades', fmt(p.value)]]) },
-    xAxis: { type: 'value', show: false }, yAxis: { type: 'category', data: cr.map(x => x[0]), ...ax, axisLine: { show: false }, axisLabel: { ...ax.axisLabel, color: theme().text } },
-    series: [{ type: 'bar', barMaxWidth: 16, data: cr.map(x => ({ value: x[1], itemStyle: { color: x[2].color, borderRadius: [0, 4, 4, 0] } })), label: { show: true, position: 'right', color: theme().text, fontWeight: 700, fontSize: 11 } }] },
-    (p) => { const m = cr[p.dataIndex][2]; openList(`Reemplazos de ${m.name}`, periodLabel(), S.colRep.filter(t => t.parts.some(x => x.model === m.id)), 'sup', 'model'); });
 }
 function renderSupComp() {
   const S = state.S, ax = axis();
@@ -1131,6 +1185,7 @@ function renderSupComp() {
   $('k-clients').innerHTML = top.length ? `<table class="t"><tbody>${top.map(([c, v]) => `<tr><td><button class="linkb" data-action="m-client" data-c="${esc(c)}">${esc(c)}</button></td><td class="n">${fmt(v)} uds</td></tr>`).join('')}</tbody></table>` : '<p class="empty">Sin datos.</p>';
 }
 function renderSupDev() {
+  $('d-sum').innerHTML = returnsHtml(returnsSummary(state.S.recibir.map(x => x.t)));
   const S = state.S, r = S.recibir.slice(0, 20).reverse(), ax = axis();
   if (!r.length) noData('ch-dev', 'No hay devoluciones pendientes.');
   else chart('ch-dev', { grid: { left: 8, right: 50, top: 6, bottom: 6, containLabel: true }, tooltip: { ...tip(), formatter: (p) => tipRows(r[p.dataIndex].t.name, [['', 'Días esperando', p.value]]) },
@@ -1237,8 +1292,6 @@ function renderReportProd() {
   const onTimeBy = FAMILIES.map(([f, l]) => { const ls = cur.list.filter(t => t.due && t.parts.some(x => MODEL_BY_ID[x.model]?.family === f)), late = ls.filter(t => dayStart(t.closedAt) > dayStart(t.due));
     return [l, ls.length ? (ls.length - late.length) / ls.length * 100 : null, late.length ? late.reduce((a, t) => a + (dayStart(t.closedAt) - dayStart(t.due)) / DAY, 0) / late.length : 0]; });
   const repBy = MODELS.map(m => { let v = 0, rr = 0; for (const t of cur.list) for (const x of t.parts) if (x.model === m.id) { v += x.units; if (t.kind === 'reemplazo') rr += x.units; } return [m, v, rr]; }).filter(x => x[1]);
-  const byClient = {}; for (const t of cur.list) if (t.client && t.kind !== 'reemplazo') byClient[t.client] = (byClient[t.client] || 0) + t.collarUnits;
-  const topC = Object.entries(byClient).sort((a, b) => b[1] - a[1]).slice(0, 6), topShare = pct(topC.slice(0, 3).reduce((a, c) => a + c[1], 0), cur.units);
   const worstBk = bks.map((b, i) => [b.label, FAMILIES.reduce((a, _, fi) => a + byFam[fi][i], 0)]).sort((a, b) => b[1] - a[1])[0];
   const worstOT = onTimeBy.filter(x => x[1] !== null).sort((a, b) => a[1] - b[1])[0];
   state.rp.rows = cur.list;
@@ -1259,16 +1312,15 @@ function renderReportProd() {
           ${FAMILIES.map(([, l], i) => `<span style="font-weight:600;font-size:12px">${esc(l)}</span>${occ[i].map((v, j) => `<span class="c" style="background:${occColor(v)}" title="${esc(l)} semana ${isoWeek(weeks[j])}: ${v} %">${weeks.length <= 14 ? v : ''}</span>`).join('')}`).join('')}</div>
         <div class="r-legend"><span><i class="sw" style="background:#d9f99d"></i>&lt; ${CONFIG.capacityWarnPct} %</span><span><i class="sw" style="background:#fde68a"></i>${CONFIG.capacityWarnPct}–100 %</span><span><i class="sw" style="background:#fecaca"></i>&gt; 100 % (cupo superado)</span></div></section>
     </div>
-    <div class="r-g3">
+    <div class="r-g2" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr)">
       <section class="r-sec"><h2>3. Cumplimiento de plazos</h2><p class="c">${worstOT ? `Los retrasos se concentran en ${esc(worstOT[0])}.` : 'Sin pedidos con fecha en el periodo.'}</p>
         <table><thead><tr><th>Familia</th><th class="n">A tiempo</th><th class="n">Retraso medio</th></tr></thead><tbody>${onTimeBy.map(([l, ot, ld]) => `<tr><td>${esc(l)}</td><td class="n" style="${ot !== null && ot < 90 ? 'color:#b91c1c' : ''}">${ot === null ? '—' : fmt(ot) + ' %'}</td><td class="n">${ld ? fmt(ld, 1) + ' d' : '—'}</td></tr>`).join('')}</tbody></table></section>
       <section class="r-sec"><h2>4. Ventas y reemplazos por modelo</h2><p class="c">Porcentaje de unidades que fueron reemplazos en garantía.</p>
         <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">${repBy.map(([m, v, rr]) => `<div style="display:grid;grid-template-columns:110px 1fr 50px;gap:8px;align-items:center"><span>${esc(m.short)}</span><div class="r-bar"><div style="flex:${v - rr};background:#3987e5"></div><div style="flex:${rr || 0.0001};background:#c98500"></div></div><span style="text-align:right;font-family:'IBM Plex Mono', monospace;${pct(rr, v) >= 10 ? 'color:#b91c1c' : ''}">${pct(rr, v)} %</span></div>`).join('') || '<p class="r-note">Sin datos.</p>'}</div>
-        <div class="r-legend"><span><i class="sw" style="background:#3987e5"></i>Venta</span><span><i class="sw" style="background:#c98500"></i>Reemplazo</span></div></section>
-      <section class="r-sec"><h2>5. Clientes con más unidades</h2><p class="c">${topC.length ? `Los 3 primeros suponen el ${topShare} % del periodo.` : 'Sin ventas en el periodo.'}</p>
-        <table><tbody>${topC.map(([c, v]) => `<tr><td>${esc(c)}</td><td class="n">${fmt(v)}</td></tr>`).join('')}</tbody></table></section>
+        <div class="r-legend"><span><i class="sw" style="background:#3987e5"></i>Venta</span><span><i class="sw" style="background:#c98500"></i>Reemplazo</span></div>
+        ${repBy.length ? `<table style="margin-top:10px"><thead><tr><th>Modelo</th><th class="n">Ventas (uds)</th><th class="n">Reemplazos (uds)</th><th class="n">Total</th><th class="n">% reemplazos</th></tr></thead><tbody>${repBy.map(([m, v, rr]) => `<tr><td>${esc(m.short)}</td><td class="n">${fmt(v - rr)}</td><td class="n">${fmt(rr)}</td><td class="n">${fmt(v)}</td><td class="n" style="${pct(rr, v) >= 10 ? 'color:#b91c1c' : ''}">${pct(rr, v)} %</td></tr>`).join('')}<tr style="font-weight:700"><td>Total</td><td class="n">${fmt(repBy.reduce((a, x) => a + x[1] - x[2], 0))}</td><td class="n">${fmt(repBy.reduce((a, x) => a + x[2], 0))}</td><td class="n">${fmt(repBy.reduce((a, x) => a + x[1], 0))}</td><td class="n">${pct(repBy.reduce((a, x) => a + x[2], 0), repBy.reduce((a, x) => a + x[1], 0))} %</td></tr></tbody></table>` : ''}</section>
     </div>
-    <p class="r-note">Fuente: pedidos de fabricación cerrados en ClickUp (fecha de cierre = fecha de fabricación; a tiempo = cerrado el día de su fecha límite o antes). Cupos: Ixotrack ${CONFIG.capacity.ixo}, familia Pro ${CONFIG.capacity.pro}, Cowpro ${CONFIG.capacity.cow} uds/semana.</p>`;
+    <p class="r-note">Fuente: pedidos de fabricación cerrados en ClickUp (fecha de cierre = fecha de fabricación; a tiempo = cerrado el día de su fecha límite o antes). Cupos: Ixotrack ${CONFIG.capacity.ixo}, IxotrackPro ${CONFIG.capacity.pro}, Cowpro ${CONFIG.capacity.cow} uds/semana.</p>`;
   chart('ch-rp1', { textStyle: { fontFamily: "'IBM Plex Sans', sans-serif" }, grid: { left: 46, right: 10, top: 30, bottom: 26 }, legend: { top: 0, left: 0, itemWidth: 10, itemHeight: 10, icon: 'rect', textStyle: { color: '#3f3f46' } },
     tooltip: { trigger: 'axis', axisPointer: shadow(), formatter: (ps) => tipRows(ps[0].axisValue, [...ps.map(x => [x.color, x.seriesName, fmt(x.value)]), ['', 'Total', fmt(ps.reduce((a, x) => a + x.value, 0))]]) },
     xAxis: { type: 'category', data: bks.map(b => b.label), axisLine: { lineStyle: { color: '#d4d4d8' } }, axisTick: { show: false }, axisLabel: { color: '#3f3f46' } },
@@ -1302,6 +1354,10 @@ function renderReportSup() {
   const pend = state.tasks.filter(t => t.kind === 'recibir' && !t.closed && (!r.client || t.client === r.client)).length;
   const peak = bks.map((b, i) => [b.label, CATS.reduce((a, _, ci) => a + byCat[ci][i], 0)]).sort((a, b) => b[1] - a[1])[0];
   state.rs.rows = cur.list;
+  state.rs.heatT = topCl.map(([c, ts]) => ({ c, all: ts, cells: bks.map(b => ts.filter(t => supDate(t) >= b.start && supDate(t) < b.end)), labels: bks.map(b => b.label) }));
+  const colOf = (L) => { const o = Object.fromEntries(MODELS.map(m => [m.id, { u: 0, n: 0 }])); for (const t of L.filter(t => t.kind === 'reemplazo')) for (const x of t.parts) if (o[x.model]) { o[x.model].u += x.units; o[x.model].n++; } return o; };
+  const col = colOf(cur.list), colPv = pv ? colOf(pv.list) : null, colMax = Math.max(1, ...MODELS.map(m => col[m.id].u)), colTot = MODELS.reduce((a, m) => a + col[m.id].u, 0);
+  const R = returnsSummary(state.tasks.filter(t => t.kind === 'recibir' && !t.closed && (!r.client || t.client === r.client)));
   const clientSel = `<label>Cliente<select data-rclient>${['', ...state.S.clients.map(c => c.name).sort((a, b) => a.localeCompare(b))].map(c => `<option value="${esc(c)}"${c === r.client ? ' selected' : ''}>${c ? esc(c) : 'Todos'}</option>`).join('')}</select></label>`;
   $('r-sup').innerHTML = reportHeader('sup', r, { ...p, label: p.label + (r.client ? ` · ${r.client}` : '') }, opts, clientSel) + `
     <div class="r-kpis">
@@ -1320,10 +1376,16 @@ function renderReportSup() {
     <div class="r-g2">
       <section class="r-sec"><h2>3. Recurrencia por cliente</h2><p class="c">${chronic.length ? `${esc(chronic.map(h => h[0]).join(', '))} ${chronic.length === 1 ? 'tiene' : 'tienen'} casos en casi todos los ${r.type === 'mes' ? 'semanas' : 'meses'}: problema crónico.` : 'Ningún cliente con casos de forma continuada.'}</p>
         ${heat.length ? `<div class="r-heat" style="grid-template-columns: 170px repeat(${bks.length}, minmax(0, 1fr)) 50px"><span></span>${bks.map(b => `<span style="text-align:center;color:#6b6b75">${esc(b.label)}</span>`).join('')}<span style="text-align:right;color:#6b6b75">Total</span>
-          ${heat.map(([c, vals, tot]) => `<span style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c)}</span>${vals.map(v => `<span class="c" style="background:${hc(v)};color:${v / hmax >= .5 ? '#fff' : '#1f1f23'}">${v || ''}</span>`).join('')}<span style="text-align:right;font-family:'IBM Plex Mono', monospace;font-weight:600">${tot}</span>`).join('')}</div>` : '<p class="r-note">Sin datos.</p>'}</section>
+          ${heat.map(([c, vals, tot], ci) => `<span style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c)}</span>${vals.map((v, bi) => v ? `<button class="c" data-action="rs-cell" data-ci="${ci}" data-bi="${bi}" title="Ver ${v} tiquet${v > 1 ? 's' : ''}" style="background:${hc(v)};color:${v / hmax >= .5 ? '#fff' : '#1f1f23'}">${v}</button>` : `<span class="c" style="background:${hc(v)}"></span>`).join('')}<button class="linkb" data-action="rs-cell" data-ci="${ci}" data-bi="-1" style="text-align:right;font-family:'IBM Plex Mono', monospace;font-weight:600;color:#1f1f23">${tot}</button>`).join('')}</div>` : '<p class="r-note">Sin datos.</p>'}</section>
       <section class="r-sec" style="display:flex;flex-direction:column;gap:14px"><h2>4. Gateways y componentes</h2>
         <table><thead><tr><th>Marca</th><th class="n">Incidencias</th><th class="n">Reemplazados</th><th>Causa n.º 1</th></tr></thead><tbody>${brands.map(([b, i, rp, c]) => `<tr style="${b === 'Sin especificar' ? 'color:#6b6b75' : ''}"><td style="font-weight:600">${b === 'Sin especificar' ? 'Sin marca' : b}</td><td class="n">${i}</td><td class="n">${rp}</td><td>${esc(c)}</td></tr>`).join('')}</tbody></table>
         <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;text-align:center">${compTop.map(([k, v]) => `<div style="border:1px solid #e4e4e7;padding:10px 6px"><div style="font:600 20px 'IBM Plex Mono', monospace">${fmt(v)}</div><div style="font-size:11px;color:#6b6b75">${esc((COMPONENTS.find(c => c.id === k) || {}).label || k)}</div></div>`).join('')}${compTop.length < 4 ? `<div style="border:1px solid #e4e4e7;padding:10px 6px"><div style="font:600 20px 'IBM Plex Mono', monospace">${pend}</div><div style="font-size:11px;color:#6b6b75">devoluciones pendientes</div></div>` : ''}</div></section>
+    </div>
+    <div class="r-g2">
+      <section class="r-sec"><h2>5. Reemplazos de collares por modelo</h2><p class="c">${colTot ? `${fmt(colTot)} collares reemplazados en garantía${colPv ? ` (periodo anterior: ${fmt(MODELS.reduce((a, m) => a + colPv[m.id].u, 0))})` : ''}.` : 'Sin reemplazos de collares en el periodo.'}</p>
+        ${colTot ? `<div style="display:flex;flex-direction:column;gap:7px;font-size:13px;margin-bottom:10px">${MODELS.filter(m => col[m.id].u).map(m => `<div style="display:grid;grid-template-columns:110px 1fr 44px;gap:8px;align-items:center"><span>${esc(m.short)}</span><div style="height:12px;width:${col[m.id].u / colMax * 100}%;background:${m.color}"></div><span style="text-align:right;font-family:'IBM Plex Mono', monospace;font-weight:600">${fmt(col[m.id].u)}</span></div>`).join('')}</div>
+        <table><thead><tr><th>Modelo</th><th class="n">Unidades</th><th class="n">Tiquets</th>${colPv ? '<th class="n">Periodo anterior</th>' : ''}</tr></thead><tbody>${MODELS.filter(m => col[m.id].u || (colPv && colPv[m.id].u)).map(m => `<tr><td>${esc(m.short)}</td><td class="n">${fmt(col[m.id].u)}</td><td class="n">${fmt(col[m.id].n)}</td>${colPv ? `<td class="n">${fmt(colPv[m.id].u)}</td>` : ''}</tr>`).join('')}</tbody></table>` : ''}</section>
+      <section class="r-sec"><h2>6. Pendiente de recibir</h2><p class="c">${R.tickets ? `Situación a día de hoy: ${fmt(R.units)} unidades en ${fmt(R.tickets)} devoluciones abiertas${R.over30 ? `, ${R.over30} con más de 30 días (reclamar)` : ''}.` : 'No hay devoluciones pendientes.'}</p>${R.tickets ? returnsHtml(R, true) : ''}</section>
     </div>
     <p class="r-note">Fuente: casos de soporte en ClickUp (fecha = creación del tiquet). Reincidente: ${CONFIG.recurrentMin} o más incidencias o reemplazos de GW en el periodo. Histórico disponible: ${Math.round(CONFIG.historyDays / 30)} meses.</p>`;
   chart('ch-rs1', { textStyle: { fontFamily: "'IBM Plex Sans', sans-serif" }, grid: { left: 36, right: 10, top: 30, bottom: 26 }, legend: { top: 0, left: 0, itemWidth: 10, itemHeight: 10, icon: 'rect', textStyle: { color: '#3f3f46' } },
@@ -1429,7 +1491,7 @@ const closeModal = () => { $('modal').classList.add('hidden'); state.modal = nul
    NAVEGACIÓN Y DATOS
    ========================================================================= */
 const PAGES = {
-  'prod-hoy': { env: 'prod', render: renderProdHoy }, 'prod-cap': { env: 'prod', render: renderProdCap }, 'prod-pedidos': { env: 'prod', render: renderProdPedidos }, 'prod-informe': { env: 'prod', render: renderReportProd },
+  'prod-hoy': { env: 'prod', render: renderProdHoy }, 'prod-cal': { env: 'prod', render: renderCalendar }, 'prod-cap': { env: 'prod', render: renderProdCap }, 'prod-pedidos': { env: 'prod', render: renderProdPedidos }, 'prod-informe': { env: 'prod', render: renderReportProd },
   'sup-general': { env: 'sup', title: 'Visión general', render: renderSupGeneral }, 'sup-clientes': { env: 'sup', title: 'Clientes', sub: 'Quién tiene más problemas y la trazabilidad completa de cada uno', render: renderSupClientes },
   'sup-gw': { env: 'sup', title: 'Gateways', render: renderSupGw }, 'sup-comp': { env: 'sup', title: 'Componentes', render: renderSupComp }, 'sup-dev': { env: 'sup', title: 'Devoluciones', sub: 'Dispositivos que el cliente debe devolver', render: renderSupDev, noPeriod: true },
   'sup-casos': { env: 'sup', title: 'Casos', render: renderSupCasos }, 'sup-informe': { env: 'sup', title: 'Informes', sub: 'Por mes, trimestre, semestre o año', render: renderReportSup, noPeriod: true },
@@ -1518,6 +1580,8 @@ document.addEventListener('click', (e) => {
     case 'm-overdue': { const P = state.P, ts = state.tasks.filter(t => !t.closed && t.production && t.units > 0 && t.due !== null && t.due < P.today0); return openList('Pedidos atrasados', `${fmt(P.atrasado.units)} uds`, ts, 'prod', 'model', batchesFor(ts, P.today0)); }
     case 'm-week': return openWeek(+D.w, D.f);
     case 'm-model': { const m = MODEL_BY_ID[D.m]; return openList(m.name, `Pedidos activos · cupo de la familia ${fmt(CONFIG.capacity[m.family])} uds/semana`, state.tasks.filter(t => !t.closed && t.production && t.units > 0 && t.parts.some(p => p.model === D.m)), 'prod', 'model', state.P.batches.filter(b => b.model.id === D.m)); }
+    case 'm-fixedrisk': return openList('Fecha acordada con cliente', state.P.fixedRisk.length ? `${state.P.fixedRisk.length} con entrega en un día que supera la capacidad diaria: conviene adelantar su fabricación` : 'Pedidos con fecha comprometida con el cliente (etiqueta ' + CONFIG.fixedDateTag + ')', state.P.fixedAll, 'prod', 'model', batchesFor(state.P.fixedAll));
+    case 'rs-cell': { const h = state.rs.heatT[+D.ci], bi = +D.bi; return openList(`${h.c}${bi >= 0 ? ' · ' + h.labels[bi] : ''}`, 'Casos de soporte del informe', bi >= 0 ? h.cells[bi] : h.all, 'sup', 'kind'); }
     case 'm-deliv': { const P = state.P, d = +D.d, m = MODEL_BY_ID[D.m], os = P.delivery.filter(o => o.day === d && o.model === D.m), tasks = [...new Set(os.map(o => o.t))];
       return openList(`Entregas ${m.name} · ${d === P.today0 ? 'hoy' : fDowDay(d)}`, `${fmt(os.reduce((a, o) => a + o.u, 0))} uds con fecha límite este día`, tasks, 'prod', 'model', batchesFor(tasks)); }
     case 'm-lot': { const b = state.P.batches[+D.i]; return openList(`Lote ${b.model.name} · ${b.day === state.P.today0 ? 'hoy' : fDowDay(b.day)}`, `${fmt(b.units)} uds en ${b.orders.length} pedidos`, lotTasks([b]), 'prod', 'model', [b]); }
